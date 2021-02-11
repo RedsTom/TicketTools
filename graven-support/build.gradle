@@ -1,0 +1,19 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+    // Snapshot Javacord repo
+    maven {
+        url "https://oss.sonatype.org/content/repositories/snapshots/"
+    }
+}
+
+dependencies {
+    implementation project(":api")
+    implementation 'org.jetbrains:annotations:20.1.0'
+}
+
+// Change to the "plugins" folder of the "server" folder
+setLibsDirName("../../server/plugins")

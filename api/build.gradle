@@ -1,0 +1,26 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+    // Snapshot Javacord repo
+    maven {
+        url "https://oss.sonatype.org/content/repositories/snapshots/"
+    }
+    maven {
+        url 'https://jitpack.io/'
+    }
+}
+
+dependencies {
+    // Restore when a new version is released
+    apiElements 'org.javacord:javacord:3.1.3-20201228.161159-6'
+    implementation 'org.javacord:javacord:3.1.3-20201228.161159-6'
+
+    implementation 'com.google.code.gson:gson:2.8.6'
+    apiElements 'com.google.code.gson:gson:2.8.6'
+
+    implementation 'org.apache.logging.log4j:log4j-core:2.14.0'
+    apiElements 'org.apache.logging.log4j:log4j-core:2.14.0'
+}
