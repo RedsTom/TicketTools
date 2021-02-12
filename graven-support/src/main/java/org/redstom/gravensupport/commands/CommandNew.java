@@ -35,7 +35,8 @@ public class CommandNew implements CommandExecutor {
                 getUsersFromArgs(event.getApi(), args).thenAccept(users -> {
                     event.getMessage().addReaction("✏");
                     users.forEach(user -> {
-                        TicketManager.createTicket(server, user, true, true);
+                        TicketManager.createTicket(server, user, true, true,
+                            event.getMessageAuthor().asUser().get());
                     });
                 });
             }

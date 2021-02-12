@@ -32,7 +32,7 @@ public class Ticket {
         this.to = to;
     }
 
-    public void sendOpeningAnnounce(IServer iServer, boolean dm, boolean forced) {
+    public void sendOpeningAnnounce(IServer iServer, boolean dm, boolean forced, User source) {
         Server server = to.getServer();
         ServerChannel channel = server.getChannelById(MessageListener.TICKETS_CHANNEL_ID).get();
         EmbedBuilder embed = new EmbedBuilder()
@@ -47,7 +47,9 @@ public class Ticket {
                     to.getMentionTag() + "\n\n" +
                     (forced
                         ? ":asterisk: **Note**\n" +
-                        "Ce ticket a été ouvert par la modération"
+                        "Ce ticket a été ouvert par la modération\n\n" +
+                        ":customs: **Ouvert par**\n" +
+                        "" + source.getMentionTag() + " (" + source.getDiscriminatedName() + ")"
                         : ""
                     )
             )

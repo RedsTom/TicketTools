@@ -43,14 +43,20 @@ public class TicketManager {
     }
 
     public static CompletableFuture<Ticket> createTicket(IServer server, User user) {
-        return createTicket(server, user, true, false);
+        return createTicket(server, user, true, false, null);
     }
 
     public static CompletableFuture<Ticket> createTicket(IServer server, User user, boolean dm) {
-        return createTicket(server, user, dm, false);
+        return createTicket(server, user, dm, false, null);
     }
 
-    public static CompletableFuture<Ticket> createTicket(IServer iServer, User user, boolean dm, boolean forced) {
+    public static CompletableFuture<Ticket> createTicket(
+        IServer iServer,
+        User user,
+        boolean dm,
+        boolean forced,
+        User source
+    ) {
         CompletableFuture<Ticket> future = new CompletableFuture<>();
         Server server = user.getApi().getServerById(MessageListener.SUPPORT_SERVER_ID)
             .get();
@@ -73,9 +79,9 @@ public class TicketManager {
                     Ticket ticket = addTicket(new Ticket(user, channel));
                     ticket.setupTicket().thenAccept((a) -> {
                         if (!forced) {
-                            ticket.sendOpeningAnnounce(iServer, dm, forced);
+                            ticket.sendOpeningAnnounce(iServer, dm, false, source);
                         } else {
-                            ticket.sendOpeningAnnounce(iServer, false, forced);
+                            ticket.sendOpeningAnnounce(iServer, false, true, source);
                             ticket.sendForcedOpeningDm(iServer);
                         }
                         future.complete(ticket);
