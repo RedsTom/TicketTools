@@ -31,12 +31,14 @@ public class CommandNew implements CommandExecutor {
                 TicketManager.createTicket(server, user);
             });
         } else {
-            getUsersFromArgs(event.getApi(), args).thenAccept(users -> {
-                event.getMessage().addReaction("👍");
-                users.forEach(user -> {
-                    TicketManager.createTicket(server, user, true, true);
+            if (event.getMessageAuthor().canManageServer()) {
+                getUsersFromArgs(event.getApi(), args).thenAccept(users -> {
+                    event.getMessage().addReaction("✏");
+                    users.forEach(user -> {
+                        TicketManager.createTicket(server, user, true, true);
+                    });
                 });
-            });
+            }
         }
     }
 

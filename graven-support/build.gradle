@@ -17,3 +17,5 @@ dependencies {
 
 // Change to the "plugins" folder of the "server" folder
 setLibsDirName("../../server/plugins")
+
+sourceCompatibility = targetCompatibility = '11'
