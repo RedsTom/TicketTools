@@ -98,7 +98,9 @@ public class MessageListener {
             if (event.getMessageContent().startsWith(server.getPrefix())) {
                 String[] args = event.getMessageContent().split(" ");
                 String cmdName = args[0].substring(server.getPrefix().length());
-                args = args.length == 1 ? new String[0] : Arrays.copyOfRange(args, 1, args.length - 1);
+                System.out.println(Arrays.toString(args));
+                args = args.length == 1 ? new String[0] : Arrays.copyOfRange(args, 1, args.length);
+                System.out.println(Arrays.toString(args));
 
                 String[] finalArgs = args;
                 registry.getByAlias(cmdName).ifPresent(cmd -> cmd.getExecutor().run(server, event, cmd, finalArgs));

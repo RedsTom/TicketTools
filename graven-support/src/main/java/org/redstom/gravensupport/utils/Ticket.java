@@ -32,7 +32,7 @@ public class Ticket {
         this.to = to;
     }
 
-    public void sendOpeningAnnounce(IServer iServer, boolean dm) {
+    public void sendOpeningAnnounce(IServer iServer, boolean dm, boolean forced) {
         Server server = to.getServer();
         ServerChannel channel = server.getChannelById(MessageListener.TICKETS_CHANNEL_ID).get();
         EmbedBuilder embed = new EmbedBuilder()
@@ -42,11 +42,17 @@ public class Ticket {
                 "> **Identifiant de l'utilisateur**\n" +
                     "" + from.getId() + "\n\n" +
                     "> **Nom de l'utilisateur**\n" +
-                    "" + from.getMentionTag() + "\n\n" +
+                    "" + from.getMentionTag() + " (" + from.getDiscriminatedName() + ")\n\n" +
                     ":hash: **Salon**\n" +
-                    to.getMentionTag())
+                    to.getMentionTag() + "\n\n" +
+                    (forced
+                        ? ":asterisk: **Note**\n" +
+                        "Ce ticket a été ouvert par la modération"
+                        : ""
+                    )
+            )
             .setThumbnail(from.getAvatar())
-            .setColor(Color.GREEN);
+            .setColor(forced ? Color.CYAN : Color.GREEN);
         channel.asServerTextChannel().get().sendMessage(embed);
         if (dm) sendOpeningDM(iServer);
     }
@@ -70,6 +76,29 @@ public class Ticket {
                     "Dans le cas où elle n'apparaitrai pas dans la minute suivant l'envoi de votre message, " +
                     "faites la commande **`" + iServer.getPrefix() + "new`** sur le serveur et renvoyez votre message")
             .setColor(Color.GREEN));
+    }
+
+    void sendForcedOpeningDm(IServer iServer) {
+        from.sendMessage(new EmbedBuilder()
+            .setAuthor("Modération")
+            .setTitle("Ticket ouvert !")
+            .setDescription("La modération a ouvert un ticket avec vous. Vous pouvez désormais discuter avec la modération\n" +
+                "en envoyant vos messages ici.")
+            .setColor(Color.ORANGE)
+            .addField(":notebook_with_decorative_cover: Note :",
+                "La réaction <:sent:" + MessageListener.REACTION_ID + "> " +
+                    "sera ajoutée à votre message si le message est bien transmis. \n" +
+                    "Dans le cas où elle n'apparaitrai pas dans la minute suivant l'envoi de votre message, " +
+                    "faites la commande **`" + iServer.getPrefix() + "new`** sur le serveur et renvoyez votre message")
+            .addField(":notebook_with_decorative_cover: Notes à propos de vos messages : ",
+                ":warning: Les messages que vous envoyez " +
+                    "ne peuvent ni être édités, ni être supprimés. Faites donc bien attention au contenu que vous " +
+                    "envoyez. \n" +
+                    ":warning: Les règles du discord `Graven - Développement` s'appliquent également dans cette " +
+                    "conversation")
+            .addField(":warning: Attention :", "Sachant que ce ticket a été ouvert par la modération, " +
+                "il est probable que ce soit à cause d'un problème sur le serveur. Veuillez en tenir compte dans vos " +
+                "messages."));
     }
 
     public void sendClosingAnnounce(String reportUrl) {

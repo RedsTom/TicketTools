@@ -1,3 +1,4 @@
 .idea/
 server/logs/
 server/plugins/
+server/config.json
