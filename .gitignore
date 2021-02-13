@@ -1,4 +1,8 @@
+# IntelliJ project-specific config folder
 .idea/
+# Gradle cache
+.gradle/
+
 server/logs/
 server/plugins/
 server/config.json
