@@ -10,6 +10,8 @@ name: Java automatic build and release
 on:
   push:
     branches: [ master ]
+    tags:
+      - "v2.0"
 
 jobs:
   build:
