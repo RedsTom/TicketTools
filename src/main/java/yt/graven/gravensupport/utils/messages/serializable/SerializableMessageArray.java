@@ -13,8 +13,8 @@ import java.util.List;
 public class SerializableMessageArray {
 
     @Expose(deserialize = false, serialize = false) public User fromUser;
+    @Expose(deserialize = false, serialize = false) private String attachementsChannelId;
 
-    @Expose private String attachementsChannelId;
     @Expose
     @SerializedName("to")
     private SerializableMessageAuthor from;
