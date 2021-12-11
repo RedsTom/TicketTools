@@ -1,0 +1,12 @@
+config:
+  token: ''
+  prefix: !
+
+  ticket_guild:
+    guild_id: 0
+    reaction_id: 0
+    tickets_category: 0
+    channels_ids:
+      reports: 0
+      tickets: 0
+      attachements: 0
