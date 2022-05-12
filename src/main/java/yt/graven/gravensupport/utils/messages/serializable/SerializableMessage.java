@@ -1,10 +1,12 @@
 package yt.graven.gravensupport.utils.messages.serializable;
 
 import com.google.gson.annotations.Expose;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class SerializableMessage {
 
@@ -14,6 +16,7 @@ public class SerializableMessage {
     @Expose private List<String> attachementUrls = new ArrayList<>();
     @Expose private boolean edited = false;
     @Expose private MessageType messageType;
+    @Expose private List<Map<String, Object>> embeds = new ArrayList<java.util.Map<String, Object>>();
 
     public SerializableMessage() {
     }
@@ -77,5 +80,9 @@ public class SerializableMessage {
 
     public void setMessageType(MessageType messageType) {
         this.messageType = messageType;
+    }
+
+    public void addEmbed(MessageEmbed embed) {
+        this.embeds.add(embed.toData().toMap());
     }
 }
