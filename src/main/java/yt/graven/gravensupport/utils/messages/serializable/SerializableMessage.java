@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 public class SerializableMessage {
-
     @Expose private SerializableMessageAuthor author = new SerializableMessageAuthor();
     @Expose private long creationTimestamp = Instant.EPOCH.toEpochMilli();
     @Expose private String content = "";
@@ -21,7 +20,8 @@ public class SerializableMessage {
     public SerializableMessage() {
     }
 
-    public SerializableMessage(SerializableMessageAuthor author, long creationDate, String content, List<String> attachementUrls, boolean edited, MessageType messageType) {
+    public SerializableMessage(SerializableMessageAuthor author, long creationDate, String content,
+                               List<String> attachementUrls, boolean edited, MessageType messageType) {
         this.author = author;
         this.creationTimestamp = creationDate;
         this.content = content;

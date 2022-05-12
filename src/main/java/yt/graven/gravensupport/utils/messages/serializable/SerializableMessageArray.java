@@ -13,6 +13,8 @@ import java.util.List;
 
 public class SerializableMessageArray {
 
+    @Expose private final int version = 1;
+
     @Expose(deserialize = false, serialize = false) public User fromUser;
     @Expose(deserialize = false, serialize = false) private String attachementsChannelId;
 
