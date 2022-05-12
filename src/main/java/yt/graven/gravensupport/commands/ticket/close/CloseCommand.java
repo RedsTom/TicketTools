@@ -1,26 +1,23 @@
 package yt.graven.gravensupport.commands.ticket.close;
 
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.utils.MiscUtil;
 import org.simpleyaml.configuration.file.YamlConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.yaml.snakeyaml.Yaml;
+import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.commands.ticket.Ticket;
 import yt.graven.gravensupport.commands.ticket.TicketManager;
 import yt.graven.gravensupport.utils.commands.ICommand;
 import yt.graven.gravensupport.utils.exceptions.CommandCancelledException;
 import yt.graven.gravensupport.utils.messages.Embeds;
-import yt.graven.gravensupport.utils.messages.TMessage;
 
-import java.awt.*;
 import java.util.Objects;
 import java.util.Optional;
 
-public class
-CloseCommand implements ICommand {
+@Component
+public class CloseCommand implements ICommand {
     @Override
     public String[] getNames() {
         return new String[]{

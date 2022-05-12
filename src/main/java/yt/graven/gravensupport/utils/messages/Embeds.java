@@ -2,10 +2,12 @@ package yt.graven.gravensupport.utils.messages;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
+import org.springframework.stereotype.Component;
 
 import java.awt.*;
 import java.time.Instant;
 
+@Component
 public class Embeds {
 
     public EmbedBuilder error(String message) {

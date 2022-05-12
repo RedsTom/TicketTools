@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.commands.ticket.Ticket;
 import yt.graven.gravensupport.commands.ticket.TicketManager;
 import yt.graven.gravensupport.utils.exceptions.TicketException;
@@ -15,6 +16,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.util.Optional;
 
+@Component
 public class ValidateOpeningHandler implements IIInteractionAction<ButtonClickEvent> {
 
     @Autowired

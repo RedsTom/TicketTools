@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.utils.MiscUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.commands.ticket.Ticket;
 import yt.graven.gravensupport.commands.ticket.TicketManager;
 import yt.graven.gravensupport.utils.commands.ICommand;
@@ -22,6 +23,7 @@ import java.util.Arrays;
 
 import static net.dv8tion.jda.api.entities.ChannelType.*;
 
+@Component
 public class TicketCommand implements ICommand {
 
     @Autowired

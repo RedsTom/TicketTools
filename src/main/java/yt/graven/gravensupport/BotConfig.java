@@ -3,6 +3,7 @@ package yt.graven.gravensupport;
 import net.dv8tion.jda.api.JDA;
 import org.simpleyaml.configuration.file.YamlConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import yt.graven.gravensupport.commands.help.HelpCommand;
 import yt.graven.gravensupport.commands.help.HelpManager;
@@ -24,6 +25,7 @@ import java.io.*;
 import java.util.Objects;
 
 @Configuration
+@ComponentScan("yt.graven.gravensupport")
 public class BotConfig {
 
     // GENERALITIES
@@ -54,112 +56,7 @@ public class BotConfig {
     }
 
     @Bean
-    public EventReceiver eventReceiver() {
-        return new EventReceiver();
+    public JDA jda(Main main) throws LoginException, IOException, TicketException {
+        return main.getClient();
     }
-
-    @Bean
-    public CommandRegistry commandRegistry() {
-        return new CommandRegistry();
-    }
-
-    @Bean
-    public Embeds embeds() {
-        return new Embeds();
-    }
-
-    @Bean
-    public Main main() throws LoginException, IOException {
-        return new Main(eventReceiver(), config());
-    }
-
-    @Bean
-    public JDA jda() throws LoginException, IOException, TicketException {
-        return main().getClient();
-    }
-
-    // HELP COMMAND
-
-    @Bean
-    public HelpCommand helpCommand() {
-        return new HelpCommand();
-    }
-
-    @Bean
-    public HelpManager helpManager() {
-        return new HelpManager();
-    }
-
-    @Bean
-    public PrevPageHandler prevPageHandler() {
-        return new PrevPageHandler();
-    }
-
-    @Bean
-    public NextPageHandler nextPageHandler() {
-        return new NextPageHandler();
-    }
-
-
-    // PING COMMAND
-
-    @Bean
-    public PingCommand pingCommand() {
-        return new PingCommand();
-    }
-
-    @Bean
-    public PingManager pingManager() {
-        return new PingManager();
-    }
-
-    @Bean
-    public RefreshPingHandler refreshPingHandler() {
-        return new RefreshPingHandler();
-    }
-
-    // TICKET COMMAND
-
-    @Bean
-    public TicketCommand ticketCommand() {
-        return new TicketCommand();
-    }
-
-    @Bean
-    public TicketManager ticketManager() {
-        return new TicketManager();
-    }
-
-    @Bean
-    public ValidateOpeningHandler validateOpeningHandler() {
-        return new ValidateOpeningHandler();
-    }
-
-    @Bean
-    public ConfirmMessageHandler confirmMessageHandler() {
-        return new ConfirmMessageHandler();
-    }
-
-    @Bean
-    public DeleteMessageHandler deleteMessageHandler() {
-        return new DeleteMessageHandler();
-    }
-
-    @Bean
-    public DenyMessageHandler denyMessageHandler() {
-        return new DenyMessageHandler();
-    }
-
-    @Bean
-    public FirstSentenceHandler firstSentenceHandler() {
-        return new FirstSentenceHandler();
-    }
-
-    // CLOSE COMMAND
-
-    @Bean
-    public CloseCommand closeCommand() {
-        return new CloseCommand();
-    }
-
 }
