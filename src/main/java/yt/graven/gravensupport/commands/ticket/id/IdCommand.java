@@ -1,4 +1,4 @@
-package yt.graven.gravensupport.commands.ticket.close;
+package yt.graven.gravensupport.commands.ticket.id;
 
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -11,23 +11,23 @@ import yt.graven.gravensupport.commands.ticket.Ticket;
 import yt.graven.gravensupport.commands.ticket.TicketManager;
 import yt.graven.gravensupport.utils.commands.ICommand;
 import yt.graven.gravensupport.utils.exceptions.CommandCancelledException;
+import yt.graven.gravensupport.utils.exceptions.TicketException;
 import yt.graven.gravensupport.utils.messages.Embeds;
 
+import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
 
 @Component
-public class CloseCommand implements ICommand {
+public class IdCommand implements ICommand {
     @Override
     public String[] getNames() {
-        return new String[]{
-            "close"
-        };
+        return new String[] { "id" };
     }
 
     @Override
     public String getDescription() {
-        return "Ferme le ticket actuel";
+        return "Affiche l'ID du destinataire du ticket.";
     }
 
     @Override
@@ -45,7 +45,7 @@ public class CloseCommand implements ICommand {
     private Embeds embeds;
 
     @Override
-    public void run(MessageReceivedEvent event, String[] args) throws CommandCancelledException {
+    public void run(MessageReceivedEvent event, String[] args) throws TicketException, IOException, CommandCancelledException {
 
         if (event.getChannelType() == ChannelType.PRIVATE) {
             throw new CommandCancelledException();
@@ -56,8 +56,7 @@ public class CloseCommand implements ICommand {
         }
 
         TextChannel textChannel = event.getTextChannel();
-        if (!Objects.equals(textChannel.getParentCategoryId(), config.getString("config.ticket_guild" +
-            ".tickets_category"))) {
+        if (!Objects.equals(textChannel.getParentCategoryId(), config.getString("config.ticket_guild.tickets_category"))) {
             embeds.errorMessage("Cette commande doit être exécutée dans un ticket !")
                 .sendMessage(event.getChannel())
                 .queue();
@@ -72,7 +71,6 @@ public class CloseCommand implements ICommand {
             return;
         }
 
-
-        ticket.get().close();
+        event.getChannel().sendMessage(ticket.get().getFrom().getId()).queue();
     }
 }

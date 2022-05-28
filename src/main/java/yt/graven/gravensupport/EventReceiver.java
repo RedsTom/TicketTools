@@ -22,6 +22,7 @@ import yt.graven.gravensupport.commands.ticket.Ticket;
 import yt.graven.gravensupport.commands.ticket.TicketManager;
 import yt.graven.gravensupport.commands.ticket.close.CloseCommand;
 import yt.graven.gravensupport.commands.ticket.create.TicketCommand;
+import yt.graven.gravensupport.commands.ticket.id.IdCommand;
 import yt.graven.gravensupport.utils.commands.CommandRegistry;
 import yt.graven.gravensupport.utils.exceptions.CommandCancelledException;
 import yt.graven.gravensupport.utils.exceptions.TicketException;
@@ -58,6 +59,9 @@ public class EventReceiver extends ListenerAdapter {
     private HelpCommand helpCommand;
 
     @Autowired
+    private IdCommand idCommand;
+
+    @Autowired
     private YamlConfiguration config;
 
     @Autowired
@@ -80,7 +84,8 @@ public class EventReceiver extends ListenerAdapter {
             .addCommand(pingCommand)
             .addCommand(ticketCommand)
             .addCommand(closeCommand)
-            .addCommand(helpCommand);
+            .addCommand(helpCommand)
+            .addCommand(idCommand);
 
         helpManager.updateEmbeds();
         System.out.println("Bot ready - Commands initialized !");
