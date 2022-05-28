@@ -1,14 +1,11 @@
 package yt.graven.gravensupport.utils.interactions;
 
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import org.springframework.context.ApplicationContext;
 import yt.graven.gravensupport.commands.help.interactions.NextPageHandler;
 import yt.graven.gravensupport.commands.help.interactions.PrevPageHandler;
 import yt.graven.gravensupport.commands.ping.interactions.RefreshPingHandler;
-import yt.graven.gravensupport.commands.ticket.create.interactions.ConfirmMessageHandler;
-import yt.graven.gravensupport.commands.ticket.create.interactions.DeleteMessageHandler;
-import yt.graven.gravensupport.commands.ticket.create.interactions.DenyMessageHandler;
-import yt.graven.gravensupport.commands.ticket.create.interactions.ValidateOpeningHandler;
+import yt.graven.gravensupport.commands.ticket.create.interactions.*;
 import yt.graven.gravensupport.utils.exceptions.TicketException;
 
 import java.io.IOException;
@@ -25,13 +22,14 @@ public enum ButtonActions {
     CONFIRM_MESSAGE("confirm-message", (context) -> context.getBean(ConfirmMessageHandler.class)),
     DENY_MESSAGE("deny-message", (context) -> context.getBean(DenyMessageHandler.class)),
     DELETE_MESSAGE("delete-message", (context) -> context.getBean(DeleteMessageHandler.class)),
-    CONFIRM_OPENING("validate-opening", (context) -> context.getBean(ValidateOpeningHandler.class)),
+    EDIT_MESSAGE("edit-message", (context) -> context.getBean(EditMessageHandler.class)),
+    CONFIRM_OPENING("validate-opening", (context) -> context.getBean(ValidateOpeningHandler.class));
     ;
 
     private final String actionId;
-    private final Function<ApplicationContext, IIInteractionAction<ButtonClickEvent>> handler;
+    private final Function<ApplicationContext, IIInteractionAction<ButtonInteractionEvent>> handler;
 
-    ButtonActions(String actionId, Function<ApplicationContext, IIInteractionAction<ButtonClickEvent>> handler) {
+    ButtonActions(String actionId, Function<ApplicationContext, IIInteractionAction<ButtonInteractionEvent>> handler) {
         this.actionId = actionId;
         this.handler = handler;
     }
@@ -40,11 +38,11 @@ public enum ButtonActions {
         return actionId;
     }
 
-    public Function<ApplicationContext, IIInteractionAction<ButtonClickEvent>> getHandler() {
+    public Function<ApplicationContext, IIInteractionAction<ButtonInteractionEvent>> getHandler() {
         return handler;
     }
 
-    public void run(ApplicationContext context, ButtonClickEvent event) throws TicketException, IOException {
+    public void run(ApplicationContext context, ButtonInteractionEvent event) throws TicketException, IOException {
         handler.apply(context).run(event);
     }
 

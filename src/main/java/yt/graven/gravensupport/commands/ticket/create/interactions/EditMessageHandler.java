@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import net.dv8tion.jda.api.utils.MiscUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,7 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
-public class DeleteMessageHandler implements IIInteractionAction<ButtonInteractionEvent> {
+public class EditMessageHandler implements IIInteractionAction<ButtonInteractionEvent> {
 
     @Autowired
     private TicketManager ticketManager;
@@ -62,16 +63,50 @@ public class DeleteMessageHandler implements IIInteractionAction<ButtonInteracti
             return;
         }
 
-        referingMessage.delete().queue();
+        String originalMessageId = baseEmbed.getFields().get(0).getValue();
+        originalMessageId = originalMessageId
+            .replace(originalMessageId.replaceAll("\\[[0-9]+]", ""), "")
+            .replaceAll("[\\[\\]]", "");
+
+        Message originalMessage =
+            ticket.get().getTo().getHistoryAround(originalMessageId, 50).complete().getMessageById(originalMessageId);
+
+        if (originalMessage == null) {
+            event.deferReply(true)
+                .addEmbeds(new EmbedBuilder()
+                    .setColor(Color.RED)
+                    .setTitle("Erreur")
+                    .setDescription("Impossible de trouver le message source associé à cet envoi !")
+                    .build())
+                .queue();
+            return;
+        }
+
+        String before = referingMessage.getContentRaw();
+        String after = originalMessage.getContentRaw().startsWith("'")
+            ? originalMessage.getContentRaw().substring(1).trim()
+            : originalMessage.getContentRaw().trim();
+
+        if (before.equals(after)) {
+            event.deferReply(true)
+                .setContent("Aucune modification n'a été effectuée !")
+                .queue();
+            return;
+        }
+
+        referingMessage.editMessage(after)
+            .queue();
+
 
         List<MessageEmbed> embedList = new ArrayList<>(event.getMessage().getEmbeds());
         embedList.add(new EmbedBuilder()
-            .setTitle("Message supprimé")
-            .setColor(Color.RED)
+            .setTitle("Message édité")
+            .addField("Avant : ", before, true)
+            .addField("Après : ", after, true)
             .setTimestamp(Instant.now())
+            .setColor(Color.ORANGE)
             .build());
         event.deferEdit()
-            .setActionRow(Button.secondary("delete", Emoji.fromUnicode("🗑️")))
             .setEmbeds(embedList)
             .queue();
     }

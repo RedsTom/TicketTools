@@ -3,7 +3,7 @@ package yt.graven.gravensupport.commands.ticket.create.interactions;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.interaction.SelectionMenuEvent;
+import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
 import net.dv8tion.jda.api.utils.MiscUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,7 +17,7 @@ import java.awt.*;
 import java.util.Optional;
 
 @Component
-public class FirstSentenceHandler implements IIInteractionAction<SelectionMenuEvent> {
+public class FirstSentenceHandler implements IIInteractionAction<SelectMenuInteractionEvent> {
 
     @Autowired
     private TicketManager ticketManager;
@@ -26,7 +26,7 @@ public class FirstSentenceHandler implements IIInteractionAction<SelectionMenuEv
     private Embeds embeds;
 
     @Override
-    public void run(SelectionMenuEvent event) {
+    public void run(SelectMenuInteractionEvent event) {
         Optional<Ticket> ticket = ticketManager.get(MiscUtil.parseLong(((TextChannel) event.getChannel()).getTopic()));
         if (ticket.isEmpty()) {
             event.deferReply(true)

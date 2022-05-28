@@ -2,3 +2,4 @@
 build/
 config.yml
 graven-support.jar
+/.gradle/

@@ -94,7 +94,10 @@ public class Embeds {
                 - Les réponses de la modération se feront par le biais de ces message privés.
                 - Si votre message est transmis, la réaction %s sera ajoutée à vos messages
                 """, sentEmote), false)
-            .setFooter("Cliquez sur le bouton ci-dessous pour confirmer l'ouverture du ticket.")
+            .addField("✨ Terminer l'ouverture du ticket", """
+                Afin de terminer l'ouverture du ticket, merci de sélectionner ci-dessous la raison de l'ouverture de votre ticket.
+                Vous serez ensuite recontacté dans les plus brefs délais.
+                """, false)
             .setColor(Color.GREEN);
     }
 
@@ -123,7 +126,7 @@ public class Embeds {
             .setColor(Color.ORANGE);
     }
 
-    public EmbedBuilder ticketOpening(boolean forced, User by, User from, TextChannel channel) {
+    public EmbedBuilder ticketOpening(boolean forced, User by, User from, TextChannel channel, String reason) {
         return new EmbedBuilder()
             .setTitle("Ticket ouvert")
             .setColor(forced ? Color.CYAN : Color.GREEN)
@@ -150,8 +153,15 @@ public class Embeds {
                     """
                          🛂 **Ouvert par**
                          %s (`@%s`)
+            
                         """, by.getAsMention(), by.getAsTag()
-                ) : ""), false);
+                ) : String.format(
+                    """
+                        📝 **Raison**
+                        `%s`
+                    """, reason
+                )),
+                false);
     }
 
     public EmbedBuilder ticketClosing(User from, String jumpUrl) {
