@@ -4,10 +4,11 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.Button;
-import net.dv8tion.jda.api.interactions.components.ButtonStyle;
 import net.dv8tion.jda.api.interactions.components.Component;
-import net.dv8tion.jda.api.interactions.components.selections.SelectionMenu;
+import net.dv8tion.jda.api.interactions.components.ItemComponent;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
+import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.jetbrains.annotations.NotNull;
 
@@ -114,7 +115,7 @@ public class TMessage {
     public static class TActionRow {
 
         private final TMessage msg;
-        private final List<Component> components;
+        private final List<ItemComponent> components;
 
         private TActionRow(TMessage msg) {
             this.msg = msg;
@@ -136,7 +137,7 @@ public class TMessage {
             return new TButton(this);
         }
 
-        public TActionRow add(Component component) {
+        public TActionRow add(ItemComponent component) {
             this.components.add(component);
             return this;
         }
@@ -225,11 +226,11 @@ public class TMessage {
 
         public static class TSelectMenu {
             private final TActionRow row;
-            private SelectionMenu.Builder builder;
+            private SelectMenu.Builder builder;
 
             private TSelectMenu(TActionRow row, @NotNull String customId) {
                 this.row = row;
-                this.builder = SelectionMenu.create(customId);
+                this.builder = SelectMenu.create(customId);
             }
 
             public TSelectMenu addOption(String label, String value, Emoji emoji) {

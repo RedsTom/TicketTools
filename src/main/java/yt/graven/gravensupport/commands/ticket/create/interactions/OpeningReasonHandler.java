@@ -3,7 +3,12 @@ package yt.graven.gravensupport.commands.ticket.create.interactions;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.PrivateChannel;
-import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.Modal;
+import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
+import net.dv8tion.jda.api.interactions.components.text.TextInput;
+import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.commands.ticket.Ticket;
@@ -17,16 +22,16 @@ import java.io.IOException;
 import java.util.Optional;
 
 @Component
-public class ValidateOpeningHandler implements IIInteractionAction<ButtonInteractionEvent> {
-
-    @Autowired
-    private TicketManager manager;
+public class OpeningReasonHandler implements IIInteractionAction<SelectMenuInteractionEvent> {
 
     @Autowired
     private Embeds embeds;
 
+    @Autowired
+    private TicketManager manager;
+
     @Override
-    public void run(ButtonInteractionEvent event) throws TicketException, IOException {
+    public void run(SelectMenuInteractionEvent event) throws TicketException, IOException {
         if (event.getChannel().getType() != ChannelType.PRIVATE) return;
 
         PrivateChannel channel = event.getPrivateChannel();
@@ -43,7 +48,27 @@ public class ValidateOpeningHandler implements IIInteractionAction<ButtonInterac
             return;
         }
 
-        ticket.get().openOnServer(false, null, "");
+        SelectOption selectedOption = event.getInteraction().getSelectedOptions().get(0);
+
+        if (selectedOption.getValue().equalsIgnoreCase("op-other")) {
+            Modal modal = Modal.create(
+                "op-other-reason",
+                "Pourquoi ouvrez-vous un ticket ?"
+            ).addActionRows(ActionRow.of(
+                    TextInput.create(
+                        "reason",
+                        "Raison (en quelques mots)",
+                        TextInputStyle.SHORT
+                    ).build()
+                )
+            ).build();
+
+            event.replyModal(modal).queue();
+
+            return;
+        }
+
+        ticket.get().openOnServer(false, null, selectedOption.getLabel());
         event.deferReply(true)
             .addEmbeds(new EmbedBuilder()
                 .setColor(Color.GREEN)

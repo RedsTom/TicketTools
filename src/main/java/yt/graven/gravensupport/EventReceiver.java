@@ -1,40 +1,35 @@
 package yt.graven.gravensupport;
 
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.ChannelType;
-import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.ReadyEvent;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
-import net.dv8tion.jda.api.events.interaction.SelectionMenuEvent;
+import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.utils.MiscUtil;
 import org.jetbrains.annotations.NotNull;
 import org.simpleyaml.configuration.file.YamlConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+import yt.graven.gravensupport.commands.help.HelpCommand;
+import yt.graven.gravensupport.commands.help.HelpManager;
+import yt.graven.gravensupport.commands.ping.PingCommand;
 import yt.graven.gravensupport.commands.ticket.Ticket;
 import yt.graven.gravensupport.commands.ticket.TicketManager;
-import yt.graven.gravensupport.utils.exceptions.CommandCancelledException;
-import yt.graven.gravensupport.utils.interactions.ButtonActions;
 import yt.graven.gravensupport.commands.ticket.close.CloseCommand;
-import yt.graven.gravensupport.commands.help.HelpCommand;
-import yt.graven.gravensupport.commands.ping.PingCommand;
 import yt.graven.gravensupport.commands.ticket.create.TicketCommand;
-import yt.graven.gravensupport.commands.help.HelpManager;
 import yt.graven.gravensupport.utils.commands.CommandRegistry;
+import yt.graven.gravensupport.utils.exceptions.CommandCancelledException;
 import yt.graven.gravensupport.utils.exceptions.TicketException;
+import yt.graven.gravensupport.utils.interactions.ButtonActions;
+import yt.graven.gravensupport.utils.interactions.ModalActions;
 import yt.graven.gravensupport.utils.interactions.SelectionMenuActions;
 import yt.graven.gravensupport.utils.messages.Embeds;
-import yt.graven.gravensupport.utils.messages.TMessage;
 
-import java.awt.*;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Objects;
@@ -179,7 +174,7 @@ public class EventReceiver extends ListenerAdapter {
     }
 
     @Override
-    public void onButtonClick(@NotNull ButtonClickEvent event) {
+    public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
         ButtonActions.getFromActionId(event.getButton().getId())
             .ifPresent(a -> {
                 try {
@@ -191,8 +186,20 @@ public class EventReceiver extends ListenerAdapter {
     }
 
     @Override
-    public void onSelectionMenu(@NotNull SelectionMenuEvent event) {
-        SelectionMenuActions.getFromActionId(event.getSelectionMenu().getId())
+    public void onSelectMenuInteraction(@NotNull SelectMenuInteractionEvent event) {
+        SelectionMenuActions.getFromActionId(event.getSelectMenu().getId())
+            .ifPresent(a -> {
+                try {
+                    a.run(context, event);
+                } catch (TicketException | IOException e) {
+                    e.printStackTrace();
+                }
+            });
+    }
+
+    @Override
+    public void onModalInteraction(@NotNull ModalInteractionEvent event) {
+        ModalActions.getFromActionId(event.getModalId())
             .ifPresent(a -> {
                 try {
                     a.run(context, event);

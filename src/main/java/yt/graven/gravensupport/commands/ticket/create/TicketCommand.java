@@ -1,12 +1,8 @@
 package yt.graven.gravensupport.commands.ticket.create;
 
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.utils.MiscUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,7 +13,6 @@ import yt.graven.gravensupport.utils.exceptions.TicketException;
 import yt.graven.gravensupport.utils.messages.Embeds;
 import yt.graven.gravensupport.utils.messages.TMessage;
 
-import java.awt.*;
 import java.io.IOException;
 import java.util.Arrays;
 

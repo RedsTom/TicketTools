@@ -3,8 +3,8 @@ package yt.graven.gravensupport.commands.ticket.create.interactions;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
-import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.commands.ticket.TicketManager;
@@ -15,13 +15,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class DenyMessageHandler implements IIInteractionAction<ButtonClickEvent> {
+public class DenyMessageHandler implements IIInteractionAction<ButtonInteractionEvent> {
 
     @Autowired
     private TicketManager ticketManager;
 
     @Override
-    public void run(ButtonClickEvent event) {
+    public void run(ButtonInteractionEvent event) {
         List<MessageEmbed> embedList = new ArrayList<>(event.getMessage().getEmbeds());
         embedList.add(new EmbedBuilder()
             .setTitle("Envoi annulé")

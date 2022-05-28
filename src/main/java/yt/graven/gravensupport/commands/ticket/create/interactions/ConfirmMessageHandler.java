@@ -5,10 +5,10 @@ import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
-import net.dv8tion.jda.api.interactions.components.Button;
-import net.dv8tion.jda.api.interactions.components.ButtonStyle;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.utils.MiscUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,10 +18,11 @@ import yt.graven.gravensupport.utils.interactions.IIInteractionAction;
 import yt.graven.gravensupport.utils.messages.Embeds;
 
 import java.awt.*;
+import java.time.Instant;
 import java.util.Optional;
 
 @Component
-public class ConfirmMessageHandler implements IIInteractionAction<ButtonClickEvent> {
+public class ConfirmMessageHandler implements IIInteractionAction<ButtonInteractionEvent> {
 
     @Autowired
     private TicketManager ticketManager;
@@ -30,7 +31,7 @@ public class ConfirmMessageHandler implements IIInteractionAction<ButtonClickEve
     private Embeds embeds;
 
     @Override
-    public void run(ButtonClickEvent event) {
+    public void run(ButtonInteractionEvent event) {
         Message embedMessage = event.getMessage();
 
         MessageEmbed baseEmbed = embedMessage.getEmbeds().get(0);
@@ -81,6 +82,7 @@ public class ConfirmMessageHandler implements IIInteractionAction<ButtonClickEve
                             .setTitle("Message transmis :")
                             .setDescription(message.getContentRaw())
                             .setFooter("")
+                            .setTimestamp(Instant.now())
                             .setColor(Color.GREEN);
 
                     embed.getFields().add(new MessageEmbed.Field("🔗 Identifiant du message envoyé", message.getId(), true));
@@ -89,6 +91,7 @@ public class ConfirmMessageHandler implements IIInteractionAction<ButtonClickEve
                         fInteraction.deleteOriginal().queue();
                         embedMessage.editMessageEmbeds(embed.build())
                                 .setActionRow(
+                                        Button.of(ButtonStyle.SUCCESS, "edit-message", "Modifier le message", Emoji.fromUnicode("✏️")),
                                         Button.of(ButtonStyle.DANGER, "delete-message", "Supprimer le message", Emoji.fromUnicode("🗑️"))
                                 )
                                 .queue();
@@ -96,6 +99,7 @@ public class ConfirmMessageHandler implements IIInteractionAction<ButtonClickEve
                         event.deferEdit()
                                 .setEmbeds(embed.build())
                                 .setActionRow(
+                                        Button.of(ButtonStyle.SUCCESS, "edit-message", "Modifier le message", Emoji.fromUnicode("✏️")),
                                         Button.of(ButtonStyle.DANGER, "delete-message", "Supprimer le message", Emoji.fromUnicode("🗑️"))
                                 )
                                 .queue();
