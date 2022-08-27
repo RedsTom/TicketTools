@@ -22,7 +22,9 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
@@ -35,8 +37,10 @@ public class Ticket {
         .excludeFieldsWithoutExposeAnnotation()
         .create();
 
-    private Ticket(TicketManager ticketManager, Embeds embeds, YamlConfiguration config, User from, TextChannel to,
-                   JDAWebhookClient webhookTransmitter) {
+    private Ticket(
+        TicketManager ticketManager, Embeds embeds, YamlConfiguration config, User from, TextChannel to,
+        JDAWebhookClient webhookTransmitter
+    ) {
         this.embeds = embeds;
         this.from = from;
         this.to = to;
@@ -46,7 +50,8 @@ public class Ticket {
         this.ticketManager = ticketManager;
 
         this.moderationGuild = from.getJDA().getGuildById(config.getString("config.ticket_guild.guild_id"));
-        this.sentEmote = this.moderationGuild.getEmoteById(this.config.getString("config.ticket_guild.reaction_id"));
+        this.sentEmote = this.moderationGuild.getEmoteById(
+            this.config.getString("config.ticket_guild.reaction_id"));
     }
 
     private final TicketManager ticketManager;
@@ -71,8 +76,10 @@ public class Ticket {
         this.opened = false;
     }
 
-    public static Ticket loadFromChannel(TicketManager ticketManager, Embeds embeds, YamlConfiguration config,
-                                         TextChannel channel) throws IOException {
+    public static Ticket loadFromChannel(
+        TicketManager ticketManager, Embeds embeds, YamlConfiguration config,
+        TextChannel channel
+    ) throws IOException {
         String topic = channel.getTopic();
         topic = topic == null ? "0" : topic;
 
@@ -308,7 +315,12 @@ public class Ticket {
 
     public void close() {
         Executors.newSingleThreadExecutor().execute(() -> {
-            List<Message> messages = to.getIterableHistory().complete();
+            List<Message> messages = null;
+            try {
+                messages = to.getIterableHistory().takeWhileAsync(Objects::nonNull).get();
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
             Collections.reverse(messages);
 
             SerializableMessageArray sma = new SerializableMessageArray(
@@ -352,8 +364,9 @@ public class Ticket {
                 .setEmbeds(new EmbedBuilder()
                     .setColor(Color.RED)
                     .setTitle("Ticket fermé.")
-                    .setDescription("La modération a fermé le ticket avec vous. Si vous souhaitez le rouvrir, " +
-                        "refaites la commande `" + config.getString("config.prefix") + "new`"))
+                    .setDescription(
+                        "La modération a fermé le ticket avec vous. Si vous souhaitez le rouvrir, " +
+                            "refaites la commande `" + config.getString("config.prefix") + "new`"))
                 .sendMessage(from)
                 .queue();
 
