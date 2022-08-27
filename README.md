@@ -17,7 +17,7 @@ Most of the contributors are part of the staff but the members are also allowed 
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Description         | GravenSupport is the bot used to manage tickets on the Graven - Développement discord server. It can manage tickets and generate reports of those tickets readable by the [ticket reader](https://redstom.github.io/GravenDev-TicketReader).
 | Collaborators       | <img src="https://avatars.githubusercontent.com/u/44524788?v=4" alt="drawing" width="25"/> [RedsTom](https://github.com/RedsTom), <img src="https://avatars.githubusercontent.com/u/44118516?v=4" alt="drawing" width="25"/> [enimaloc](https://github.com/enimaloc)      |
-| Version             | 3.0                                                                                                                                                                                                                                                                   |
+| Version             | 2.0                                                                                                                                                                                                                                                                   |
 
 ---
 
