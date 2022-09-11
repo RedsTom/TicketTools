@@ -1,27 +1,16 @@
 package yt.graven.gravensupport;
 
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.simpleyaml.configuration.file.YamlConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import yt.graven.gravensupport.commands.help.HelpCommand;
-import yt.graven.gravensupport.commands.help.HelpManager;
-import yt.graven.gravensupport.commands.help.interactions.NextPageHandler;
-import yt.graven.gravensupport.commands.help.interactions.PrevPageHandler;
-import yt.graven.gravensupport.commands.ping.PingCommand;
-import yt.graven.gravensupport.commands.ping.PingManager;
-import yt.graven.gravensupport.commands.ping.interactions.RefreshPingHandler;
-import yt.graven.gravensupport.commands.ticket.TicketManager;
-import yt.graven.gravensupport.commands.ticket.close.CloseCommand;
-import yt.graven.gravensupport.commands.ticket.create.TicketCommand;
-import yt.graven.gravensupport.commands.ticket.create.interactions.*;
-import yt.graven.gravensupport.utils.commands.CommandRegistry;
-import yt.graven.gravensupport.utils.exceptions.TicketException;
-import yt.graven.gravensupport.utils.messages.Embeds;
 
 import javax.security.auth.login.LoginException;
 import java.io.*;
+import java.util.EnumSet;
 import java.util.Objects;
 
 @Configuration
@@ -56,7 +45,9 @@ public class BotConfig {
     }
 
     @Bean
-    public JDA jda(Main main) throws LoginException, IOException, TicketException {
-        return main.getClient();
+    public JDA jda() throws LoginException, IOException {
+        return JDABuilder.create(EnumSet.allOf(GatewayIntent.class))
+            .setToken(this.config().getString("config.token"))
+            .build();
     }
 }
