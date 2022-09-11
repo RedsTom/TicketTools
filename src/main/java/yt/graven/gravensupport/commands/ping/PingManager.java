@@ -3,7 +3,6 @@ package yt.graven.gravensupport.commands.ping;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.awt.*;
@@ -11,7 +10,6 @@ import java.awt.*;
 @Component
 public class PingManager {
 
-    @Autowired
     private final JDA client;
 
     public PingManager(JDA client) {
