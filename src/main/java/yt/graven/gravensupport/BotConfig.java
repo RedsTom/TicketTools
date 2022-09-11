@@ -47,7 +47,7 @@ public class BotConfig {
     @Bean
     public JDA jda() throws LoginException, IOException {
         return JDABuilder.create(EnumSet.allOf(GatewayIntent.class))
-                .setToken(this.config().getString("config.token"))
-                .build();
+            .setToken(this.config().getString("config.token"))
+            .build();
     }
 }
