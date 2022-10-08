@@ -8,8 +8,11 @@ import com.google.gson.GsonBuilder;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.exceptions.ErrorHandler;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
+import net.dv8tion.jda.api.requests.ErrorResponse;
 import org.simpleyaml.configuration.file.YamlConfiguration;
 import yt.graven.gravensupport.utils.exceptions.TicketAlreadyExistsException;
 import yt.graven.gravensupport.utils.messages.Embeds;
@@ -98,10 +101,14 @@ public class Ticket {
     /**
      * Sends a message to confirm the opening of the ticket in the case of a user-opened ticket.
      */
-    public void proposeOpening() {
+    public void proposeOpening(MessageChannel channel) {
         if ((webhookTransmitter != null && to != null) || opened) {
             throw new TicketAlreadyExistsException(from);
         }
+
+        ErrorHandler errorHandler = new ErrorHandler()
+            .ignore(ErrorResponse.UNKNOWN_MESSAGE)
+            .handle(ErrorResponse.CANNOT_SEND_TO_USER, exception -> handleUnableToDmUser(channel));
 
         from.openPrivateChannel()
             .complete()
@@ -120,7 +127,7 @@ public class Ticket {
                     .build()
                     .build()
             )
-            .queue();
+            .queue(null, errorHandler);
     }
 
     /**
@@ -372,5 +379,14 @@ public class Ticket {
 
             to.delete().queue((v1) -> ticketManager.remove(from));
         });
+    }
+
+    private void handleUnableToDmUser(MessageChannel channel) {
+        ticketManager.remove(from);
+
+        String errorMessage = "Impossible d'envoyer un message privé à cet utilisateur!";
+        MessageEmbed embed = embeds.error(errorMessage).build();
+
+        TMessage.from(embed).sendMessage(channel).queue();
     }
 }

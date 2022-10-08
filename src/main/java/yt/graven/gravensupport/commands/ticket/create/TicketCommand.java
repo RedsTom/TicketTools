@@ -59,7 +59,7 @@ public class TicketCommand implements ICommand {
             return;
         }
 
-        ticketManager.create(event.getAuthor()).proposeOpening();
+        ticketManager.create(event.getAuthor()).proposeOpening(event.getChannel());
     }
 
     private void runWithSelectedUser(MessageReceivedEvent event, String[] args) throws TicketException, IOException {
