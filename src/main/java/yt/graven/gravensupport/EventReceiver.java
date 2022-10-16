@@ -1,5 +1,7 @@
 package yt.graven.gravensupport;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -12,7 +14,6 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.utils.MiscUtil;
 import org.jetbrains.annotations.NotNull;
 import org.simpleyaml.configuration.file.YamlConfiguration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.commands.help.HelpCommand;
@@ -37,41 +38,22 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+@Slf4j
 @Component
+@RequiredArgsConstructor
 public class EventReceiver extends ListenerAdapter {
 
-    @Autowired
-    private ApplicationContext context;
-
-    @Autowired
-    private CommandRegistry registry;
-
-    @Autowired
-    private PingCommand pingCommand;
-
-    @Autowired
-    private TicketCommand ticketCommand;
-
-    @Autowired
-    private CloseCommand closeCommand;
-
-    @Autowired
-    private HelpCommand helpCommand;
-
-    @Autowired
-    private IdCommand idCommand;
-
-    @Autowired
-    private YamlConfiguration config;
-
-    @Autowired
-    private HelpManager helpManager;
-
-    @Autowired
-    private TicketManager ticketManager;
-
-    @Autowired
-    private Embeds embeds;
+    private final ApplicationContext context;
+    private final CommandRegistry registry;
+    private final PingCommand pingCommand;
+    private final TicketCommand ticketCommand;
+    private final CloseCommand closeCommand;
+    private final HelpCommand helpCommand;
+    private final IdCommand idCommand;
+    private final YamlConfiguration config;
+    private final HelpManager helpManager;
+    private final TicketManager ticketManager;
+    private final Embeds embeds;
 
     private boolean loaded = false;
 
@@ -79,7 +61,7 @@ public class EventReceiver extends ListenerAdapter {
     public void onReady(@NotNull ReadyEvent event) {
         if (loaded) return;
 
-        System.out.println("Bot preparing - Initializing commands...");
+        log.info("Bot preparing - Initializing commands...");
         this.registry
             .addCommand(pingCommand)
             .addCommand(ticketCommand)
@@ -88,7 +70,7 @@ public class EventReceiver extends ListenerAdapter {
             .addCommand(idCommand);
 
         helpManager.updateEmbeds();
-        System.out.println("Bot ready - Commands initialized !");
+        log.info("Bot ready - Commands initialized!");
 
         try {
             ticketManager.load(event.getJDA());

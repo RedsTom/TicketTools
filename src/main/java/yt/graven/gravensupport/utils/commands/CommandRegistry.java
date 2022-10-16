@@ -11,11 +11,7 @@ import java.util.stream.Collectors;
 @Component
 public class CommandRegistry {
 
-    private List<ICommand> commands;
-
-    public CommandRegistry() {
-        this.commands = new ArrayList<>();
-    }
+    private final List<ICommand> commands = new ArrayList<>();
 
     public CommandRegistry addCommand(ICommand command) {
         if (getCommandByName(command.getNames()[0]).isPresent()) return this;

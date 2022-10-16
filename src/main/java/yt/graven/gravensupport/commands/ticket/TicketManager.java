@@ -1,11 +1,11 @@
 package yt.graven.gravensupport.commands.ticket;
 
+import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 import org.simpleyaml.configuration.file.YamlConfiguration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.utils.exceptions.TicketAlreadyExistsException;
 import yt.graven.gravensupport.utils.exceptions.TicketException;
@@ -18,15 +18,13 @@ import java.util.Map;
 import java.util.Optional;
 
 @Component
+@RequiredArgsConstructor
 public class TicketManager {
 
-    private Map<Long, Ticket> tickets = new HashMap<>();
+    private final YamlConfiguration config;
+    private final Embeds embeds;
 
-    @Autowired
-    private YamlConfiguration config;
-
-    @Autowired
-    private Embeds embeds;
+    private final Map<Long, Ticket> tickets = new HashMap<>();
 
     public Ticket create(User user) throws TicketException {
         if (exists(user)) {

@@ -35,6 +35,16 @@ import static yt.graven.gravensupport.utils.WebhookCreator.fromJDA;
 
 public class Ticket {
 
+    private final TicketManager ticketManager;
+    private final Embeds embeds;
+    private final YamlConfiguration config;
+    private final User from;
+    private final Guild moderationGuild;
+    private final Emote sentEmote;
+    private TextChannel to;
+    private JDAWebhookClient webhookTransmitter;
+    private boolean opened;
+
     private static final Gson GSON = new GsonBuilder()
         .setPrettyPrinting()
         .excludeFieldsWithoutExposeAnnotation()
@@ -56,18 +66,6 @@ public class Ticket {
         this.sentEmote = this.moderationGuild.getEmoteById(
             this.config.getString("config.ticket_guild.reaction_id"));
     }
-
-    private final TicketManager ticketManager;
-
-    private final Embeds embeds;
-    private final YamlConfiguration config;
-
-    private final User from;
-    private final Guild moderationGuild;
-    private final Emote sentEmote;
-    private TextChannel to;
-    private JDAWebhookClient webhookTransmitter;
-    private boolean opened;
 
     /**
      * Creates a new ticket

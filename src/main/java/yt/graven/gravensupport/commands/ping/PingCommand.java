@@ -1,24 +1,22 @@
 package yt.graven.gravensupport.commands.ping;
 
+import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.utils.commands.ICommand;
 import yt.graven.gravensupport.utils.messages.Embeds;
 import yt.graven.gravensupport.utils.messages.TMessage;
 
 @Component
+@RequiredArgsConstructor
 public class PingCommand implements ICommand {
+    private final PingManager pingManager;
 
-    @Autowired
-    private PingManager pingManager;
-
-    @Autowired
-    private Embeds embeds;
+    private final Embeds embeds;
 
     @Override
     public String[] getNames() {

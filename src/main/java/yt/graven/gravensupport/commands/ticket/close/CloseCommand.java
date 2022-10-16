@@ -1,11 +1,11 @@
 package yt.graven.gravensupport.commands.ticket.close;
 
+import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.utils.MiscUtil;
 import org.simpleyaml.configuration.file.YamlConfiguration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.commands.ticket.Ticket;
 import yt.graven.gravensupport.commands.ticket.TicketManager;
@@ -17,7 +17,13 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Component
+@RequiredArgsConstructor
 public class CloseCommand implements ICommand {
+
+    private final YamlConfiguration config;
+    private final TicketManager ticketManager;
+    private final Embeds embeds;
+
     @Override
     public String[] getNames() {
         return new String[]{
@@ -34,15 +40,6 @@ public class CloseCommand implements ICommand {
     public boolean isShown() {
         return false;
     }
-
-    @Autowired
-    private YamlConfiguration config;
-
-    @Autowired
-    private TicketManager ticketManager;
-
-    @Autowired
-    private Embeds embeds;
 
     @Override
     public void run(MessageReceivedEvent event, String[] args) throws CommandCancelledException {

@@ -1,18 +1,18 @@
 package yt.graven.gravensupport.commands.help;
 
+import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.utils.commands.ICommand;
 import yt.graven.gravensupport.utils.messages.TMessage;
 
 @Component
+@RequiredArgsConstructor
 public class HelpCommand implements ICommand {
 
-    @Autowired
-    private HelpManager helpManager;
+    private final HelpManager helpManager;
 
     @Override
     public String[] getNames() {

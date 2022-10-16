@@ -1,20 +1,11 @@
 package yt.graven.gravensupport.utils;
 
+import lombok.Value;
+
+// TODO useless, to remove
+@Value
 public class Config {
 
-    private String token;
-    private String prefix;
-
-    public Config(String token, String prefix) {
-        this.token = token;
-        this.prefix = prefix;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public String getPrefix() {
-        return prefix;
-    }
+    String token;
+    String prefix;
 }
