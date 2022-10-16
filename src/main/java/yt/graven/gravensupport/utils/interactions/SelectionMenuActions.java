@@ -1,7 +1,6 @@
 package yt.graven.gravensupport.utils.interactions;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
 import org.springframework.context.ApplicationContext;
 import yt.graven.gravensupport.commands.ticket.create.interactions.FirstSentenceHandler;
@@ -14,12 +13,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
-// TODO getters seems to be unused, investigation needs to be done
-@AllArgsConstructor
-@Getter
+@RequiredArgsConstructor
 public enum SelectionMenuActions {
     FIRST_SENTENCE("first-sentence", (context) -> context.getBean(FirstSentenceHandler.class)),
-    OPENING_REASON_("opening-reason", (context) -> context.getBean(OpeningReasonHandler.class));
+    OPENING_REASON("opening-reason", (context) -> context.getBean(OpeningReasonHandler.class));
 
     private final String actionId;
     private final Function<ApplicationContext, IIInteractionAction<SelectMenuInteractionEvent>> handler;

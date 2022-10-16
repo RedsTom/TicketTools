@@ -7,7 +7,6 @@ import org.simpleyaml.configuration.file.YamlConfiguration;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.utils.commands.CommandRegistry;
 import yt.graven.gravensupport.utils.commands.ICommand;
-import yt.graven.gravensupport.utils.messages.Embeds;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -19,8 +18,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class HelpManager {
 
-    // TODO remove this useless dependency
-    private final Embeds premadeEmbeds;
     private final CommandRegistry registry;
     private final YamlConfiguration config;
 
