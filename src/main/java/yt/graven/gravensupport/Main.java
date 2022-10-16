@@ -1,5 +1,6 @@
 package yt.graven.gravensupport;
 
+import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Activity;
 import org.simpleyaml.configuration.file.YamlConfiguration;
@@ -17,17 +18,12 @@ public class Main {
     }
 
     @Component
+    @RequiredArgsConstructor
     private static class Startup {
 
         private final EventReceiver eventReceiver;
         private final YamlConfiguration config;
         private final JDA client;
-
-        public Startup(EventReceiver eventReceiver, YamlConfiguration config, JDA client) {
-            this.eventReceiver = eventReceiver;
-            this.config = config;
-            this.client = client;
-        }
 
         public void run() {
             this.client.getPresence().setPresence(

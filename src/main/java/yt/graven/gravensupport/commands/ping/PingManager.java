@@ -1,5 +1,6 @@
 package yt.graven.gravensupport.commands.ping;
 
+import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -8,13 +9,10 @@ import org.springframework.stereotype.Component;
 import java.awt.*;
 
 @Component
+@RequiredArgsConstructor
 public class PingManager {
 
     private final JDA client;
-
-    public PingManager(JDA client) {
-        this.client = client;
-    }
 
     public MessageEmbed compute() {
         return new EmbedBuilder()

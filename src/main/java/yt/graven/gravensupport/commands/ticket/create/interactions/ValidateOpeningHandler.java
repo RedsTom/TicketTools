@@ -1,10 +1,10 @@
 package yt.graven.gravensupport.commands.ticket.create.interactions;
 
+import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.commands.ticket.Ticket;
 import yt.graven.gravensupport.commands.ticket.TicketManager;
@@ -17,13 +17,11 @@ import java.io.IOException;
 import java.util.Optional;
 
 @Component
+@RequiredArgsConstructor
 public class ValidateOpeningHandler implements IIInteractionAction<ButtonInteractionEvent> {
 
-    @Autowired
-    private TicketManager manager;
-
-    @Autowired
-    private Embeds embeds;
+    private final TicketManager manager;
+    private final Embeds embeds;
 
     @Override
     public void run(ButtonInteractionEvent event) throws TicketException, IOException {

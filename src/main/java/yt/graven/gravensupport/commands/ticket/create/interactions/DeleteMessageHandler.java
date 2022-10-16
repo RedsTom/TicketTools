@@ -1,5 +1,6 @@
 package yt.graven.gravensupport.commands.ticket.create.interactions;
 
+import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.Message;
@@ -8,7 +9,6 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.utils.MiscUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.commands.ticket.Ticket;
 import yt.graven.gravensupport.commands.ticket.TicketManager;
@@ -21,10 +21,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
+@RequiredArgsConstructor
 public class DeleteMessageHandler implements IIInteractionAction<ButtonInteractionEvent> {
 
-    @Autowired
-    private TicketManager ticketManager;
+    private final TicketManager ticketManager;
 
     @Override
     public void run(ButtonInteractionEvent event) {

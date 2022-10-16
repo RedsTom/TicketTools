@@ -20,6 +20,10 @@ import java.util.stream.Collectors;
 
 public class TMessage {
 
+    private final List<ActionRow> actionRows = new ArrayList<>();
+    private List<File> files = new ArrayList<>();
+    private MessageBuilder msgBuilder = new MessageBuilder();
+
     public static TMessage create() {
         return new TMessage();
     }
@@ -38,16 +42,6 @@ public class TMessage {
         TMessage msg = new TMessage();
         msg.setEmbeds(embeds);
         return msg;
-    }
-
-    private MessageBuilder msgBuilder;
-    private List<ActionRow> actionRows;
-    private List<File> files;
-
-    private TMessage() {
-        this.msgBuilder = new MessageBuilder();
-        this.actionRows = new ArrayList<>();
-        this.files = new ArrayList<>();
     }
 
     private TMessage setMsgBuilder(MessageBuilder msgBuilder) {

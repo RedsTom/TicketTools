@@ -1,5 +1,7 @@
 package yt.graven.gravensupport.utils.interactions;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import org.springframework.context.ApplicationContext;
 import yt.graven.gravensupport.commands.ticket.create.interactions.OtherOpeningReasonHandler;
@@ -11,25 +13,14 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
+// TODO getters seems to be unused, investigation needs to be done
+@AllArgsConstructor
+@Getter
 public enum ModalActions {
-    OPENING_REASON("op-other-reason", (context) -> context.getBean(OtherOpeningReasonHandler.class))
-    ;
+    OPENING_REASON("op-other-reason", (context) -> context.getBean(OtherOpeningReasonHandler.class));
 
     private final String actionId;
     private final Function<ApplicationContext, IIInteractionAction<ModalInteractionEvent>> handler;
-
-    ModalActions(String actionId, Function<ApplicationContext, IIInteractionAction<ModalInteractionEvent>> handler) {
-        this.actionId = actionId;
-        this.handler = handler;
-    }
-
-    public String getActionId() {
-        return actionId;
-    }
-
-    public Function<ApplicationContext, IIInteractionAction<ModalInteractionEvent>> getHandler() {
-        return handler;
-    }
 
     public void run(ApplicationContext context, ModalInteractionEvent event) throws TicketException, IOException {
         handler.apply(context).run(event);

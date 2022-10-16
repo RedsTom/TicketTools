@@ -1,10 +1,10 @@
 package yt.graven.gravensupport.commands.ticket.create;
 
+import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.utils.MiscUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.commands.ticket.Ticket;
 import yt.graven.gravensupport.commands.ticket.TicketManager;
@@ -19,13 +19,11 @@ import java.util.Arrays;
 import static net.dv8tion.jda.api.entities.ChannelType.*;
 
 @Component
+@RequiredArgsConstructor
 public class TicketCommand implements ICommand {
 
-    @Autowired
-    private TicketManager ticketManager;
-
-    @Autowired
-    private Embeds embeds;
+    private final TicketManager ticketManager;
+    private final Embeds embeds;
 
     @Override
     public String[] getNames() {

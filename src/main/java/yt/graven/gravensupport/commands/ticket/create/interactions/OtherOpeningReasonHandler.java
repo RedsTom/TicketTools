@@ -1,10 +1,10 @@
 package yt.graven.gravensupport.commands.ticket.create.interactions;
 
+import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.commands.ticket.Ticket;
 import yt.graven.gravensupport.commands.ticket.TicketManager;
@@ -17,13 +17,11 @@ import java.io.IOException;
 import java.util.Optional;
 
 @Component
+@RequiredArgsConstructor
 public class OtherOpeningReasonHandler implements IIInteractionAction<ModalInteractionEvent> {
 
-    @Autowired
-    private Embeds embeds;
-
-    @Autowired
-    private TicketManager manager;
+    private final Embeds embeds;
+    private final TicketManager manager;
 
     @Override
     public void run(ModalInteractionEvent event) throws TicketException, IOException {

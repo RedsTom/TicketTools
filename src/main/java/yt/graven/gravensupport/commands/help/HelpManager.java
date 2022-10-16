@@ -1,9 +1,9 @@
 package yt.graven.gravensupport.commands.help;
 
+import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.simpleyaml.configuration.file.YamlConfiguration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.utils.commands.CommandRegistry;
 import yt.graven.gravensupport.utils.commands.ICommand;
@@ -16,27 +16,24 @@ import java.util.HashMap;
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class HelpManager {
 
-    @Autowired
-    private Embeds premadeEmbeds;
+    // TODO remove this useless dependency
+    private final Embeds premadeEmbeds;
+    private final CommandRegistry registry;
+    private final YamlConfiguration config;
+
+    private final HashMap<Long, Integer> page = new HashMap<>();
+
+    private int maxPage;
+    private MessageEmbed[] embeds;
 
     private static final int RESULT_PER_PAGE = 1;
     private static final EmbedBuilder DEFAULT_HELP_EMBED = new EmbedBuilder()
         .setTitle("Besoin d'aide ?")
         .setDescription("Voici la liste des commandes disponibles avec le bot de tickets :")
         .setColor(Color.green);
-
-    @Autowired
-    private CommandRegistry registry;
-
-    @Autowired
-    private YamlConfiguration config;
-
-    private HashMap<Long, Integer> page = new HashMap<>();
-    private int maxPage;
-
-    private MessageEmbed[] embeds;
 
     private void init() {
         int size = registry.getShownCommands().size();

@@ -1,5 +1,7 @@
 package yt.graven.gravensupport.utils.interactions;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import org.springframework.context.ApplicationContext;
 import yt.graven.gravensupport.commands.help.interactions.NextPageHandler;
@@ -14,6 +16,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
+// TODO getters seems to be unused, investigation needs to be done
+@AllArgsConstructor
+@Getter
 public enum ButtonActions {
     DELETE("delete", (context) -> new DeleteHandler()),
     PREV_PAGE("prev-page", (context) -> context.getBean(PrevPageHandler.class)),
@@ -24,23 +29,9 @@ public enum ButtonActions {
     DELETE_MESSAGE("delete-message", (context) -> context.getBean(DeleteMessageHandler.class)),
     EDIT_MESSAGE("edit-message", (context) -> context.getBean(EditMessageHandler.class)),
     CONFIRM_OPENING("validate-opening", (context) -> context.getBean(ValidateOpeningHandler.class));
-    ;
 
     private final String actionId;
     private final Function<ApplicationContext, IIInteractionAction<ButtonInteractionEvent>> handler;
-
-    ButtonActions(String actionId, Function<ApplicationContext, IIInteractionAction<ButtonInteractionEvent>> handler) {
-        this.actionId = actionId;
-        this.handler = handler;
-    }
-
-    public String getActionId() {
-        return actionId;
-    }
-
-    public Function<ApplicationContext, IIInteractionAction<ButtonInteractionEvent>> getHandler() {
-        return handler;
-    }
 
     public void run(ApplicationContext context, ButtonInteractionEvent event) throws TicketException, IOException {
         handler.apply(context).run(event);
