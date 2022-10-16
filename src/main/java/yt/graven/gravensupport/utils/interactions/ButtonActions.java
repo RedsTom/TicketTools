@@ -1,7 +1,6 @@
 package yt.graven.gravensupport.utils.interactions;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import org.springframework.context.ApplicationContext;
 import yt.graven.gravensupport.commands.help.interactions.NextPageHandler;
@@ -16,9 +15,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
-// TODO getters seems to be unused, investigation needs to be done
-@AllArgsConstructor
-@Getter
+@RequiredArgsConstructor
 public enum ButtonActions {
     DELETE("delete", (context) -> new DeleteHandler()),
     PREV_PAGE("prev-page", (context) -> context.getBean(PrevPageHandler.class)),
