@@ -15,17 +15,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ComponentScan("yt.graven.gravensupport")
 public class BotConfig {
+  public static final String CONFIGURATION_FILE = "config.yml";
 
   // GENERALITIES
 
   @Bean
-  public File configurationFile() {
-    return new File("config.yml");
-  }
-
-  @Bean
   public YamlConfiguration config() throws IOException {
-    File configurationFile = configurationFile();
+    File configurationFile = new File(CONFIGURATION_FILE);
     if (!configurationFile.exists()) {
       configurationFile.createNewFile();
       FileWriter writer = new FileWriter(configurationFile);
