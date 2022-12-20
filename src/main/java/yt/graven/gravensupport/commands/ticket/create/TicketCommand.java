@@ -123,7 +123,7 @@ public class TicketCommand implements ICommand {
 
 
         Ticket ticket = ticketManager.create(user);
-        ticket.forceOpening(event.getAuthor());
+        ticket.forceOpening(event.getAuthor(), event.getChannel());
 
         embeds
             .successMessage(String.format(

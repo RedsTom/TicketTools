@@ -4,11 +4,11 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.Component;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
+import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.jetbrains.annotations.NotNull;
 
@@ -94,16 +94,17 @@ public class TMessage {
         return action;
     }
 
-    public MessageAction sendMessage(User user) {
-        MessageAction action = user.openPrivateChannel()
-            .complete()
-            .sendMessage(this.build());
-        for (File file : files) {
-            action = action.addFile(file);
-            file.delete();
-        }
-        files = new ArrayList<>();
-        return action;
+    public RestAction<Message> sendMessage(User user) {
+        return user.openPrivateChannel()
+            .flatMap(channel -> {
+                MessageAction action = channel.sendMessage(this.build());
+                for (File file : files) {
+                    action = action.addFile(file);
+                    file.delete();
+                }
+                files = new ArrayList<>();
+                return action;
+            });
     }
 
     public static class TActionRow {

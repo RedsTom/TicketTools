@@ -9,10 +9,10 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;
-import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.requests.ErrorResponse;
+import net.dv8tion.jda.api.requests.RestAction;
 import org.simpleyaml.configuration.file.YamlConfiguration;
 import yt.graven.gravensupport.utils.exceptions.TicketAlreadyExistsException;
 import yt.graven.gravensupport.utils.messages.Embeds;
@@ -29,6 +29,7 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static yt.graven.gravensupport.utils.WebhookCreator.fromJDA;
@@ -104,54 +105,62 @@ public class Ticket {
             throw new TicketAlreadyExistsException(from);
         }
 
-        ErrorHandler errorHandler = new ErrorHandler()
-            .ignore(ErrorResponse.UNKNOWN_MESSAGE)
-            .handle(ErrorResponse.CANNOT_SEND_TO_USER, exception -> handleUnableToDmUser(channel));
-
         from.openPrivateChannel()
-            .complete()
-            .sendMessage(
-                TMessage.from(embeds.proposeOpening(sentEmote.getAsMention()))
-                    .actionRow()
-                    .add(Button.secondary("?", "Raison : ").asDisabled())
-                    .build()
-                    .actionRow()
-                    .selectMenu("opening-reason")
-                    .addOption("Signalement utilisateur", "op-user-report", Emoji.fromUnicode("\uD83D\uDCDD"))
-                    .addOption("Contester une sanction", "op-unban", Emoji.fromUnicode("⛔"))
-                    .addOption("Proposer une amélioration", "op-enhancement", Emoji.fromUnicode("✨"))
-                    .addOption("Autre", "op-other", Emoji.fromUnicode("\uD83D\uDCAC"))
-                    .build()
-                    .build()
-                    .build()
-            )
-            .queue(null, errorHandler);
+            .flatMap(c -> c.sendMessage(
+                    TMessage.from(embeds.proposeOpening(sentEmote.getAsMention()))
+                            .actionRow()
+                            .add(Button.secondary("?", "Raison : ").asDisabled())
+                            .build()
+                            .actionRow()
+                            .selectMenu("opening-reason")
+                            .addOption("Signalement utilisateur", "op-user-report", Emoji.fromUnicode("\uD83D\uDCDD"))
+                            .addOption("Contester une sanction", "op-unban", Emoji.fromUnicode("⛔"))
+                            .addOption("Proposer une amélioration", "op-enhancement", Emoji.fromUnicode("✨"))
+                            .addOption("Autre", "op-other", Emoji.fromUnicode("\uD83D\uDCAC"))
+                            .build()
+                            .build()
+                            .build()
+            ))
+            .queue(null, new ErrorHandler()
+                        .ignore(ErrorResponse.UNKNOWN_MESSAGE)
+                        .handle(ErrorResponse.CANNOT_SEND_TO_USER, exception -> handleUnableToDmUser(channel)));
     }
 
     /**
      * Directly opens a ticket without asking for the user permission.
+     *
+     * @return
      */
-    public void forceOpening(User by) throws IOException {
+    public void forceOpening(User by, MessageChannel srcChannel) {
         TMessage
             .from(embeds.forceOpening(sentEmote.getAsMention()))
             .sendMessage(from)
-            .queue();
-
-        openOnServer(true, by, null);
+            .queue(unused -> openOnServer(true, by, null),
+                    new ErrorHandler()
+                            .handle(ErrorResponse.UNKNOWN_MESSAGE,
+                                    unused -> openOnServer(true, by, null))
+                            .handle(ErrorResponse.CANNOT_SEND_TO_USER,
+                                    unused -> handleUnableToDmUser(srcChannel)));
     }
 
-    public void openOnServer(boolean forced, User by, String reason) throws IOException {
+    public void openOnServer(boolean forced, User by, String reason) {
         if (opened) {
             throw new TicketAlreadyExistsException(from);
         }
 
         Category category = moderationGuild.getCategoryById(config.getString("config.ticket_guild.tickets_category"));
-        TextChannel channel = category
-            .createTextChannel(from.getName())
+        category.createTextChannel(from.getName())
             .setTopic(from.getId())
-            .complete();
+             .queue(channel -> openChannel(forced, by, reason, channel));
+    }
+
+    private void openChannel(boolean forced, User by, String reason, TextChannel channel) {
         this.to = channel;
-        this.webhookTransmitter = retrieveWebhook();
+        try {
+            this.webhookTransmitter = retrieveWebhook();
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to retrieve webhook for ticket #" + channel.getName() + " !", e);
+        }
 
         if (!forced) {
             TMessage.create()
@@ -200,20 +209,49 @@ public class Ticket {
     }
 
     private JDAWebhookClient retrieveWebhook() throws IOException {
-        List<Webhook> webhooks = to.retrieveWebhooks().complete();
-        Webhook webhook = switch (webhooks.size()) {
-            case 0 -> to
-                .createWebhook(from.getName())
-                .setAvatar(Icon.from(
-                    new URL(from.getEffectiveAvatarUrl()).openStream()
-                ))
-                .complete();
-            default -> webhooks.get(0);
-        };
-        JDAWebhookClient client = new WebhookClientBuilder(webhook.getIdLong(), webhook.getToken())
-            .buildJDA();
+        AtomicReference<JDAWebhookClient> client    = new AtomicReference<>(null);
+        AtomicReference<IOException>      exception = new AtomicReference<>(null);
+        to.retrieveWebhooks().queue(webhooks -> {
+            try {
+                Webhook webhook = switch (webhooks.size()) {
+                    case 0 -> getQueue(to
+                            .createWebhook(from.getName())
+                            .setAvatar(Icon.from(
+                                    new URL(from.getEffectiveAvatarUrl()).openStream()
+                            )));
+                    default -> webhooks.get(0);
+                };
+                client.set(new WebhookClientBuilder(webhook.getIdLong(), webhook.getToken())
+                        .buildJDA());
+            } catch (IOException e) {
+                throw new RuntimeException("Unable to retrieve webhook for ticket #" + to.getName() + " !", e);
+            }
+        });
+        while (client.get() == null && exception.get() == null) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        if (exception.get() != null) {
+            throw exception.get();
+        } else {
+            return client.get();
+        }
+    }
 
-        return client;
+    private <T> T getQueue(RestAction<T> rest) {
+        AtomicReference<T> ref = new AtomicReference<>(null);
+        rest.queue(ref::set);
+        while (ref.get() == null) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        return ref.get();
     }
 
     public TextChannel getTo() {
