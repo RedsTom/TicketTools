@@ -170,7 +170,7 @@ public class Ticket {
                     .setColor(0x48dbfb)
                     .build())
                 .sendMessage(channel)
-                .complete();
+                .queue();
             TMessage.create()
                 .setEmbeds(new EmbedBuilder()
                     .setTitle("Sélectionnez le premier message à envoyer :")
@@ -186,7 +186,7 @@ public class Ticket {
                 .deletable()
                 .build()
                 .sendMessage(channel)
-                .complete();
+                .queue();
         }
 
         TextChannel ticketChannel =
