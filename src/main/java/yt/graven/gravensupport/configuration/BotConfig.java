@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import yt.graven.gravensupport.common.exception.BotStartupException;
+import yt.graven.gravensupport.common.exception.ImpossibleException;
 import yt.graven.gravensupport.configuration.exception.ConfigurationException;
 
 @Configuration
@@ -74,7 +75,7 @@ public class BotConfig {
                           "Unable to retrieve default configuration file in JAR"));
       return Paths.get(resourceUrl.toURI());
     } catch (URISyntaxException e) {
-      throw new ConfigurationException("Unable to retrieve default configuration file in JAR");
+      throw new ImpossibleException("a JAR file URL is a valid URI, wtf happened?");
     }
   }
 }
