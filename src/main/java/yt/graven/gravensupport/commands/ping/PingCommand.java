@@ -9,7 +9,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.utils.commands.ICommand;
 import yt.graven.gravensupport.utils.messages.Embeds;
-import yt.graven.gravensupport.utils.messages.TMessage;
+import yt.graven.gravensupport.utils.messages.TicketMessage;
 
 @Component
 @RequiredArgsConstructor
@@ -32,7 +32,7 @@ public class PingCommand implements ICommand {
   public void run(MessageReceivedEvent event, String[] args) {
     MessageEmbed embed = pingManager.compute();
 
-    TMessage.from(embed)
+    TicketMessage.from(embed)
         .actionRow()
         .add(Button.of(ButtonStyle.PRIMARY, "refresh-ping", "Actualiser", Emoji.fromUnicode("🔁")))
         .deletable()

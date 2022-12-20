@@ -15,7 +15,7 @@ import yt.graven.gravensupport.commands.ticket.TicketManager;
 import yt.graven.gravensupport.utils.commands.ICommand;
 import yt.graven.gravensupport.utils.exceptions.TicketException;
 import yt.graven.gravensupport.utils.messages.Embeds;
-import yt.graven.gravensupport.utils.messages.TMessage;
+import yt.graven.gravensupport.utils.messages.TicketMessage;
 
 @Component
 @RequiredArgsConstructor
@@ -45,7 +45,7 @@ public class TicketCommand implements ICommand {
 
   private void runDefault(MessageReceivedEvent event) throws TicketException {
     if (ticketManager.exists(event.getAuthor())) {
-      TMessage.from(embeds.ticketAlreadyExists(true))
+      TicketMessage.from(embeds.ticketAlreadyExists(true))
           .actionRow()
           .deletable()
           .build()
