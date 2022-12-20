@@ -49,13 +49,19 @@ public class BotConfig {
 
   @Bean
   @SuppressWarnings("unused")
-  public JDA getJDAInstance() throws LoginException {
+  public JDA getJDAInstance() {
     String token = this.getBotConfiguration().getString(CONFIGURATION_TOKEN_PROPERTY);
     if (token.isEmpty()) {
       throw new BotStartupException("No token provided!");
     }
 
-    return JDABuilder.create(EnumSet.allOf(GatewayIntent.class)).setToken(token).build();
+    try {
+      EnumSet<GatewayIntent> allIntentsBecauseWhyNot = EnumSet.allOf(GatewayIntent.class);
+      return JDABuilder.create(allIntentsBecauseWhyNot).setToken(token).build();
+    } catch (LoginException exception) {
+      throw new BotStartupException(
+          "Unable to start JDA instance. Please ensure your token is valid!", exception);
+    }
   }
 
   private Path getDefaultConfigFromInsideJar() {
