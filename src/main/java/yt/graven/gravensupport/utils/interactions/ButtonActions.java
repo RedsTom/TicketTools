@@ -27,7 +27,7 @@ public enum ButtonActions {
   CONFIRM_OPENING("validate-opening", (context) -> context.getBean(ValidateOpeningHandler.class));
 
   private final String actionId;
-  private final Function<ApplicationContext, IInteractionAction<ButtonInteractionEvent>> handler;
+  private final Function<ApplicationContext, IIInteractionAction<ButtonInteractionEvent>> handler;
 
   public void run(ApplicationContext context, ButtonInteractionEvent event)
       throws TicketException, IOException {

@@ -17,11 +17,11 @@ import net.dv8tion.jda.api.utils.MiscUtil;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.commands.ticket.Ticket;
 import yt.graven.gravensupport.commands.ticket.TicketManager;
-import yt.graven.gravensupport.utils.interactions.IInteractionAction;
+import yt.graven.gravensupport.utils.interactions.IIInteractionAction;
 
 @Component
 @RequiredArgsConstructor
-public class DeleteMessageHandler implements IInteractionAction<ButtonInteractionEvent> {
+public class DeleteMessageHandler implements IIInteractionAction<ButtonInteractionEvent> {
 
   private final TicketManager ticketManager;
 

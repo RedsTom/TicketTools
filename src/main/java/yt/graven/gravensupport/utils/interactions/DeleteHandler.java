@@ -2,7 +2,7 @@ package yt.graven.gravensupport.utils.interactions;
 
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 
-public class DeleteHandler implements IInteractionAction<ButtonInteractionEvent> {
+public class DeleteHandler implements IIInteractionAction<ButtonInteractionEvent> {
   @Override
   public void run(ButtonInteractionEvent event) {
     try {

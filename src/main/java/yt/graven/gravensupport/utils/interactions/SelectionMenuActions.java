@@ -18,7 +18,7 @@ public enum SelectionMenuActions {
   OPENING_REASON("opening-reason", (context) -> context.getBean(OpeningReasonHandler.class));
 
   private final String actionId;
-  private final Function<ApplicationContext, IInteractionAction<SelectMenuInteractionEvent>>
+  private final Function<ApplicationContext, IIInteractionAction<SelectMenuInteractionEvent>>
       handler;
 
   public void run(ApplicationContext context, SelectMenuInteractionEvent event)

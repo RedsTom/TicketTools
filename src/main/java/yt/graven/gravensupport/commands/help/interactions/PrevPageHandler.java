@@ -4,11 +4,11 @@ import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.commands.help.HelpManager;
-import yt.graven.gravensupport.utils.interactions.IInteractionAction;
+import yt.graven.gravensupport.utils.interactions.IIInteractionAction;
 
 @Component
 @RequiredArgsConstructor
-public class PrevPageHandler implements IInteractionAction<ButtonInteractionEvent> {
+public class PrevPageHandler implements IIInteractionAction<ButtonInteractionEvent> {
 
   private final HelpManager helpManager;
 

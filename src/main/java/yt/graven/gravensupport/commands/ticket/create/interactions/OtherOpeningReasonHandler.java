@@ -12,12 +12,12 @@ import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.commands.ticket.Ticket;
 import yt.graven.gravensupport.commands.ticket.TicketManager;
 import yt.graven.gravensupport.utils.exceptions.TicketException;
-import yt.graven.gravensupport.utils.interactions.IInteractionAction;
+import yt.graven.gravensupport.utils.interactions.IIInteractionAction;
 import yt.graven.gravensupport.utils.messages.Embeds;
 
 @Component
 @RequiredArgsConstructor
-public class OtherOpeningReasonHandler implements IInteractionAction<ModalInteractionEvent> {
+public class OtherOpeningReasonHandler implements IIInteractionAction<ModalInteractionEvent> {
 
   private final Embeds embeds;
   private final TicketManager manager;
