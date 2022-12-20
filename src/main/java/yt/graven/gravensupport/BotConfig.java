@@ -42,15 +42,15 @@ public class BotConfig {
     return YamlConfiguration.loadConfiguration(configurationFile.toFile());
   }
 
-  private Path getDefaultConfigFromInsideJar() throws URISyntaxException {
-    URL resourceUrl = Optional.ofNullable(getClass().getClassLoader().getResource(DEFAULT_CONFIG_FILE)).orElseThrow(RuntimeException::new);
-    return Paths.get(resourceUrl.toURI());
-  }
-
   @Bean
   public JDA jda() throws LoginException, IOException, URISyntaxException {
     return JDABuilder.create(EnumSet.allOf(GatewayIntent.class))
         .setToken(this.config().getString("config.token"))
         .build();
+  }
+
+  private Path getDefaultConfigFromInsideJar() throws URISyntaxException {
+    URL resourceUrl = Optional.ofNullable(getClass().getClassLoader().getResource(DEFAULT_CONFIG_FILE)).orElseThrow(RuntimeException::new);
+    return Paths.get(resourceUrl.toURI());
   }
 }
