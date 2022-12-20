@@ -16,7 +16,7 @@ public enum ModalActions {
   OPENING_REASON("op-other-reason", (context) -> context.getBean(OtherOpeningReasonHandler.class));
 
   private final String actionId;
-  private final Function<ApplicationContext, IIInteractionAction<ModalInteractionEvent>> handler;
+  private final Function<ApplicationContext, IInteractionAction<ModalInteractionEvent>> handler;
 
   public void run(ApplicationContext context, ModalInteractionEvent event)
       throws TicketException, IOException {

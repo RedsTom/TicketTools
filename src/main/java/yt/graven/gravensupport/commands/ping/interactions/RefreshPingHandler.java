@@ -4,11 +4,11 @@ import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.commands.ping.PingManager;
-import yt.graven.gravensupport.utils.interactions.IIInteractionAction;
+import yt.graven.gravensupport.utils.interactions.IInteractionAction;
 
 @Component
 @RequiredArgsConstructor
-public class RefreshPingHandler implements IIInteractionAction<ButtonInteractionEvent> {
+public class RefreshPingHandler implements IInteractionAction<ButtonInteractionEvent> {
 
   private final PingManager pingManager;
 

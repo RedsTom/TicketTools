@@ -17,12 +17,12 @@ import net.dv8tion.jda.api.utils.MiscUtil;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.commands.ticket.Ticket;
 import yt.graven.gravensupport.commands.ticket.TicketManager;
-import yt.graven.gravensupport.utils.interactions.IIInteractionAction;
+import yt.graven.gravensupport.utils.interactions.IInteractionAction;
 import yt.graven.gravensupport.utils.messages.Embeds;
 
 @Component
 @RequiredArgsConstructor
-public class ConfirmMessageHandler implements IIInteractionAction<ButtonInteractionEvent> {
+public class ConfirmMessageHandler implements IInteractionAction<ButtonInteractionEvent> {
 
   private final TicketManager ticketManager;
   private final Embeds embeds;
