@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.*;
@@ -51,18 +52,20 @@ public class TicketMessage {
     return this;
   }
 
-  public TicketMessage setEmbeds(EmbedBuilder... embedBuilders) {
-    MessageEmbed[] embeds =
-        Arrays.stream(embedBuilders).map(EmbedBuilder::build).toArray(MessageEmbed[]::new);
-    return setEmbeds(embeds);
+  public TicketMessage setEmbeds(EmbedBuilder... embeds) {
+    msgBuilder.setEmbeds(
+        Arrays.stream(embeds).map(EmbedBuilder::build).collect(Collectors.toList()));
+    return this;
   }
 
   public TicketMessage setContent(String content) {
-    if (!content.isEmpty()) {
-      msgBuilder.setContent(content);
-    } else {
-      msgBuilder.setContent("** **");
-    }
+    if (content.isEmpty()) content = "** **";
+    msgBuilder.setContent(content);
+    return this;
+  }
+
+  public TicketMessage addFile(File file) {
+    this.files.add(file);
     return this;
   }
 
