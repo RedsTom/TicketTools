@@ -14,32 +14,30 @@ import yt.graven.gravensupport.utils.messages.TMessage;
 @Component
 @RequiredArgsConstructor
 public class PingCommand implements ICommand {
-    private final PingManager pingManager;
+  private final PingManager pingManager;
 
-    private final Embeds embeds;
+  private final Embeds embeds;
 
-    @Override
-    public String[] getNames() {
-        return new String[]{
-            "ping", "pong"
-        };
-    }
+  @Override
+  public String[] getNames() {
+    return new String[] {"ping", "pong"};
+  }
 
-    @Override
-    public String getDescription() {
-        return "Sert à calculer la latence du bot";
-    }
+  @Override
+  public String getDescription() {
+    return "Sert à calculer la latence du bot";
+  }
 
-    @Override
-    public void run(MessageReceivedEvent event, String[] args) {
-        MessageEmbed embed = pingManager.compute();
+  @Override
+  public void run(MessageReceivedEvent event, String[] args) {
+    MessageEmbed embed = pingManager.compute();
 
-        TMessage.from(embed)
-            .actionRow()
-            .add(Button.of(ButtonStyle.PRIMARY, "refresh-ping", "Actualiser", Emoji.fromUnicode("🔁")))
-            .deletable()
-            .build()
-            .sendMessage(event.getChannel())
-            .queue();
-    }
+    TMessage.from(embed)
+        .actionRow()
+        .add(Button.of(ButtonStyle.PRIMARY, "refresh-ping", "Actualiser", Emoji.fromUnicode("🔁")))
+        .deletable()
+        .build()
+        .sendMessage(event.getChannel())
+        .queue();
+  }
 }

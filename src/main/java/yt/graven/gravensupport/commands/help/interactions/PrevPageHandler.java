@@ -10,12 +10,10 @@ import yt.graven.gravensupport.utils.interactions.IIInteractionAction;
 @RequiredArgsConstructor
 public class PrevPageHandler implements IIInteractionAction<ButtonInteractionEvent> {
 
-    private final HelpManager helpManager;
+  private final HelpManager helpManager;
 
-    @Override
-    public void run(ButtonInteractionEvent event) {
-        event.deferEdit()
-            .setEmbeds(helpManager.getPrevPage(event.getMessageIdLong()))
-            .queue();
-    }
+  @Override
+  public void run(ButtonInteractionEvent event) {
+    event.deferEdit().setEmbeds(helpManager.getPrevPage(event.getMessageIdLong())).queue();
+  }
 }
