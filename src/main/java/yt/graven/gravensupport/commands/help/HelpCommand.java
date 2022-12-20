@@ -6,7 +6,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.utils.commands.ICommand;
-import yt.graven.gravensupport.utils.messages.TicketMessage;
+import yt.graven.gravensupport.utils.messages.TMessage;
 
 @Component
 @RequiredArgsConstructor
@@ -27,7 +27,7 @@ public class HelpCommand implements ICommand {
   @Override
   public void run(MessageReceivedEvent event, String[] args) {
     helpManager.updateEmbeds();
-    TicketMessage.from(helpManager.getCurrentPage())
+    TMessage.from(helpManager.getCurrentPage())
         .actionRow()
         .button("prev-page")
         .withStyle(ButtonStyle.PRIMARY)

@@ -13,7 +13,7 @@ import yt.graven.gravensupport.commands.ticket.Ticket;
 import yt.graven.gravensupport.commands.ticket.TicketManager;
 import yt.graven.gravensupport.utils.interactions.IInteractionAction;
 import yt.graven.gravensupport.utils.messages.Embeds;
-import yt.graven.gravensupport.utils.messages.TicketMessage;
+import yt.graven.gravensupport.utils.messages.TMessage;
 
 @Component
 @RequiredArgsConstructor
@@ -63,7 +63,7 @@ public class FirstSentenceHandler implements IInteractionAction<SelectMenuIntera
             (msg) -> {
               event.deferEdit().queue();
 
-              TicketMessage.from(embed.build()).sendMessage(event.getChannel()).queue();
+              TMessage.from(embed.build()).sendMessage(event.getChannel()).queue();
 
               event.getMessage().delete().queue();
             })

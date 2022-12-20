@@ -13,16 +13,16 @@ public class Embeds {
     return new EmbedBuilder().setColor(Color.RED).setTitle("Erreur").setDescription(message);
   }
 
-  public TicketMessage errorMessage(String message) {
-    return TicketMessage.from(error(message)).actionRow().deletable().build();
+  public TMessage errorMessage(String message) {
+    return TMessage.from(error(message)).actionRow().deletable().build();
   }
 
   public EmbedBuilder success(String message) {
     return new EmbedBuilder().setColor(Color.GREEN).setTitle("Succès").setDescription(message);
   }
 
-  public TicketMessage successMessage(String message) {
-    return TicketMessage.from(success(message)).actionRow().deletable().build();
+  public TMessage successMessage(String message) {
+    return TMessage.from(success(message)).actionRow().deletable().build();
   }
 
   public EmbedBuilder ticketAlreadyExists(boolean personal) {
@@ -32,13 +32,12 @@ public class Embeds {
             : "Un ticket est déjà ouvert avec cet utilisateur.");
   }
 
-  public TicketMessage ticketAlreadyExistsMessage(boolean personal) {
-    return TicketMessage.from(ticketAlreadyExists(personal)).actionRow().deletable().build();
+  public TMessage ticketAlreadyExistsMessage(boolean personal) {
+    return TMessage.from(ticketAlreadyExists(personal)).actionRow().deletable().build();
   }
 
-  public TicketMessage ticketAlreadyExistsMessage(
-      GuildMessageChannel ticketChannel, boolean personal) {
-    return TicketMessage.from(ticketAlreadyExists(personal))
+  public TMessage ticketAlreadyExistsMessage(GuildMessageChannel ticketChannel, boolean personal) {
+    return TMessage.from(ticketAlreadyExists(personal))
         .actionRow()
         .button()
         .withText("Aller au ticket")
@@ -55,8 +54,8 @@ public class Embeds {
     return error("Impossible de trouver un ticket rattaché à ce salon");
   }
 
-  public TicketMessage noTicketAttachedMessage() {
-    return TicketMessage.from(noTicketAttached()).actionRow().deletable().build();
+  public TMessage noTicketAttachedMessage() {
+    return TMessage.from(noTicketAttached()).actionRow().deletable().build();
   }
 
   public EmbedBuilder proposeOpening(String sentEmote) {

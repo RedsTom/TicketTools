@@ -16,60 +16,60 @@ import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.jetbrains.annotations.NotNull;
 
-public class TicketMessage {
+public class TMessage {
 
   private final List<ActionRow> actionRows = new ArrayList<>();
   private List<File> files = new ArrayList<>();
   private MessageBuilder msgBuilder = new MessageBuilder();
 
-  public static TicketMessage create() {
-    return new TicketMessage();
+  public static TMessage create() {
+    return new TMessage();
   }
 
-  public static TicketMessage from(MessageBuilder msgBuilder) {
-    return new TicketMessage().setMsgBuilder(msgBuilder);
+  public static TMessage from(MessageBuilder msgBuilder) {
+    return new TMessage().setMsgBuilder(msgBuilder);
   }
 
-  public static TicketMessage from(MessageEmbed... embeds) {
-    TicketMessage msg = new TicketMessage();
+  public static TMessage from(MessageEmbed... embeds) {
+    TMessage msg = new TMessage();
     msg.setEmbeds(embeds);
     return msg;
   }
 
-  public static TicketMessage from(EmbedBuilder... embeds) {
-    TicketMessage msg = new TicketMessage();
+  public static TMessage from(EmbedBuilder... embeds) {
+    TMessage msg = new TMessage();
     msg.setEmbeds(embeds);
     return msg;
   }
 
-  private TicketMessage setMsgBuilder(MessageBuilder msgBuilder) {
+  private TMessage setMsgBuilder(MessageBuilder msgBuilder) {
     this.msgBuilder = msgBuilder;
     return this;
   }
 
-  public TicketMessage setEmbeds(MessageEmbed... embeds) {
+  public TMessage setEmbeds(MessageEmbed... embeds) {
     msgBuilder.setEmbeds(embeds);
     return this;
   }
 
-  public TicketMessage setEmbeds(EmbedBuilder... embeds) {
+  public TMessage setEmbeds(EmbedBuilder... embeds) {
     msgBuilder.setEmbeds(
         Arrays.stream(embeds).map(EmbedBuilder::build).collect(Collectors.toList()));
     return this;
   }
 
-  public TicketMessage setContent(String content) {
+  public TMessage setContent(String content) {
     if (content.isEmpty()) content = "** **";
     msgBuilder.setContent(content);
     return this;
   }
 
-  public TicketMessage addFile(File file) {
+  public TMessage addFile(File file) {
     this.files.add(file);
     return this;
   }
 
-  public TicketMessage setFiles(List<File> files) {
+  public TMessage setFiles(List<File> files) {
     this.files = files;
     return this;
   }
@@ -105,10 +105,10 @@ public class TicketMessage {
 
   public static class TActionRow {
 
-    private final TicketMessage msg;
+    private final TMessage msg;
     private final List<ItemComponent> components;
 
-    private TActionRow(TicketMessage msg) {
+    private TActionRow(TMessage msg) {
       this.msg = msg;
       this.components = new ArrayList<>();
     }
@@ -130,7 +130,7 @@ public class TicketMessage {
       return this;
     }
 
-    public TicketMessage build() {
+    public TMessage build() {
       msg.actionRows.add(ActionRow.of(components));
       return msg;
     }
