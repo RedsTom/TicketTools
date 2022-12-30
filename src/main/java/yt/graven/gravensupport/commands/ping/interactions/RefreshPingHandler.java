@@ -10,10 +10,10 @@ import yt.graven.gravensupport.utils.interactions.IIInteractionAction;
 @RequiredArgsConstructor
 public class RefreshPingHandler implements IIInteractionAction<ButtonInteractionEvent> {
 
-    private final PingManager pingManager;
+  private final PingManager pingManager;
 
-    @Override
-    public void run(ButtonInteractionEvent event) {
-        event.deferEdit().setEmbeds(pingManager.compute()).queue();
-    }
+  @Override
+  public void run(ButtonInteractionEvent event) {
+    event.deferEdit().setEmbeds(pingManager.compute()).queue();
+  }
 }
