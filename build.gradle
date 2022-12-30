@@ -49,7 +49,6 @@ compileJava {
         attributes('Main-Class': 'yt.graven.gravensupport.Main')
     }
     options.encoding = "UTF-8"
-    dependsOn "spotlessApply"
 }
 
 spotless {
