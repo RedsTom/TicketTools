@@ -171,7 +171,7 @@ public class Ticket {
           .deletable()
           .build()
           .sendMessage(channel)
-          .queue();
+          .complete();
     }
 
     TextChannel ticketChannel =
