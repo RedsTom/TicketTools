@@ -1,7 +1,7 @@
 package yt.graven.gravensupport.commands.help;
 
 import lombok.RequiredArgsConstructor;
-import net.dv8tion.jda.api.entities.Emoji;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import org.springframework.stereotype.Component;

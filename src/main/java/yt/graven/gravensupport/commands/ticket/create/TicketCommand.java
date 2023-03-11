@@ -1,6 +1,6 @@
 package yt.graven.gravensupport.commands.ticket.create;
 
-import static net.dv8tion.jda.api.entities.ChannelType.*;
+import static net.dv8tion.jda.api.entities.channel.ChannelType.*;
 
 import java.io.IOException;
 import java.util.Arrays;

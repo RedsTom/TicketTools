@@ -3,8 +3,8 @@ package yt.graven.gravensupport.commands.ticket.close;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import net.dv8tion.jda.api.entities.ChannelType;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.utils.MiscUtil;
 import org.simpleyaml.configuration.file.YamlConfiguration;
@@ -49,7 +49,7 @@ public class CloseCommand implements ICommand {
       throw new CommandCancelledException();
     }
 
-    TextChannel textChannel = event.getTextChannel();
+    TextChannel textChannel = event.getChannel().asTextChannel();
     if (!Objects.equals(
         textChannel.getParentCategoryId(),
         config.getString("config.ticket_guild" + ".tickets_category"))) {

@@ -7,8 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.utils.FileUpload;
 
 public class SerializableMessageArray {
 
@@ -68,7 +69,7 @@ public class SerializableMessageArray {
                 Message msg =
                     channel
                         .sendMessage("Attachement of @" + message.getAuthor().getAsTag())
-                        .addFile(f)
+                        .addFiles(FileUpload.fromData(f))
                         .complete();
 
                 for (Message.Attachment msgAttachment : msg.getAttachments()) {

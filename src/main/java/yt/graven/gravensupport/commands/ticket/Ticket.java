@@ -1,8 +1,6 @@
 package yt.graven.gravensupport.commands.ticket;
 
-import static yt.graven.gravensupport.utils.WebhookCreator.fromJDA;
-
-import club.minnced.discord.webhook.WebhookClientBuilder;
+import club.minnced.discord.webhook.WebhookClient;
 import club.minnced.discord.webhook.external.JDAWebhookClient;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import com.google.gson.Gson;
@@ -11,21 +9,30 @@ import java.awt.*;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.concrete.Category;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.requests.ErrorResponse;
+import net.dv8tion.jda.api.utils.FileUpload;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import org.simpleyaml.configuration.file.YamlConfiguration;
+import yt.graven.gravensupport.utils.WebhookMessageAdapter;
 import yt.graven.gravensupport.utils.exceptions.TicketAlreadyExistsException;
 import yt.graven.gravensupport.utils.messages.Embeds;
 import yt.graven.gravensupport.utils.messages.TMessage;
@@ -38,13 +45,13 @@ public class Ticket {
   private final YamlConfiguration config;
   private final User from;
   private final Guild moderationGuild;
-  private final Emote sentEmote;
+  private final Emoji sentEmote;
   private TextChannel to;
-  private JDAWebhookClient webhookTransmitter;
   private boolean opened;
 
   private static final Gson GSON =
       new GsonBuilder().setPrettyPrinting().excludeFieldsWithoutExposeAnnotation().create();
+  private WebhookClient webhook;
 
   private Ticket(
       TicketManager ticketManager,
@@ -52,19 +59,21 @@ public class Ticket {
       YamlConfiguration config,
       User from,
       TextChannel to,
-      JDAWebhookClient webhookTransmitter) {
+      WebhookClient webhook) {
     this.embeds = embeds;
     this.from = from;
     this.to = to;
-    this.webhookTransmitter = webhookTransmitter;
     this.config = config;
     this.opened = true;
     this.ticketManager = ticketManager;
+    this.webhook = webhook;
 
     this.moderationGuild =
         from.getJDA().getGuildById(config.getString("config.ticket_guild.guild_id"));
     this.sentEmote =
-        this.moderationGuild.getEmoteById(this.config.getString("config.ticket_guild.reaction_id"));
+        this.moderationGuild
+            .retrieveEmojiById(this.config.getString("config.ticket_guild.reaction_id"))
+            .complete();
   }
 
   /**
@@ -89,15 +98,14 @@ public class Ticket {
           "Error : Unable to find an user matching the ticket #" + channel.getName() + " !");
     }
 
-    Ticket t = new Ticket(ticketManager, embeds, config, user, channel, null);
-    t.webhookTransmitter = t.retrieveWebhook();
-
-    return t;
+    Ticket ticket = new Ticket(ticketManager, embeds, config, user, channel, null);
+    ticket.webhook = ticket.retrieveWebhook();
+    return ticket;
   }
 
   /** Sends a message to confirm the opening of the ticket in the case of a user-opened ticket. */
   public void proposeOpening(MessageChannel channel) {
-    if ((webhookTransmitter != null && to != null) || opened) {
+    if ((webhook != null && to != null) || opened) {
       throw new TicketAlreadyExistsException(from);
     }
 
@@ -109,7 +117,7 @@ public class Ticket {
     from.openPrivateChannel()
         .complete()
         .sendMessage(
-            TMessage.from(embeds.proposeOpening(sentEmote.getAsMention()))
+            TMessage.from(embeds.proposeOpening(sentEmote.getFormatted()))
                 .actionRow()
                 .add(Button.secondary("?", "Raison : ").asDisabled())
                 .build()
@@ -128,7 +136,7 @@ public class Ticket {
 
   /** Directly opens a ticket without asking for the user permission. */
   public void forceOpening(User by) throws IOException {
-    TMessage.from(embeds.forceOpening(sentEmote.getAsMention())).sendMessage(from).queue();
+    TMessage.from(embeds.forceOpening(sentEmote.getFormatted())).sendMessage(from).queue();
 
     openOnServer(true, by, null);
   }
@@ -143,7 +151,7 @@ public class Ticket {
     TextChannel channel =
         category.createTextChannel(from.getName()).setTopic(from.getId()).complete();
     this.to = channel;
-    this.webhookTransmitter = retrieveWebhook();
+    this.webhook = retrieveWebhook();
 
     if (!forced) {
       TMessage.create()
@@ -196,19 +204,15 @@ public class Ticket {
     opened = true;
   }
 
-  private JDAWebhookClient retrieveWebhook() throws IOException {
+  private WebhookClient retrieveWebhook() throws IOException {
     List<Webhook> webhooks = to.retrieveWebhooks().complete();
-    Webhook webhook =
+    return JDAWebhookClient.from(
         switch (webhooks.size()) {
           case 0 -> to.createWebhook(from.getName())
               .setAvatar(Icon.from(new URL(from.getEffectiveAvatarUrl()).openStream()))
               .complete();
           default -> webhooks.get(0);
-        };
-    JDAWebhookClient client =
-        new WebhookClientBuilder(webhook.getIdLong(), webhook.getToken()).buildJDA();
-
-    return client;
+        });
   }
 
   public TextChannel getTo() {
@@ -219,10 +223,6 @@ public class Ticket {
     return from;
   }
 
-  public JDAWebhookClient getWebhookTransmitter() {
-    return webhookTransmitter;
-  }
-
   public boolean isOpened() {
     return opened;
   }
@@ -231,19 +231,16 @@ public class Ticket {
     Executors.newSingleThreadExecutor()
         .execute(
             () -> {
-              WebhookMessageBuilder webhookMessageBuilder = fromJDA(message);
-              for (Message.Attachment attachement : message.getAttachments()) {
-                webhookMessageBuilder.addFile(attachement.downloadToFile().join());
-              }
-              this.getWebhookTransmitter()
-                  .send(webhookMessageBuilder.build())
+              WebhookMessageBuilder builder = WebhookMessageAdapter.fromJDA(message);
+              webhook
+                  .send(builder.build())
                   .thenAccept(
                       msg -> {
                         message.addReaction(sentEmote).queue();
                       })
                   .exceptionally(
                       (error) -> {
-                        message.addReaction("❌").queue();
+                        message.addReaction(Emoji.fromUnicode("❌")).queue();
                         return null;
                       });
             });
@@ -291,7 +288,7 @@ public class Ticket {
         .queue();
   }
 
-  public CompletableFuture<Message> confirmSendToUser(Message message) {
+  public CompletableFuture<Message> confirmSendToUser(MessageCreateData message) {
     CompletableFuture<Message> cf = new CompletableFuture<>();
 
     Executors.newSingleThreadExecutor()
@@ -299,17 +296,31 @@ public class Ticket {
             () -> {
               try {
                 TMessage builder =
-                    TMessage.from(new MessageBuilder(message))
+                    TMessage.from(MessageCreateBuilder.from(message))
                         .setContent(
-                            message.getContentRaw().startsWith("'")
-                                ? message.getContentRaw().substring(1).trim()
-                                : message.getContentRaw().trim());
+                            message.getContent().startsWith("'")
+                                ? message.getContent().substring(1).trim()
+                                : message.getContent().trim());
 
                 try {
-                  builder.setFiles(
+                  // Set attachements as files in builder
+                  Set<String> passed = new HashSet<>();
+                  UnaryOperator<String> nameGenerator =
+                      (name) -> {
+                        if (passed.contains(name)) {
+                          return name + "-" + UUID.randomUUID();
+                        } else {
+                          passed.add(name);
+                          return name;
+                        }
+                      };
+                  builder.addFiles(
                       message.getAttachments().stream()
-                          .map(a -> a.downloadToFile().join())
-                          .collect(Collectors.toList()));
+                          .map(
+                              a ->
+                                  FileUpload.fromData(
+                                      a.getData(), nameGenerator.apply(a.getName())))
+                          .toArray(FileUpload[]::new));
                 } catch (UnsupportedOperationException ignored) {
                 }
 
@@ -353,7 +364,9 @@ public class Ticket {
               Message report =
                   reportsChannel
                       .sendMessage("Rapport du ticket de `@" + from.getAsTag() + "`")
-                      .addFile(json.getBytes(StandardCharsets.UTF_8), to.getName() + ".json")
+                      .addFiles(
+                          FileUpload.fromData(
+                              json.getBytes(StandardCharsets.UTF_8), to.getName() + ".json"))
                       .complete();
 
               String reportJsonUrl = "";

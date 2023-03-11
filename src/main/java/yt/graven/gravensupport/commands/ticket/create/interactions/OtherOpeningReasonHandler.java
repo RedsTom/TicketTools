@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.ChannelType;
-import net.dv8tion.jda.api.entities.PrivateChannel;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.commands.ticket.Ticket;
@@ -27,7 +27,7 @@ public class OtherOpeningReasonHandler implements IIInteractionAction<ModalInter
 
     if (event.getChannel().getType() != ChannelType.PRIVATE) return;
 
-    PrivateChannel channel = event.getPrivateChannel();
+    PrivateChannel channel = event.getChannel().asPrivateChannel();
     Optional<Ticket> ticket = manager.get(channel.getUser());
 
     if (ticket.isEmpty()) {
