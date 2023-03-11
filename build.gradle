@@ -46,13 +46,21 @@ application {
 
 compileJava {
     manifest {
-        attributes(
-                'Main-Class': 'yt.graven.gravensupport.Main'
-        )
+        attributes('Main-Class': 'yt.graven.gravensupport.Main')
     }
+    options.encoding = "UTF-8"
 }
 
-compileJava.options.encoding = "UTF-8"
+spotless {
+    java {
+        googleJavaFormat('1.15.0')
+
+        importOrder()
+        removeUnusedImports()
+        formatAnnotations()
+        trimTrailingWhitespace()
+    }
+}
 
 spotless {
     java {
