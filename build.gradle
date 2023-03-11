@@ -61,14 +61,3 @@ spotless {
         trimTrailingWhitespace()
     }
 }
-
-spotless {
-    java {
-        googleJavaFormat('1.15.0')
-
-        importOrder()
-        removeUnusedImports()
-        formatAnnotations()
-        trimTrailingWhitespace()
-    }
-}

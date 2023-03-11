@@ -24,9 +24,9 @@ import yt.graven.gravensupport.utils.messages.Embeds;
 @RequiredArgsConstructor
 public class IdCommand implements ICommand {
 
-    private final YamlConfiguration config;
-    private final TicketManager ticketManager;
-    private final Embeds embeds;
+  private final YamlConfiguration config;
+  private final TicketManager ticketManager;
+  private final Embeds embeds;
 
   @Override
   public String getName() {
