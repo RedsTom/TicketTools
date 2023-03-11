@@ -12,11 +12,11 @@ import org.springframework.stereotype.Component;
 public class Embeds {
 
   public EmbedBuilder error(String message) {
-    return new EmbedBuilder().setColor(Color.RED).setTitle("Erreur").setDescription(message);
+    return new EmbedBuilder().setColor(Color.RED).addField("Erreur :", "> " + message, false);
   }
 
   public TMessage errorMessage(String message) {
-    return TMessage.from(error(message)).actionRow().deletable().build();
+    return TMessage.from(error(message));
   }
 
   public EmbedBuilder success(String message) {
@@ -24,7 +24,7 @@ public class Embeds {
   }
 
   public TMessage successMessage(String message) {
-    return TMessage.from(success(message)).actionRow().deletable().build();
+    return TMessage.from(success(message)).actionRow().build();
   }
 
   public EmbedBuilder ticketAlreadyExists(boolean personal) {
@@ -35,7 +35,7 @@ public class Embeds {
   }
 
   public TMessage ticketAlreadyExistsMessage(boolean personal) {
-    return TMessage.from(ticketAlreadyExists(personal)).actionRow().deletable().build();
+    return TMessage.from(ticketAlreadyExists(personal)).actionRow().build();
   }
 
   public TMessage ticketAlreadyExistsMessage(GuildMessageChannel ticketChannel, boolean personal) {
@@ -48,7 +48,6 @@ public class Embeds {
                 "https://discord.com/channels/%s/%s",
                 ticketChannel.getGuild().getId(), ticketChannel.getId()))
         .build()
-        .deletable()
         .build();
   }
 
@@ -57,7 +56,7 @@ public class Embeds {
   }
 
   public TMessage noTicketAttachedMessage() {
-    return TMessage.from(noTicketAttached()).actionRow().deletable().build();
+    return TMessage.from(noTicketAttached()).actionRow().build();
   }
 
   public EmbedBuilder proposeOpening(String sentEmote) {
