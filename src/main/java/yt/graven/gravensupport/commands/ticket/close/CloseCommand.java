@@ -3,12 +3,18 @@ package yt.graven.gravensupport.commands.ticket.close;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.utils.MiscUtil;
 import org.simpleyaml.configuration.file.YamlConfiguration;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.commands.ticket.Ticket;
 import yt.graven.gravensupport.commands.ticket.TicketManager;
+import yt.graven.gravensupport.utils.commands.Command;
 import yt.graven.gravensupport.utils.commands.ICommand;
 import yt.graven.gravensupport.utils.exceptions.CommandCancelledException;
 import yt.graven.gravensupport.utils.messages.Embeds;
@@ -16,7 +22,7 @@ import yt.graven.gravensupport.utils.messages.Embeds;
 import java.util.Objects;
 import java.util.Optional;
 
-@Component
+@Command
 @RequiredArgsConstructor
 public class CloseCommand implements ICommand {
 
@@ -25,24 +31,19 @@ public class CloseCommand implements ICommand {
     private final Embeds embeds;
 
     @Override
-    public String[] getNames() {
-        return new String[]{
-            "close"
-        };
+    public String getName() {
+        return "close";
     }
 
     @Override
-    public String getDescription() {
-        return "Ferme le ticket actuel";
+    public SlashCommandData getSlashCommandData() {
+        return Commands.slash("close", "Ferme le ticket actuel")
+                .setDefaultPermissions(DefaultMemberPermissions.DISABLED)
+                .setGuildOnly(true);
     }
 
     @Override
-    public boolean isShown() {
-        return false;
-    }
-
-    @Override
-    public void run(MessageReceivedEvent event, String[] args) throws CommandCancelledException {
+    public void run(SlashCommandInteractionEvent event) throws CommandCancelledException {
 
         if (event.getChannelType() == ChannelType.PRIVATE) {
             throw new CommandCancelledException();
@@ -56,7 +57,7 @@ public class CloseCommand implements ICommand {
         if (!Objects.equals(textChannel.getParentCategoryId(), config.getString("config.ticket_guild" +
             ".tickets_category"))) {
             embeds.errorMessage("Cette commande doit être exécutée dans un ticket !")
-                .sendMessage(event.getChannel())
+                .reply(event)
                 .queue();
             return;
         }
@@ -64,7 +65,7 @@ public class CloseCommand implements ICommand {
         Optional<Ticket> ticket = ticketManager.get(MiscUtil.parseLong(((TextChannel) event.getChannel()).getTopic()));
         if (ticket.isEmpty()) {
             embeds.errorMessage("Impossible de trouver le ticket associé à ce salon !")
-                .sendMessage(event.getChannel())
+                .reply(event)
                 .queue();
             return;
         }

@@ -4,19 +4,22 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
+import net.dv8tion.jda.api.requests.restaction.WebhookMessageEditAction;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -98,9 +101,23 @@ public class TMessage {
 
     public MessageCreateAction sendMessage(User user) {
         MessageCreateAction action = user.openPrivateChannel()
-            .complete()
-            .sendMessage(this.build());
+                .complete()
+                .sendMessage(this.build());
         return action;
+    }
+
+    public ReplyCallbackAction reply(SlashCommandInteractionEvent event) {
+        return event.deferReply(true)
+                .applyData(build());
+    }
+
+    public ReplyCallbackAction reply(SlashCommandInteractionEvent event, boolean ephemeral) {
+        return event.deferReply(ephemeral)
+                .applyData(build());
+    }
+
+    public WebhookMessageEditAction<Message> editReply(InteractionHook reply) {
+        return reply.editOriginal(buildEdit());
     }
 
     public static class TActionRow {
@@ -115,8 +132,8 @@ public class TMessage {
 
         public TActionRow deletable() {
             return add(Button.secondary(
-                "delete",
-                Emoji.fromUnicode("🗑️")
+                    "delete",
+                    Emoji.fromUnicode("🗑️")
             ));
         }
 
@@ -134,7 +151,9 @@ public class TMessage {
         }
 
         public TMessage build() {
-            msg.actionRows.add(ActionRow.of(components));
+            if (!components.isEmpty()) {
+                msg.actionRows.add(ActionRow.of(components));
+            }
             return msg;
         }
 
@@ -187,29 +206,29 @@ public class TMessage {
                 if (link != null) {
                     if (text != null) {
                         tActionRow.components.add(
-                            Button.link(link, text)
+                                Button.link(link, text)
                         );
                     } else if (emoji != null) {
                         tActionRow.components.add(
-                            Button.link(link, emoji)
+                                Button.link(link, emoji)
                         );
                     }
                     return tActionRow;
                 }
                 if (text == null && emoji != null) {
                     tActionRow.components.add(
-                        Button.of(buttonStyle, id, emoji)
+                            Button.of(buttonStyle, id, emoji)
                     );
                     return tActionRow;
                 }
                 if (text != null && emoji == null) {
                     tActionRow.components.add(
-                        Button.of(buttonStyle, id, text)
+                            Button.of(buttonStyle, id, text)
                     );
                     return tActionRow;
                 }
                 tActionRow.components.add(
-                    Button.of(buttonStyle, id, text, emoji)
+                        Button.of(buttonStyle, id, text, emoji)
                 );
                 return tActionRow;
             }

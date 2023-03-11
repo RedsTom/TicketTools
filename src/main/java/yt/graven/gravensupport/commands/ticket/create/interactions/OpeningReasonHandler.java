@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
@@ -41,8 +42,8 @@ public class OpeningReasonHandler implements IIInteractionAction<StringSelectInt
 
         if (ticket.get().isOpened()) {
             event.deferReply(true)
-                .addEmbeds(embeds.ticketAlreadyExists(true).build())
-                .queue();
+                    .addEmbeds(embeds.ticketAlreadyExists(true).build())
+                    .queue();
             return;
         }
 
@@ -50,15 +51,15 @@ public class OpeningReasonHandler implements IIInteractionAction<StringSelectInt
 
         if (selectedOption.getValue().equalsIgnoreCase("op-other")) {
             Modal modal = Modal.create(
-                "op-other-reason",
-                "Pourquoi ouvrez-vous un ticket ?"
+                    "op-other-reason",
+                    "Pourquoi ouvrez-vous un ticket ?"
             ).addActionRows(ActionRow.of(
-                    TextInput.create(
-                        "reason",
-                        "Raison (en quelques mots)",
-                        TextInputStyle.SHORT
-                    ).build()
-                )
+                            TextInput.create(
+                                    "reason",
+                                    "Raison (en quelques mots)",
+                                    TextInputStyle.SHORT
+                            ).build()
+                    )
             ).build();
 
             event.replyModal(modal).queue();
@@ -66,13 +67,14 @@ public class OpeningReasonHandler implements IIInteractionAction<StringSelectInt
             return;
         }
 
+        InteractionHook reply = event.deferReply(true).complete();
         ticket.get().openOnServer(false, null, selectedOption.getLabel());
-        event.deferReply(true)
-            .addEmbeds(new EmbedBuilder()
-                .setColor(Color.GREEN)
-                .setTitle("Ticket ouvert !")
-                .setDescription("Le ticket a bien été ouvert ! Vous pouvez désormais communiquer avec la modération")
-                .build())
-            .queue();
+        reply.editOriginalEmbeds(
+                        new EmbedBuilder()
+                                .setColor(Color.GREEN)
+                                .setTitle("Ticket ouvert !")
+                                .setDescription("Le ticket a bien été ouvert ! Vous pouvez désormais communiquer avec la modération")
+                                .build())
+                .queue();
     }
 }
