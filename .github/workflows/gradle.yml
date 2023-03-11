@@ -26,10 +26,14 @@ jobs:
     - name: Set up Gradle
       uses: gradle/gradle-build-action@v2
 
+    - name: Setup Gradle permission
+      run: chmod +x gradlew
+
+    - name: Check code formatting
+      run: ./gradlew spotlessCheck
+
     - name: Execute Gradle build
-      run: |
-        chmod +x gradlew
-        ./gradlew build
+      run: ./gradlew build
 
     - name: Cache everything for CD
       if: github.ref_type == 'tag'

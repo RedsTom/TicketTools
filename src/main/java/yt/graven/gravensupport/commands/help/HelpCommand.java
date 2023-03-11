@@ -12,31 +12,36 @@ import yt.graven.gravensupport.utils.messages.TMessage;
 @RequiredArgsConstructor
 public class HelpCommand implements ICommand {
 
-    private final HelpManager helpManager;
+  private final HelpManager helpManager;
 
-    @Override
-    public String[] getNames() {
-        return new String[]{"help", "?"};
-    }
+  @Override
+  public String[] getNames() {
+    return new String[] {"help", "?"};
+  }
 
-    @Override
-    public String getDescription() {
-        return "Sert à donner l'aide du bot afin de connaître ses différentes commandes";
-    }
+  @Override
+  public String getDescription() {
+    return "Sert à donner l'aide du bot afin de connaître ses différentes commandes";
+  }
 
-    @Override
-    public void run(MessageReceivedEvent event, String[] args) {
-        helpManager.updateEmbeds();
-        TMessage.from(helpManager.getCurrentPage())
-            .actionRow()
-            .button("prev-page").withStyle(ButtonStyle.PRIMARY).withText("Précédent").withEmote(Emoji.fromUnicode("◀️"))
-            .build()
-            .button("next-page").withStyle(ButtonStyle.PRIMARY).withText("Suivant").withEmote(Emoji.fromUnicode("▶️"))
-            .build()
-            .deletable()
-            .build()
-            .sendMessage(event.getChannel())
-            .queue();
-
-    }
+  @Override
+  public void run(MessageReceivedEvent event, String[] args) {
+    helpManager.updateEmbeds();
+    TMessage.from(helpManager.getCurrentPage())
+        .actionRow()
+        .button("prev-page")
+        .withStyle(ButtonStyle.PRIMARY)
+        .withText("Précédent")
+        .withEmote(Emoji.fromUnicode("◀️"))
+        .build()
+        .button("next-page")
+        .withStyle(ButtonStyle.PRIMARY)
+        .withText("Suivant")
+        .withEmote(Emoji.fromUnicode("▶️"))
+        .build()
+        .deletable()
+        .build()
+        .sendMessage(event.getChannel())
+        .queue();
+  }
 }
