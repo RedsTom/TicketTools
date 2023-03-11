@@ -2,15 +2,17 @@ package yt.graven.gravensupport.commands.ticket.create.interactions;
 
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.utils.MiscUtil;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
+import net.dv8tion.jda.api.utils.messages.MessageEditData;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.commands.ticket.Ticket;
 import yt.graven.gravensupport.commands.ticket.TicketManager;
@@ -73,7 +75,7 @@ public class ConfirmMessageHandler implements IIInteractionAction<ButtonInteract
         }
 
         InteractionHook fInteraction = interaction;
-        ticket.get().confirmSendToUser(referingMessage)
+        ticket.get().confirmSendToUser(MessageCreateData.fromMessage(referingMessage))
                 .thenAccept((message) -> {
 
                     EmbedBuilder embed = new EmbedBuilder(baseEmbed)
@@ -105,7 +107,7 @@ public class ConfirmMessageHandler implements IIInteractionAction<ButtonInteract
                 })
                 .exceptionally((error) -> {
                     fInteraction
-                            .editOriginal(embeds.errorMessage(error.getMessage()).build())
+                            .editOriginal(embeds.errorMessage(error.getMessage()).buildEdit())
                             .queue();
                     return null;
                 });

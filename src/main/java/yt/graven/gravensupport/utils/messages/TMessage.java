@@ -1,15 +1,19 @@
 package yt.graven.gravensupport.utils.messages;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.Component;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
-import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
-import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
+import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
+import net.dv8tion.jda.api.utils.FileUpload;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
+import net.dv8tion.jda.api.utils.messages.MessageEditData;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -21,14 +25,13 @@ import java.util.stream.Collectors;
 public class TMessage {
 
     private final List<ActionRow> actionRows = new ArrayList<>();
-    private List<File> files = new ArrayList<>();
-    private MessageBuilder msgBuilder = new MessageBuilder();
+    private MessageCreateBuilder msgBuilder = new MessageCreateBuilder();
 
     public static TMessage create() {
         return new TMessage();
     }
 
-    public static TMessage from(MessageBuilder msgBuilder) {
+    public static TMessage from(MessageCreateBuilder msgBuilder) {
         return new TMessage().setMsgBuilder(msgBuilder);
     }
 
@@ -44,7 +47,7 @@ public class TMessage {
         return msg;
     }
 
-    private TMessage setMsgBuilder(MessageBuilder msgBuilder) {
+    private TMessage setMsgBuilder(MessageCreateBuilder msgBuilder) {
         this.msgBuilder = msgBuilder;
         return this;
     }
@@ -65,13 +68,13 @@ public class TMessage {
         return this;
     }
 
-    public TMessage addFile(File file) {
-        this.files.add(file);
+    public TMessage addFiles(FileUpload... files) {
+        msgBuilder.addFiles(files);
         return this;
     }
 
-    public TMessage setFiles(List<File> files) {
-        this.files = files;
+    public TMessage setFiles(List<FileUpload> files) {
+        msgBuilder.setFiles(files);
         return this;
     }
 
@@ -79,30 +82,24 @@ public class TMessage {
         return new TActionRow(this);
     }
 
-    public Message build() {
-        msgBuilder.setActionRows(actionRows);
+    public MessageEditData buildEdit() {
+        return MessageEditData.fromCreateData(build());
+    }
+
+    public MessageCreateData build() {
+        msgBuilder.setComponents(actionRows);
         return msgBuilder.build();
     }
 
-    public MessageAction sendMessage(MessageChannel channel) {
-        MessageAction action = channel.sendMessage(this.build());
-        for (File file : files) {
-            action = action.addFile(file);
-            file.delete();
-        }
-        files = new ArrayList<>();
+    public MessageCreateAction sendMessage(MessageChannel channel) {
+        MessageCreateAction action = channel.sendMessage(this.build());
         return action;
     }
 
-    public MessageAction sendMessage(User user) {
-        MessageAction action = user.openPrivateChannel()
+    public MessageCreateAction sendMessage(User user) {
+        MessageCreateAction action = user.openPrivateChannel()
             .complete()
             .sendMessage(this.build());
-        for (File file : files) {
-            action = action.addFile(file);
-            file.delete();
-        }
-        files = new ArrayList<>();
         return action;
     }
 
@@ -220,11 +217,11 @@ public class TMessage {
 
         public static class TSelectMenu {
             private final TActionRow row;
-            private SelectMenu.Builder builder;
+            private StringSelectMenu.Builder builder;
 
             private TSelectMenu(TActionRow row, @NotNull String customId) {
                 this.row = row;
-                this.builder = SelectMenu.create(customId);
+                this.builder = StringSelectMenu.create(customId);
             }
 
             public TSelectMenu addOption(String label, String value, Emoji emoji) {

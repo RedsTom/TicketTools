@@ -2,14 +2,15 @@ package yt.graven.gravensupport;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.ReadyEvent;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.utils.MiscUtil;
 import org.jetbrains.annotations.NotNull;
@@ -104,11 +105,11 @@ public class EventReceiver extends ListenerAdapter {
                     try {
                         cmd.run(event, Arrays.copyOfRange(args, 1, args.length));
 
-                        event.getMessage().addReaction("👍").queue();
+                        event.getMessage().addReaction(Emoji.fromUnicode("👍")).queue();
                     } catch (CommandCancelledException ignored) {
 
                     } catch (Exception e) {
-                        event.getMessage().addReaction("❌").queue();
+                        event.getMessage().addReaction(Emoji.fromUnicode("❌")).queue();
                         e.printStackTrace();
                     }
                 });
@@ -140,7 +141,7 @@ public class EventReceiver extends ListenerAdapter {
             if (!event.getMessage().getContentRaw().startsWith("'"))
                 return;
 
-            TextChannel textChannel = (TextChannel) event.getChannel();
+            TextChannel textChannel = event.getChannel().asTextChannel();
             if (!Objects.equals(textChannel.getParentCategoryId(), config.getString("config.ticket_guild.tickets_category")))
                 return;
 
@@ -156,7 +157,6 @@ public class EventReceiver extends ListenerAdapter {
             }
 
             ticket.get().sendToUser(event.getMessage());
-            return;
         }
     }
 
@@ -173,7 +173,7 @@ public class EventReceiver extends ListenerAdapter {
     }
 
     @Override
-    public void onSelectMenuInteraction(@NotNull SelectMenuInteractionEvent event) {
+    public void onStringSelectInteraction(@NotNull StringSelectInteractionEvent event) {
         SelectionMenuActions.getFromActionId(event.getSelectMenu().getId())
             .ifPresent(a -> {
                 try {

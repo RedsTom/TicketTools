@@ -16,7 +16,7 @@ import yt.graven.gravensupport.utils.messages.TMessage;
 import java.io.IOException;
 import java.util.Arrays;
 
-import static net.dv8tion.jda.api.entities.ChannelType.*;
+import static net.dv8tion.jda.api.entities.channel.ChannelType.*;
 
 @Component
 @RequiredArgsConstructor

@@ -1,7 +1,7 @@
 package yt.graven.gravensupport.utils.interactions;
 
 import lombok.RequiredArgsConstructor;
-import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import org.springframework.context.ApplicationContext;
 import yt.graven.gravensupport.commands.ticket.create.interactions.FirstSentenceHandler;
 import yt.graven.gravensupport.commands.ticket.create.interactions.OpeningReasonHandler;
@@ -19,9 +19,9 @@ public enum SelectionMenuActions {
     OPENING_REASON("opening-reason", (context) -> context.getBean(OpeningReasonHandler.class));
 
     private final String actionId;
-    private final Function<ApplicationContext, IIInteractionAction<SelectMenuInteractionEvent>> handler;
+    private final Function<ApplicationContext, IIInteractionAction<StringSelectInteractionEvent>> handler;
 
-    public void run(ApplicationContext context, SelectMenuInteractionEvent event) throws TicketException, IOException {
+    public void run(ApplicationContext context, StringSelectInteractionEvent event) throws TicketException, IOException {
         handler.apply(context).run(event);
     }
 

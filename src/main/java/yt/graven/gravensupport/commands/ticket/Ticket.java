@@ -1,19 +1,25 @@
 package yt.graven.gravensupport.commands.ticket;
 
-import club.minnced.discord.webhook.WebhookClientBuilder;
+import club.minnced.discord.webhook.WebhookClient;
 import club.minnced.discord.webhook.external.JDAWebhookClient;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.concrete.Category;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;
-import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.requests.ErrorResponse;
+import net.dv8tion.jda.api.utils.FileUpload;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import org.simpleyaml.configuration.file.YamlConfiguration;
+import yt.graven.gravensupport.utils.WebhookMessageAdapter;
 import yt.graven.gravensupport.utils.exceptions.TicketAlreadyExistsException;
 import yt.graven.gravensupport.utils.messages.Embeds;
 import yt.graven.gravensupport.utils.messages.TMessage;
@@ -23,15 +29,13 @@ import java.awt.*;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
-
-import static yt.graven.gravensupport.utils.WebhookCreator.fromJDA;
 
 public class Ticket {
 
@@ -40,31 +44,29 @@ public class Ticket {
     private final YamlConfiguration config;
     private final User from;
     private final Guild moderationGuild;
-    private final Emote sentEmote;
+    private final Emoji sentEmote;
     private TextChannel to;
-    private JDAWebhookClient webhookTransmitter;
     private boolean opened;
 
     private static final Gson GSON = new GsonBuilder()
-        .setPrettyPrinting()
-        .excludeFieldsWithoutExposeAnnotation()
-        .create();
+            .setPrettyPrinting()
+            .excludeFieldsWithoutExposeAnnotation()
+            .create();
+    private WebhookClient webhook;
 
-    private Ticket(
-        TicketManager ticketManager, Embeds embeds, YamlConfiguration config, User from, TextChannel to,
-        JDAWebhookClient webhookTransmitter
-    ) {
+    private Ticket(TicketManager ticketManager, Embeds embeds, YamlConfiguration config, User from, TextChannel to, WebhookClient webhook) {
         this.embeds = embeds;
         this.from = from;
         this.to = to;
-        this.webhookTransmitter = webhookTransmitter;
         this.config = config;
         this.opened = true;
         this.ticketManager = ticketManager;
+        this.webhook = webhook;
 
         this.moderationGuild = from.getJDA().getGuildById(config.getString("config.ticket_guild.guild_id"));
-        this.sentEmote = this.moderationGuild.getEmoteById(
-            this.config.getString("config.ticket_guild.reaction_id"));
+        this.sentEmote = this.moderationGuild
+                .retrieveEmojiById(this.config.getString("config.ticket_guild.reaction_id"))
+                .complete();
     }
 
     /**
@@ -78,8 +80,8 @@ public class Ticket {
     }
 
     public static Ticket loadFromChannel(
-        TicketManager ticketManager, Embeds embeds, YamlConfiguration config,
-        TextChannel channel
+            TicketManager ticketManager, Embeds embeds, YamlConfiguration config,
+            TextChannel channel
     ) throws IOException {
         String topic = channel.getTopic();
         topic = topic == null ? "0" : topic;
@@ -87,45 +89,44 @@ public class Ticket {
         User user = channel.getJDA().retrieveUserById(topic).complete();
         if (user == null) {
             throw new RuntimeException("Error : Unable to find an user matching the ticket #" + channel.getName() +
-                " !");
+                    " !");
         }
 
-        Ticket t = new Ticket(ticketManager, embeds, config, user, channel, null);
-        t.webhookTransmitter = t.retrieveWebhook();
-
-        return t;
+        Ticket ticket = new Ticket(ticketManager, embeds, config, user, channel, null);
+        ticket.webhook = ticket.retrieveWebhook();
+        return ticket;
     }
 
     /**
      * Sends a message to confirm the opening of the ticket in the case of a user-opened ticket.
      */
     public void proposeOpening(MessageChannel channel) {
-        if ((webhookTransmitter != null && to != null) || opened) {
+        if ((webhook != null && to != null) || opened) {
             throw new TicketAlreadyExistsException(from);
         }
 
         ErrorHandler errorHandler = new ErrorHandler()
-            .ignore(ErrorResponse.UNKNOWN_MESSAGE)
-            .handle(ErrorResponse.CANNOT_SEND_TO_USER, exception -> handleUnableToDmUser(channel));
+                .ignore(ErrorResponse.UNKNOWN_MESSAGE)
+                .handle(ErrorResponse.CANNOT_SEND_TO_USER, exception -> handleUnableToDmUser(channel));
 
         from.openPrivateChannel()
-            .complete()
-            .sendMessage(
-                TMessage.from(embeds.proposeOpening(sentEmote.getAsMention()))
-                    .actionRow()
-                    .add(Button.secondary("?", "Raison : ").asDisabled())
-                    .build()
-                    .actionRow()
-                    .selectMenu("opening-reason")
-                    .addOption("Signalement utilisateur", "op-user-report", Emoji.fromUnicode("\uD83D\uDCDD"))
-                    .addOption("Contester une sanction", "op-unban", Emoji.fromUnicode("⛔"))
-                    .addOption("Proposer une amélioration", "op-enhancement", Emoji.fromUnicode("✨"))
-                    .addOption("Autre", "op-other", Emoji.fromUnicode("\uD83D\uDCAC"))
-                    .build()
-                    .build()
-                    .build()
-            )
-            .queue(null, errorHandler);
+                .complete()
+                .sendMessage(
+                        TMessage.from(embeds.proposeOpening(sentEmote.getFormatted()))
+                                .actionRow()
+                                .add(Button.secondary("?", "Raison : ").asDisabled())
+                                .build()
+                                .actionRow()
+                                .selectMenu("opening-reason")
+                                .addOption("Signalement utilisateur", "op-user-report", Emoji.fromUnicode("\uD83D\uDCDD"))
+                                .addOption("Contester une sanction", "op-unban", Emoji.fromUnicode("⛔"))
+                                .addOption("Proposer une amélioration", "op-enhancement", Emoji.fromUnicode("✨"))
+                                .addOption("Autre", "op-other", Emoji.fromUnicode("\uD83D\uDCAC"))
+                                .build()
+                                .build()
+                                .build()
+                )
+                .queue(null, errorHandler);
     }
 
     /**
@@ -133,9 +134,9 @@ public class Ticket {
      */
     public void forceOpening(User by) throws IOException {
         TMessage
-            .from(embeds.forceOpening(sentEmote.getAsMention()))
-            .sendMessage(from)
-            .queue();
+                .from(embeds.forceOpening(sentEmote.getFormatted()))
+                .sendMessage(from)
+                .queue();
 
         openOnServer(true, by, null);
     }
@@ -147,73 +148,69 @@ public class Ticket {
 
         Category category = moderationGuild.getCategoryById(config.getString("config.ticket_guild.tickets_category"));
         TextChannel channel = category
-            .createTextChannel(from.getName())
-            .setTopic(from.getId())
-            .complete();
+                .createTextChannel(from.getName())
+                .setTopic(from.getId())
+                .complete();
         this.to = channel;
-        this.webhookTransmitter = retrieveWebhook();
+        this.webhook = retrieveWebhook();
 
         if (!forced) {
             TMessage.create()
-                .setEmbeds(new EmbedBuilder()
-                    .setTitle("\uD83D\uDCDD Raison de l'ouverture du ticket")
-                    .setDescription("**`" + reason + "`**")
-                    .setColor(0x48dbfb)
-                    .build())
-                .sendMessage(channel)
-                .complete();
+                    .setEmbeds(new EmbedBuilder()
+                            .setTitle("\uD83D\uDCDD Raison de l'ouverture du ticket")
+                            .setDescription("**`" + reason + "`**")
+                            .setColor(0x48dbfb)
+                            .build())
+                    .sendMessage(channel)
+                    .complete();
             TMessage.create()
-                .setEmbeds(new EmbedBuilder()
-                    .setTitle("Sélectionnez le premier message à envoyer :")
-                    .setColor(0x48dbfb)
-                    .build())
-                .actionRow()
-                .selectMenu("first-sentence")
-                .addOption("Bonjour", "bonjour", Emoji.fromUnicode("☀️"))
-                .addOption("Bonsoir", "bonsoir", Emoji.fromUnicode("🌙"))
-                .build()
-                .build()
-                .actionRow()
-                .deletable()
-                .build()
-                .sendMessage(channel)
-                .complete();
+                    .setEmbeds(new EmbedBuilder()
+                            .setTitle("Sélectionnez le premier message à envoyer :")
+                            .setColor(0x48dbfb)
+                            .build())
+                    .actionRow()
+                    .selectMenu("first-sentence")
+                    .addOption("Bonjour", "bonjour", Emoji.fromUnicode("☀️"))
+                    .addOption("Bonsoir", "bonsoir", Emoji.fromUnicode("🌙"))
+                    .build()
+                    .build()
+                    .actionRow()
+                    .deletable()
+                    .build()
+                    .sendMessage(channel)
+                    .complete();
         }
 
         TextChannel ticketChannel =
-            moderationGuild.getTextChannelById(config.getString("config.ticket_guild.channels_ids.tickets"));
+                moderationGuild.getTextChannelById(config.getString("config.ticket_guild.channels_ids.tickets"));
         TMessage.from(embeds.ticketOpening(forced, by, from, channel, reason))
-            .actionRow()
-            .button()
-            .withText("Aller au salon")
-            .withLink(String.format("https://discord.com/channels/%s/%s", moderationGuild.getId(), channel.getId()))
-            .build()
-            .button()
-            .withText("Aller à l'utilisateur")
-            .withLink(String.format("https://discord.com/users/%s", from.getId()))
-            .build()
-            .build()
-            .sendMessage(ticketChannel)
-            .queue();
+                .actionRow()
+                .button()
+                .withText("Aller au salon")
+                .withLink(String.format("https://discord.com/channels/%s/%s", moderationGuild.getId(), channel.getId()))
+                .build()
+                .button()
+                .withText("Aller à l'utilisateur")
+                .withLink(String.format("https://discord.com/users/%s", from.getId()))
+                .build()
+                .build()
+                .sendMessage(ticketChannel)
+                .queue();
 
         opened = true;
     }
 
-    private JDAWebhookClient retrieveWebhook() throws IOException {
+    private WebhookClient retrieveWebhook() throws IOException {
         List<Webhook> webhooks = to.retrieveWebhooks().complete();
-        Webhook webhook = switch (webhooks.size()) {
+        return JDAWebhookClient.from(switch (webhooks.size()) {
             case 0 -> to
-                .createWebhook(from.getName())
-                .setAvatar(Icon.from(
-                    new URL(from.getEffectiveAvatarUrl()).openStream()
-                ))
-                .complete();
+                    .createWebhook(from.getName())
+                    .setAvatar(Icon.from(
+                            new URL(from.getEffectiveAvatarUrl()).openStream()
+                    ))
+                    .complete();
             default -> webhooks.get(0);
-        };
-        JDAWebhookClient client = new WebhookClientBuilder(webhook.getIdLong(), webhook.getToken())
-            .buildJDA();
-
-        return client;
+        });
     }
 
     public TextChannel getTo() {
@@ -224,28 +221,19 @@ public class Ticket {
         return from;
     }
 
-    public JDAWebhookClient getWebhookTransmitter() {
-        return webhookTransmitter;
-    }
-
     public boolean isOpened() {
         return opened;
     }
 
     public void sendToTicket(Message message) {
         Executors.newSingleThreadExecutor().execute(() -> {
-            WebhookMessageBuilder webhookMessageBuilder = fromJDA(message);
-            for (Message.Attachment attachement : message.getAttachments()) {
-                webhookMessageBuilder.addFile(attachement.downloadToFile().join());
-            }
-            this.getWebhookTransmitter().send(webhookMessageBuilder.build())
-                .thenAccept(msg -> {
-                    message.addReaction(sentEmote).queue();
-                })
-                .exceptionally((error) -> {
-                    message.addReaction("❌").queue();
-                    return null;
-                });
+            WebhookMessageBuilder builder = WebhookMessageAdapter.fromJDA(message);
+            webhook.send(builder.build()).thenAccept(msg -> {
+                message.addReaction(sentEmote).queue();
+            }).exceptionally((error) -> {
+                message.addReaction(Emoji.fromUnicode("❌")).queue();
+                return null;
+            });
         });
     }
 
@@ -253,63 +241,73 @@ public class Ticket {
         String content = message.getContentRaw().substring(1).trim();
 
         EmbedBuilder embedBuilder = new EmbedBuilder()
-            .setTitle("Confirmer l'envoi du message ?")
-            .setDescription(content)
-            .setColor(Color.ORANGE)
-            .setFooter("⚠️ Tant que l'envoi du message n'a pas été confirmé, vous pouvez éditer son contenu.")
-            .addField(
-                "🔗 Identifiant du message",
-                String.format("[%s](%s)", "" + message.getId(), "" + message.getJumpUrl()),
-                true
-            );
+                .setTitle("Confirmer l'envoi du message ?")
+                .setDescription(content)
+                .setColor(Color.ORANGE)
+                .setFooter("⚠️ Tant que l'envoi du message n'a pas été confirmé, vous pouvez éditer son contenu.")
+                .addField(
+                        "🔗 Identifiant du message",
+                        String.format("[%s](%s)", "" + message.getId(), "" + message.getJumpUrl()),
+                        true
+                );
 
         if (message.getAttachments().size() != 0) {
             embedBuilder.addField("📎 Pièces jointes :",
-                "`" + message.getAttachments()
-                    .stream()
-                    .map(Message.Attachment::getFileName)
-                    .collect(Collectors.joining("`, `")) + "`",
-                true);
+                    "`" + message.getAttachments()
+                            .stream()
+                            .map(Message.Attachment::getFileName)
+                            .collect(Collectors.joining("`, `")) + "`",
+                    true);
         }
 
         TMessage.from(embedBuilder.build())
-            .actionRow()
-            .button("confirm-message")
-            .withStyle(ButtonStyle.SUCCESS)
-            .withText("Confirmer")
-            .build()
-            .button("deny-message")
-            .withStyle(ButtonStyle.DANGER)
-            .withText("Annuler")
-            .build()
-            .deletable()
-            .build()
-            .sendMessage(message.getChannel())
-            .queue();
+                .actionRow()
+                .button("confirm-message")
+                .withStyle(ButtonStyle.SUCCESS)
+                .withText("Confirmer")
+                .build()
+                .button("deny-message")
+                .withStyle(ButtonStyle.DANGER)
+                .withText("Annuler")
+                .build()
+                .deletable()
+                .build()
+                .sendMessage(message.getChannel())
+                .queue();
     }
 
-    public CompletableFuture<Message> confirmSendToUser(Message message) {
+    public CompletableFuture<Message> confirmSendToUser(MessageCreateData message) {
         CompletableFuture<Message> cf = new CompletableFuture<>();
 
         Executors.newSingleThreadExecutor().execute(() -> {
             try {
-                TMessage builder = TMessage.from(new MessageBuilder(message))
-                    .setContent(message.getContentRaw().startsWith("'")
-                        ? message.getContentRaw().substring(1).trim()
-                        : message.getContentRaw().trim());
+                TMessage builder = TMessage.from(MessageCreateBuilder.from(message))
+                        .setContent(message.getContent().startsWith("'")
+                                ? message.getContent().substring(1).trim()
+                                : message.getContent().trim());
 
                 try {
-                    builder.setFiles(message.getAttachments().stream()
-                        .map(a -> a.downloadToFile().join())
-                        .collect(Collectors.toList()));
+                    // Set attachements as files in builder
+                    Set<String> passed = new HashSet<>();
+                    UnaryOperator<String> nameGenerator = (name) -> {
+                        if (passed.contains(name)) {
+                            return name + "-" + UUID.randomUUID();
+                        } else {
+                            passed.add(name);
+                            return name;
+                        }
+                    };
+                    builder.addFiles(message.getAttachments().stream()
+                            .map(a -> FileUpload.fromData(a.getData(), nameGenerator.apply(a.getName())))
+                            .toArray(FileUpload[]::new));
                 } catch (UnsupportedOperationException ignored) {
                 }
 
                 builder
-                    .sendMessage(getFrom())
-                    .queue(cf::complete, (e) -> {
-                        getTo().sendMessage(embeds.errorMessage(e.getMessage()).build()).queue();
-                    });
+                        .sendMessage(getFrom())
+                        .queue(cf::complete, (e) -> {
+                            getTo().sendMessage(embeds.errorMessage(e.getMessage()).build()).queue();
+                        });
             } catch (Exception e) {
                 cf.completeExceptionally(e);
             }
@@ -329,18 +327,18 @@ public class Ticket {
             Collections.reverse(messages);
 
             SerializableMessageArray sma = new SerializableMessageArray(
-                config.getString("config.ticket_guild.channels_ids.attachements"), from);
+                    config.getString("config.ticket_guild.channels_ids.attachements"), from);
 
             messages.forEach(sma::addMessage);
 
             String json = GSON.toJson(sma);
             TextChannel reportsChannel = moderationGuild.getTextChannelById(
-                config.getString("config.ticket_guild.channels_ids.reports")
+                    config.getString("config.ticket_guild.channels_ids.reports")
             );
             Message report = reportsChannel
-                .sendMessage("Rapport du ticket de `@" + from.getAsTag() + "`")
-                .addFile(json.getBytes(StandardCharsets.UTF_8), to.getName() + ".json")
-                .complete();
+                    .sendMessage("Rapport du ticket de `@" + from.getAsTag() + "`")
+                    .addFiles(FileUpload.fromData(json.getBytes(StandardCharsets.UTF_8), to.getName() + ".json"))
+                    .complete();
 
             String reportJsonUrl = "";
             for (Message.Attachment attachment : report.getAttachments()) {
@@ -348,32 +346,32 @@ public class Ticket {
             }
 
             TextChannel ticketsChannel = moderationGuild.getTextChannelById(
-                config.getString("config.ticket_guild.channels_ids.tickets")
+                    config.getString("config.ticket_guild.channels_ids.tickets")
             );
             TMessage.from(embeds.ticketClosing(from, report.getJumpUrl()))
-                .actionRow()
-                .button()
-                .withText("Aller au rapport")
-                .withLink(report.getJumpUrl())
-                .build()
-                .button()
-                .withText("Consulter le rapport (en ligne)")
-                .withLink("https://redstom.github.io/GravenDev-TicketReader/?input=" + reportJsonUrl)
-                .build()
-                .build()
-                .sendMessage(ticketsChannel)
-                .complete();
+                    .actionRow()
+                    .button()
+                    .withText("Aller au rapport")
+                    .withLink(report.getJumpUrl())
+                    .build()
+                    .button()
+                    .withText("Consulter le rapport (en ligne)")
+                    .withLink("https://redstom.github.io/GravenDev-TicketReader/?input=" + reportJsonUrl)
+                    .build()
+                    .build()
+                    .sendMessage(ticketsChannel)
+                    .complete();
 
 
             TMessage.create()
-                .setEmbeds(new EmbedBuilder()
-                    .setColor(Color.RED)
-                    .setTitle("Ticket fermé.")
-                    .setDescription(
-                        "La modération a fermé le ticket avec vous. Si vous souhaitez le rouvrir, " +
-                            "refaites la commande `" + config.getString("config.prefix") + "new`"))
-                .sendMessage(from)
-                .queue();
+                    .setEmbeds(new EmbedBuilder()
+                            .setColor(Color.RED)
+                            .setTitle("Ticket fermé.")
+                            .setDescription(
+                                    "La modération a fermé le ticket avec vous. Si vous souhaitez le rouvrir, " +
+                                            "refaites la commande `" + config.getString("config.prefix") + "new`"))
+                    .sendMessage(from)
+                    .queue();
 
             to.delete().queue((v1) -> ticketManager.remove(from));
         });

@@ -4,8 +4,9 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.utils.FileUpload;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -61,7 +62,7 @@ public class SerializableMessageArray {
                 File f = attachment.downloadToFile().join();
                 Message msg = channel
                     .sendMessage("Attachement of @" + message.getAuthor().getAsTag())
-                    .addFile(f)
+                    .addFiles(FileUpload.fromData(f))
                     .complete();
 
                 for (Message.Attachment msgAttachment : msg.getAttachments()) {

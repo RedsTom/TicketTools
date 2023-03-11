@@ -2,10 +2,11 @@ package yt.graven.gravensupport.commands.ticket.create.interactions;
 
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.MessageBuilder;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.events.interaction.component.GenericSelectMenuInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.utils.MiscUtil;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.commands.ticket.Ticket;
 import yt.graven.gravensupport.commands.ticket.TicketManager;
@@ -18,13 +19,13 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-public class FirstSentenceHandler implements IIInteractionAction<SelectMenuInteractionEvent> {
+public class FirstSentenceHandler implements IIInteractionAction<StringSelectInteractionEvent> {
 
     private final TicketManager ticketManager;
     private final Embeds embeds;
 
     @Override
-    public void run(SelectMenuInteractionEvent event) {
+    public void run(StringSelectInteractionEvent event) {
         Optional<Ticket> ticket = ticketManager.get(MiscUtil.parseLong(((TextChannel) event.getChannel()).getTopic()));
         if (ticket.isEmpty()) {
             event.deferReply(true)
@@ -52,7 +53,7 @@ public class FirstSentenceHandler implements IIInteractionAction<SelectMenuInter
                 .setFooter("")
                 .setColor(Color.GREEN);
 
-        ticket.get().confirmSendToUser(new MessageBuilder().setContent(content).build()).thenAccept((msg) -> {
+        ticket.get().confirmSendToUser(new MessageCreateBuilder().setContent(content).build()).thenAccept((msg) -> {
 
             event.deferEdit().queue();
 
