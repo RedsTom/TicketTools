@@ -8,7 +8,7 @@ plugins {
 group 'yt.graven'
 version '1.0-SNAPSHOT'
 
-sourceCompatibility = targetCompatibility = '16'
+sourceCompatibility = targetCompatibility = '17'
 
 repositories {
     mavenCentral()
