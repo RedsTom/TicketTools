@@ -8,12 +8,16 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
+import net.dv8tion.jda.api.requests.restaction.WebhookMessageEditAction;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
@@ -100,6 +104,18 @@ public class TMessage {
     return action;
   }
 
+  public ReplyCallbackAction reply(SlashCommandInteractionEvent event) {
+    return event.deferReply(true).applyData(build());
+  }
+
+  public ReplyCallbackAction reply(SlashCommandInteractionEvent event, boolean ephemeral) {
+    return event.deferReply(ephemeral).applyData(build());
+  }
+
+  public WebhookMessageEditAction<Message> editReply(InteractionHook reply) {
+    return reply.editOriginal(buildEdit());
+  }
+
   public static class TActionRow {
 
     private final TMessage msg;
@@ -128,7 +144,9 @@ public class TMessage {
     }
 
     public TMessage build() {
-      msg.actionRows.add(ActionRow.of(components));
+      if (!components.isEmpty()) {
+        msg.actionRows.add(ActionRow.of(components));
+      }
       return msg;
     }
 

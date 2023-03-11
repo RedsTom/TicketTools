@@ -10,9 +10,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -22,9 +20,9 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
-import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;
+import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.requests.ErrorResponse;
@@ -104,7 +102,7 @@ public class Ticket {
   }
 
   /** Sends a message to confirm the opening of the ticket in the case of a user-opened ticket. */
-  public void proposeOpening(MessageChannel channel) {
+  public void proposeOpening(InteractionHook reply) {
     if ((webhook != null && to != null) || opened) {
       throw new TicketAlreadyExistsException(from);
     }
@@ -112,7 +110,7 @@ public class Ticket {
     ErrorHandler errorHandler =
         new ErrorHandler()
             .ignore(ErrorResponse.UNKNOWN_MESSAGE)
-            .handle(ErrorResponse.CANNOT_SEND_TO_USER, exception -> handleUnableToDmUser(channel));
+            .handle(ErrorResponse.CANNOT_SEND_TO_USER, exception -> handleUnableToDmUser(reply));
 
     from.openPrivateChannel()
         .complete()
@@ -131,7 +129,11 @@ public class Ticket {
                 .build()
                 .build()
                 .build())
-        .queue(null, errorHandler);
+        .queue(
+            msg -> {
+              reply.editOriginal("➡️ " + msg.getChannel().getAsMention()).queue();
+            },
+            errorHandler);
   }
 
   /** Directly opens a ticket without asking for the user permission. */
@@ -392,6 +394,13 @@ public class Ticket {
                   .sendMessage(ticketsChannel)
                   .complete();
 
+              String ticket =
+                  from.getJDA().retrieveCommands().complete().stream()
+                      .filter(a -> a.getName().equalsIgnoreCase("ticket"))
+                      .findFirst()
+                      .map(a -> a.getAsMention())
+                      .orElse("`/ticket`");
+
               TMessage.create()
                   .setEmbeds(
                       new EmbedBuilder()
@@ -399,9 +408,9 @@ public class Ticket {
                           .setTitle("Ticket fermé.")
                           .setDescription(
                               "La modération a fermé le ticket avec vous. Si vous souhaitez le rouvrir, "
-                                  + "refaites la commande `"
-                                  + config.getString("config.prefix")
-                                  + "new`"))
+                                  + "refaites la commande "
+                                  + ticket
+                                  + "."))
                   .sendMessage(from)
                   .queue();
 
@@ -409,12 +418,12 @@ public class Ticket {
             });
   }
 
-  private void handleUnableToDmUser(MessageChannel channel) {
+  private void handleUnableToDmUser(InteractionHook reply) {
     ticketManager.remove(from);
 
     String errorMessage = "Impossible d'envoyer un message privé à cet utilisateur!";
     MessageEmbed embed = embeds.error(errorMessage).build();
 
-    TMessage.from(embed).sendMessage(channel).queue();
+    TMessage.from(embed).editReply(reply).queue();
   }
 }

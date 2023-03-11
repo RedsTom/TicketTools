@@ -1,33 +1,49 @@
 package yt.graven.gravensupport.utils.commands;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.*;
+import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.JDA;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class CommandRegistry {
 
+  private final ApplicationContext ctx;
+  private final JDA jda;
+
   private final List<ICommand> commands = new ArrayList<>();
 
-  public CommandRegistry addCommand(ICommand command) {
-    if (getCommandByName(command.getNames()[0]).isPresent()) return this;
+  public CommandRegistry(ApplicationContext ctx, JDA jda) {
+    this.ctx = ctx;
+    this.jda = jda;
+  }
+
+  public void loadAll() {
+    ctx.getBeansWithAnnotation(Command.class).values().stream()
+        .filter(ICommand.class::isInstance)
+        .map(ICommand.class::cast)
+        .peek(
+            a ->
+                log.info(
+                    "Loaded command \"{}\" into {}.", a.getName(), a.getClass().getSimpleName()))
+        .forEach(this::loadOne);
+
+    jda.updateCommands()
+        .addCommands(commands.stream().map(ICommand::getSlashCommandData).toList())
+        .queue();
+  }
+
+  public void loadOne(ICommand command) {
     this.commands.add(command);
-    return this;
   }
 
   public Optional<ICommand> getCommandByName(String name) {
-    return commands.stream().filter(a -> Arrays.asList(a.getNames()).contains(name)).findFirst();
-  }
-
-  public void removeCommand(String name) {
-    commands.removeIf(a -> Arrays.asList(a.getNames()).contains(name));
-  }
-
-  public List<ICommand> getShownCommands() {
-    return commands.stream().filter(ICommand::isShown).collect(Collectors.toList());
+    return commands.stream()
+        .peek(a -> log.info("{} ; {}", a.getName(), name))
+        .filter(a -> name.startsWith(a.getName()))
+        .findFirst();
   }
 
   public List<ICommand> getCommands() {

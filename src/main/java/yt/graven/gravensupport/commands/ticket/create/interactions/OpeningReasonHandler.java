@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
@@ -59,10 +60,10 @@ public class OpeningReasonHandler implements IIInteractionAction<StringSelectInt
       return;
     }
 
+    InteractionHook reply = event.deferReply(true).complete();
     ticket.get().openOnServer(false, null, selectedOption.getLabel());
-    event
-        .deferReply(true)
-        .addEmbeds(
+    reply
+        .editOriginalEmbeds(
             new EmbedBuilder()
                 .setColor(Color.GREEN)
                 .setTitle("Ticket ouvert !")

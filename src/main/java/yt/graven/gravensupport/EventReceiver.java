@@ -1,17 +1,14 @@
 package yt.graven.gravensupport;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
-import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -22,8 +19,6 @@ import org.jetbrains.annotations.NotNull;
 import org.simpleyaml.configuration.file.YamlConfiguration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
-import yt.graven.gravensupport.commands.help.HelpCommand;
-import yt.graven.gravensupport.commands.help.HelpManager;
 import yt.graven.gravensupport.commands.ping.PingCommand;
 import yt.graven.gravensupport.commands.ticket.Ticket;
 import yt.graven.gravensupport.commands.ticket.TicketManager;
@@ -48,10 +43,8 @@ public class EventReceiver extends ListenerAdapter {
   private final PingCommand pingCommand;
   private final TicketCommand ticketCommand;
   private final CloseCommand closeCommand;
-  private final HelpCommand helpCommand;
   private final IdCommand idCommand;
   private final YamlConfiguration config;
-  private final HelpManager helpManager;
   private final TicketManager ticketManager;
   private final Embeds embeds;
 
@@ -62,14 +55,7 @@ public class EventReceiver extends ListenerAdapter {
     if (loaded) return;
 
     log.info("Bot preparing - Initializing commands...");
-    this.registry
-        .addCommand(pingCommand)
-        .addCommand(ticketCommand)
-        .addCommand(closeCommand)
-        .addCommand(helpCommand)
-        .addCommand(idCommand);
-
-    helpManager.updateEmbeds();
+    registry.loadAll();
     log.info("Bot ready - Commands initialized!");
 
     try {
@@ -82,41 +68,22 @@ public class EventReceiver extends ListenerAdapter {
   }
 
   @Override
+  public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
+    registry
+        .getCommandByName(event.getFullCommandName())
+        .ifPresent(
+            cmd -> {
+              try {
+                cmd.run(event);
+              } catch (TicketException | IOException | CommandCancelledException e) {
+                throw new RuntimeException(e);
+              }
+            });
+  }
+
+  @Override
   public void onMessageReceived(@NotNull MessageReceivedEvent event) {
     if (event.getAuthor().isBot() || event.getAuthor().isSystem()) return;
-
-    Message message = event.getMessage();
-
-    String content = message.getContentRaw().trim();
-
-    /*
-     * Look for a command
-     */
-    if (content.startsWith(config.getString("config.prefix"))) {
-
-      String[] args = content.split(" ");
-      args[0] = args[0].substring(config.getString("config.prefix").length());
-
-      AtomicBoolean present = new AtomicBoolean(false);
-      registry
-          .getCommandByName(args[0])
-          .ifPresent(
-              cmd -> {
-                present.set(true);
-                try {
-                  cmd.run(event, Arrays.copyOfRange(args, 1, args.length));
-
-                  event.getMessage().addReaction(Emoji.fromUnicode("👍")).queue();
-                } catch (CommandCancelledException ignored) {
-
-                } catch (Exception e) {
-                  event.getMessage().addReaction(Emoji.fromUnicode("❌")).queue();
-                  e.printStackTrace();
-                }
-              });
-
-      if (present.get()) return;
-    }
 
     /*
      * Check for a dm from a member for a potential forward to a ticket.
