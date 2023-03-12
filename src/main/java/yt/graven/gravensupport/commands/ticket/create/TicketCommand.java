@@ -20,29 +20,33 @@ import yt.graven.gravensupport.utils.messages.TMessage;
 @RequiredArgsConstructor
 public class TicketCommand implements ICommand {
 
-  private final TicketManager ticketManager;
-  private final Embeds embeds;
+    private final TicketManager ticketManager;
+    private final Embeds embeds;
 
-  @Override
-  public String getName() {
-    return "ticket";
-  }
-
-  @Override
-  public SlashCommandData getSlashCommandData() {
-    return Commands.slash("ticket", "Ouvrir un ticket afin de communiquer avec la modération")
-        .setDefaultPermissions(DefaultMemberPermissions.ENABLED);
-  }
-
-  @Override
-  public void run(SlashCommandInteractionEvent event) throws TicketException, IOException {
-    if (ticketManager.exists(event.getUser())) {
-      TMessage.from(embeds.ticketAlreadyExists(true)).actionRow().build().reply(event).queue();
-      return;
+    @Override
+    public String getName() {
+        return "ticket";
     }
 
-    InteractionHook reply = event.deferReply(true).complete();
+    @Override
+    public SlashCommandData getSlashCommandData() {
+        return Commands.slash("ticket", "Ouvrir un ticket afin de communiquer avec la modération")
+                .setDefaultPermissions(DefaultMemberPermissions.ENABLED);
+    }
 
-    ticketManager.create(event.getUser()).proposeOpening(reply);
-  }
+    @Override
+    public void run(SlashCommandInteractionEvent event) throws TicketException, IOException {
+        if (ticketManager.exists(event.getUser())) {
+            TMessage.from(embeds.ticketAlreadyExists(true))
+                    .actionRow()
+                    .build()
+                    .reply(event)
+                    .queue();
+            return;
+        }
+
+        InteractionHook reply = event.deferReply(true).complete();
+
+        ticketManager.create(event.getUser()).proposeOpening(reply);
+    }
 }

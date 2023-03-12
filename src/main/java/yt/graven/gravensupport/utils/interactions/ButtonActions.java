@@ -14,23 +14,24 @@ import yt.graven.gravensupport.utils.exceptions.TicketException;
 
 @RequiredArgsConstructor
 public enum ButtonActions {
-  DELETE("delete", (context) -> new DeleteHandler()),
-  REFRESH_PING("refresh-ping", (context) -> context.getBean(RefreshPingHandler.class)),
-  CONFIRM_MESSAGE("confirm-message", (context) -> context.getBean(ConfirmMessageHandler.class)),
-  DENY_MESSAGE("deny-message", (context) -> context.getBean(DenyMessageHandler.class)),
-  DELETE_MESSAGE("delete-message", (context) -> context.getBean(DeleteMessageHandler.class)),
-  EDIT_MESSAGE("edit-message", (context) -> context.getBean(EditMessageHandler.class)),
-  CONFIRM_OPENING("validate-opening", (context) -> context.getBean(ValidateOpeningHandler.class));
+    DELETE("delete", (context) -> new DeleteHandler()),
+    REFRESH_PING("refresh-ping", (context) -> context.getBean(RefreshPingHandler.class)),
+    CONFIRM_MESSAGE("confirm-message", (context) -> context.getBean(ConfirmMessageHandler.class)),
+    DENY_MESSAGE("deny-message", (context) -> context.getBean(DenyMessageHandler.class)),
+    DELETE_MESSAGE("delete-message", (context) -> context.getBean(DeleteMessageHandler.class)),
+    EDIT_MESSAGE("edit-message", (context) -> context.getBean(EditMessageHandler.class)),
+    CONFIRM_OPENING("validate-opening", (context) -> context.getBean(ValidateOpeningHandler.class));
 
-  private final String actionId;
-  private final Function<ApplicationContext, IIInteractionAction<ButtonInteractionEvent>> handler;
+    private final String actionId;
+    private final Function<ApplicationContext, IIInteractionAction<ButtonInteractionEvent>> handler;
 
-  public void run(ApplicationContext context, ButtonInteractionEvent event)
-      throws TicketException, IOException {
-    handler.apply(context).run(event);
-  }
+    public void run(ApplicationContext context, ButtonInteractionEvent event) throws TicketException, IOException {
+        handler.apply(context).run(event);
+    }
 
-  public static Optional<ButtonActions> getFromActionId(String actionId) {
-    return Arrays.stream(values()).filter(a -> Objects.equals(a.actionId, actionId)).findFirst();
-  }
+    public static Optional<ButtonActions> getFromActionId(String actionId) {
+        return Arrays.stream(values())
+                .filter(a -> Objects.equals(a.actionId, actionId))
+                .findFirst();
+    }
 }

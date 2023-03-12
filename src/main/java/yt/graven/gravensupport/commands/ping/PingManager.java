@@ -11,28 +11,28 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class PingManager {
 
-  private final JDA client;
+    private final JDA client;
 
-  public MessageEmbed compute() {
-    return new EmbedBuilder()
-        .setTitle(":ping_pong: Pong !")
-        .setColor(Color.green)
-        .addField(
-            "↔️ Ping du Gateway :",
-            String.format(
-                """
+    public MessageEmbed compute() {
+        return new EmbedBuilder()
+                .setTitle(":ping_pong: Pong !")
+                .setColor(Color.green)
+                .addField(
+                        "↔️ Ping du Gateway :",
+                        String.format(
+                                """
                     **`%s`** ms
                 """.trim(),
-                client.getGatewayPing()),
-            false)
-        .addField(
-            "➡️ Ping de l'API :",
-            String.format(
-                """
+                                client.getGatewayPing()),
+                        false)
+                .addField(
+                        "➡️ Ping de l'API :",
+                        String.format(
+                                """
                     **`%s`** ms
                 """.trim(),
-                client.getRestPing().complete()),
-            false)
-        .build();
-  }
+                                client.getRestPing().complete()),
+                        false)
+                .build();
+    }
 }

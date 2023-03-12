@@ -25,51 +25,50 @@ import yt.graven.gravensupport.utils.messages.Embeds;
 @RequiredArgsConstructor
 public class OpeningReasonHandler implements IIInteractionAction<StringSelectInteractionEvent> {
 
-  private final Embeds embeds;
-  private final TicketManager manager;
+    private final Embeds embeds;
+    private final TicketManager manager;
 
-  @Override
-  public void run(StringSelectInteractionEvent event) throws TicketException, IOException {
-    if (event.getChannel().getType() != ChannelType.PRIVATE) return;
+    @Override
+    public void run(StringSelectInteractionEvent event) throws TicketException, IOException {
+        if (event.getChannel().getType() != ChannelType.PRIVATE) return;
 
-    PrivateChannel channel = event.getChannel().asPrivateChannel();
-    Optional<Ticket> ticket = manager.get(channel.getUser());
+        PrivateChannel channel = event.getChannel().asPrivateChannel();
+        Optional<Ticket> ticket = manager.get(channel.getUser());
 
-    if (ticket.isEmpty()) {
-      ticket = Optional.of(manager.create(channel.getUser()));
+        if (ticket.isEmpty()) {
+            ticket = Optional.of(manager.create(channel.getUser()));
+        }
+
+        if (ticket.get().isOpened()) {
+            event.deferReply(true)
+                    .addEmbeds(embeds.ticketAlreadyExists(true).build())
+                    .queue();
+            return;
+        }
+
+        SelectOption selectedOption =
+                event.getInteraction().getSelectedOptions().get(0);
+
+        if (selectedOption.getValue().equalsIgnoreCase("op-other")) {
+            Modal modal = Modal.create("op-other-reason", "Pourquoi ouvrez-vous un ticket ?")
+                    .addActionRows(
+                            ActionRow.of(TextInput.create("reason", "Raison (en quelques mots)", TextInputStyle.SHORT)
+                                    .build()))
+                    .build();
+
+            event.replyModal(modal).queue();
+
+            return;
+        }
+
+        InteractionHook reply = event.deferReply(true).complete();
+        ticket.get().openOnServer(false, null, selectedOption.getLabel());
+        reply.editOriginalEmbeds(new EmbedBuilder()
+                        .setColor(Color.GREEN)
+                        .setTitle("Ticket ouvert !")
+                        .setDescription(
+                                "Le ticket a bien été ouvert ! Vous pouvez désormais communiquer avec la modération")
+                        .build())
+                .queue();
     }
-
-    if (ticket.get().isOpened()) {
-      event.deferReply(true).addEmbeds(embeds.ticketAlreadyExists(true).build()).queue();
-      return;
-    }
-
-    SelectOption selectedOption = event.getInteraction().getSelectedOptions().get(0);
-
-    if (selectedOption.getValue().equalsIgnoreCase("op-other")) {
-      Modal modal =
-          Modal.create("op-other-reason", "Pourquoi ouvrez-vous un ticket ?")
-              .addActionRows(
-                  ActionRow.of(
-                      TextInput.create("reason", "Raison (en quelques mots)", TextInputStyle.SHORT)
-                          .build()))
-              .build();
-
-      event.replyModal(modal).queue();
-
-      return;
-    }
-
-    InteractionHook reply = event.deferReply(true).complete();
-    ticket.get().openOnServer(false, null, selectedOption.getLabel());
-    reply
-        .editOriginalEmbeds(
-            new EmbedBuilder()
-                .setColor(Color.GREEN)
-                .setTitle("Ticket ouvert !")
-                .setDescription(
-                    "Le ticket a bien été ouvert ! Vous pouvez désormais communiquer avec la modération")
-                .build())
-        .queue();
-  }
 }

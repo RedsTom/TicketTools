@@ -22,54 +22,51 @@ import yt.graven.gravensupport.configuration.exception.ConfigurationException;
 @Configuration
 @ComponentScan("yt.graven.gravensupport")
 public class BotConfig {
-  private static final String CONFIGURATION_FILE = "config.yml";
-  private static final String DEFAULT_CONFIGURATION_FILE = "config.default.yml";
-  private static final String CONFIGURATION_TOKEN_PROPERTY = "config.token";
+    private static final String CONFIGURATION_FILE = "config.yml";
+    private static final String DEFAULT_CONFIGURATION_FILE = "config.default.yml";
+    private static final String CONFIGURATION_TOKEN_PROPERTY = "config.token";
 
-  @Bean
-  public YamlConfiguration getBotConfiguration() {
-    Path configurationFile = Paths.get(CONFIGURATION_FILE);
+    @Bean
+    public YamlConfiguration getBotConfiguration() {
+        Path configurationFile = Paths.get(CONFIGURATION_FILE);
 
-    if (!Files.exists(configurationFile)) {
-      try {
-        Files.createFile(configurationFile);
-        Path defaultConfigFile = getDefaultConfigFromInsideJar();
-        String defaultConfigurationData =
-            String.join(System.lineSeparator(), Files.readAllLines(defaultConfigFile));
-        Files.writeString(configurationFile, defaultConfigurationData);
-      } catch (IOException exception) {
-        throw new ConfigurationException("Unable to create default configuration file!", exception);
-      }
+        if (!Files.exists(configurationFile)) {
+            try {
+                Files.createFile(configurationFile);
+                Path defaultConfigFile = getDefaultConfigFromInsideJar();
+                String defaultConfigurationData =
+                        String.join(System.lineSeparator(), Files.readAllLines(defaultConfigFile));
+                Files.writeString(configurationFile, defaultConfigurationData);
+            } catch (IOException exception) {
+                throw new ConfigurationException("Unable to create default configuration file!", exception);
+            }
 
-      throw new ConfigurationException("Configuration file did not exist and has been created!");
+            throw new ConfigurationException("Configuration file did not exist and has been created!");
+        }
+
+        return YamlConfiguration.loadConfiguration(configurationFile.toFile());
     }
 
-    return YamlConfiguration.loadConfiguration(configurationFile.toFile());
-  }
+    @Bean
+    @SuppressWarnings("unused")
+    public JDA getJDAInstance() {
+        String token = this.getBotConfiguration().getString(CONFIGURATION_TOKEN_PROPERTY);
+        if (token.isEmpty()) {
+            throw new BotStartupException("No token provided!");
+        }
 
-  @Bean
-  @SuppressWarnings("unused")
-  public JDA getJDAInstance() {
-    String token = this.getBotConfiguration().getString(CONFIGURATION_TOKEN_PROPERTY);
-    if (token.isEmpty()) {
-      throw new BotStartupException("No token provided!");
+        EnumSet<GatewayIntent> allIntentsBecauseWhyNot = EnumSet.allOf(GatewayIntent.class);
+        return JDABuilder.create(allIntentsBecauseWhyNot).setToken(token).build();
     }
 
-    EnumSet<GatewayIntent> allIntentsBecauseWhyNot = EnumSet.allOf(GatewayIntent.class);
-    return JDABuilder.create(allIntentsBecauseWhyNot).setToken(token).build();
-  }
-
-  private Path getDefaultConfigFromInsideJar() {
-    try {
-      URL resourceUrl =
-          Optional.ofNullable(getClass().getClassLoader().getResource(DEFAULT_CONFIGURATION_FILE))
-              .orElseThrow(
-                  () ->
-                      new ConfigurationException(
-                          "Unable to retrieve default configuration file in JAR"));
-      return Paths.get(resourceUrl.toURI());
-    } catch (URISyntaxException e) {
-      throw new ImpossibleException("a JAR file URL is a valid URI, wtf happened?");
+    private Path getDefaultConfigFromInsideJar() {
+        try {
+            URL resourceUrl = Optional.ofNullable(getClass().getClassLoader().getResource(DEFAULT_CONFIGURATION_FILE))
+                    .orElseThrow(
+                            () -> new ConfigurationException("Unable to retrieve default configuration file in JAR"));
+            return Paths.get(resourceUrl.toURI());
+        } catch (URISyntaxException e) {
+            throw new ImpossibleException("a JAR file URL is a valid URI, wtf happened?");
+        }
     }
-  }
 }

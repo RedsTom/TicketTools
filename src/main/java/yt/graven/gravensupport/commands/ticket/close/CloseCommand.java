@@ -22,54 +22,50 @@ import yt.graven.gravensupport.utils.messages.Embeds;
 @RequiredArgsConstructor
 public class CloseCommand implements ICommand {
 
-  private final YamlConfiguration config;
-  private final TicketManager ticketManager;
-  private final Embeds embeds;
+    private final YamlConfiguration config;
+    private final TicketManager ticketManager;
+    private final Embeds embeds;
 
-  @Override
-  public String getName() {
-    return "close";
-  }
-
-  @Override
-  public SlashCommandData getSlashCommandData() {
-    return Commands.slash("close", "Ferme le ticket actuel")
-        .setDefaultPermissions(DefaultMemberPermissions.DISABLED)
-        .setGuildOnly(true);
-  }
-
-  @Override
-  public void run(SlashCommandInteractionEvent event) throws CommandCancelledException {
-
-    if (event.getChannelType() == ChannelType.PRIVATE) {
-      throw new CommandCancelledException();
+    @Override
+    public String getName() {
+        return "close";
     }
 
-    if (!event.getGuild().getId().equals(config.getString("config.ticket_guild.guild_id"))) {
-      throw new CommandCancelledException();
+    @Override
+    public SlashCommandData getSlashCommandData() {
+        return Commands.slash("close", "Ferme le ticket actuel")
+                .setDefaultPermissions(DefaultMemberPermissions.DISABLED)
+                .setGuildOnly(true);
     }
 
-    TextChannel textChannel = event.getChannel().asTextChannel();
-    if (!Objects.equals(
-        textChannel.getParentCategoryId(),
-        config.getString("config.ticket_guild" + ".tickets_category"))) {
-      embeds
-          .errorMessage("Cette commande doit être exécutée dans un ticket !")
-          .reply(event)
-          .queue();
-      return;
-    }
+    @Override
+    public void run(SlashCommandInteractionEvent event) throws CommandCancelledException {
 
-    Optional<Ticket> ticket =
-        ticketManager.get(MiscUtil.parseLong(((TextChannel) event.getChannel()).getTopic()));
-    if (ticket.isEmpty()) {
-      embeds
-          .errorMessage("Impossible de trouver le ticket associé à ce salon !")
-          .reply(event)
-          .queue();
-      return;
-    }
+        if (event.getChannelType() == ChannelType.PRIVATE) {
+            throw new CommandCancelledException();
+        }
 
-    ticket.get().close();
-  }
+        if (!event.getGuild().getId().equals(config.getString("config.ticket_guild.guild_id"))) {
+            throw new CommandCancelledException();
+        }
+
+        TextChannel textChannel = event.getChannel().asTextChannel();
+        if (!Objects.equals(
+                textChannel.getParentCategoryId(), config.getString("config.ticket_guild" + ".tickets_category"))) {
+            embeds.errorMessage("Cette commande doit être exécutée dans un ticket !")
+                    .reply(event)
+                    .queue();
+            return;
+        }
+
+        Optional<Ticket> ticket = ticketManager.get(MiscUtil.parseLong(((TextChannel) event.getChannel()).getTopic()));
+        if (ticket.isEmpty()) {
+            embeds.errorMessage("Impossible de trouver le ticket associé à ce salon !")
+                    .reply(event)
+                    .queue();
+            return;
+        }
+
+        ticket.get().close();
+    }
 }
