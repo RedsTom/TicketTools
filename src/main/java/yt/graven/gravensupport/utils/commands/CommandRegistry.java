@@ -13,7 +13,7 @@ public class CommandRegistry {
     private final ApplicationContext ctx;
     private final JDA jda;
 
-    private final List<ICommand> commands = new ArrayList<>();
+    private final Map<String, ICommand> commands = new HashMap<>();
 
     public CommandRegistry(ApplicationContext ctx, JDA jda) {
         this.ctx = ctx;
@@ -28,26 +28,20 @@ public class CommandRegistry {
                         "Loaded command \"{}\" into {}.",
                         a.getName(),
                         a.getClass().getSimpleName()))
-                .forEach(this::loadOne);
+                .forEach(this::load);
 
         jda.updateCommands()
-                .addCommands(
-                        commands.stream().map(ICommand::getSlashCommandData).toList())
+                .addCommands(commands.values().stream()
+                        .map(ICommand::getSlashCommandData)
+                        .toList())
                 .queue();
     }
 
-    public void loadOne(ICommand command) {
-        this.commands.add(command);
+    public void load(ICommand command) {
+        this.commands.put(command.getName(), command);
     }
 
     public Optional<ICommand> getCommandByName(String name) {
-        return commands.stream()
-                .peek(a -> log.info("{} ; {}", a.getName(), name))
-                .filter(a -> name.startsWith(a.getName()))
-                .findFirst();
-    }
-
-    public List<ICommand> getCommands() {
-        return commands;
+        return Optional.ofNullable(commands.get(name));
     }
 }
