@@ -69,7 +69,7 @@ public class EventReceiver extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
-        registry.getCommandByName(event.getFullCommandName()).ifPresent(cmd -> {
+        registry.getCommandByName(event.getName()).ifPresent(cmd -> {
             try {
                 cmd.run(event);
             } catch (TicketException | IOException | CommandCancelledException e) {
