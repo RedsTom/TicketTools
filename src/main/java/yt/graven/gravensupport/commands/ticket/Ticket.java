@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
-import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
@@ -28,7 +27,6 @@ import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.requests.ErrorResponse;
 import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
-import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import org.simpleyaml.configuration.file.YamlConfiguration;
 import yt.graven.gravensupport.utils.WebhookMessageAdapter;
 import yt.graven.gravensupport.utils.exceptions.TicketAlreadyExistsException;
@@ -290,7 +288,7 @@ public class Ticket {
         .queue();
   }
 
-  public CompletableFuture<Message> confirmSendToUser(MessageCreateData message) {
+  public CompletableFuture<Message> confirmSendToUser(Message message) {
     CompletableFuture<Message> cf = new CompletableFuture<>();
 
     Executors.newSingleThreadExecutor()
@@ -298,33 +296,21 @@ public class Ticket {
             () -> {
               try {
                 TMessage builder =
-                    TMessage.from(MessageCreateBuilder.from(message))
+                    TMessage.from(MessageCreateBuilder.fromMessage(message))
                         .setContent(
-                            message.getContent().startsWith("'")
-                                ? message.getContent().substring(1).trim()
-                                : message.getContent().trim());
+                            message.getContentRaw().startsWith("'")
+                                ? message.getContentRaw().substring(1).trim()
+                                : message.getContentRaw().trim());
 
-                try {
-                  // Set attachements as files in builder
-                  Set<String> passed = new HashSet<>();
-                  UnaryOperator<String> nameGenerator =
-                      (name) -> {
-                        if (passed.contains(name)) {
-                          return name + "-" + UUID.randomUUID();
-                        } else {
-                          passed.add(name);
-                          return name;
-                        }
-                      };
-                  builder.addFiles(
-                      message.getAttachments().stream()
-                          .map(
-                              a ->
-                                  FileUpload.fromData(
-                                      a.getData(), nameGenerator.apply(a.getName())))
-                          .toArray(FileUpload[]::new));
-                } catch (UnsupportedOperationException ignored) {
-                }
+                // Set attachements as files in builder
+                builder.addFiles(
+                    message.getAttachments().stream()
+                        .map(
+                            attachment ->
+                                FileUpload.fromData(
+                                    attachment.getProxy().download().join(),
+                                    attachment.getFileName()))
+                        .toArray(FileUpload[]::new));
 
                 builder
                     .sendMessage(getFrom())

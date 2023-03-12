@@ -21,6 +21,12 @@ public class WebhookMessageAdapter {
         .getEmbeds()
         .forEach(embed -> builder.addEmbeds(WebhookEmbedBuilder.fromJDA(embed).build()));
 
+    message
+        .getAttachments()
+        .forEach(
+            attachment ->
+                builder.addFile(attachment.getFileName(), attachment.getProxy().download().join()));
+
     if (message instanceof MessageData data) {
       AllowedMentions allowedMentions = AllowedMentions.none();
       EnumSet<Message.MentionType> parse = data.getAllowedMentions();

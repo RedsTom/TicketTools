@@ -14,7 +14,6 @@ import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.utils.MiscUtil;
-import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.commands.ticket.Ticket;
 import yt.graven.gravensupport.commands.ticket.TicketManager;
@@ -85,7 +84,7 @@ public class ConfirmMessageHandler implements IIInteractionAction<ButtonInteract
     InteractionHook fInteraction = interaction;
     ticket
         .get()
-        .confirmSendToUser(MessageCreateData.fromMessage(referingMessage))
+        .confirmSendToUser(referingMessage)
         .thenAccept(
             (message) -> {
               EmbedBuilder embed =

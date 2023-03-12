@@ -7,7 +7,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.utils.MiscUtil;
-import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.commands.ticket.Ticket;
 import yt.graven.gravensupport.commands.ticket.TicketManager;
@@ -56,21 +55,17 @@ public class FirstSentenceHandler implements IIInteractionAction<StringSelectInt
             .setFooter("")
             .setColor(Color.GREEN);
 
-    ticket
-        .get()
-        .confirmSendToUser(new MessageCreateBuilder().setContent(content).build())
-        .thenAccept(
+    TMessage.create()
+        .setContent(content)
+        .sendMessage(ticket.get().getFrom())
+        .queue(
             (msg) -> {
               event.deferEdit().queue();
-
               TMessage.from(embed.build()).sendMessage(event.getChannel()).queue();
-
               event.getMessage().delete().queue();
-            })
-        .exceptionally(
-            (error) -> {
-              event.reply(embeds.errorMessage(error.getMessage()).build()).queue();
-              return null;
+            },
+            (err) -> {
+              event.reply(embeds.errorMessage(err.getMessage()).build()).queue();
             });
   }
 }
