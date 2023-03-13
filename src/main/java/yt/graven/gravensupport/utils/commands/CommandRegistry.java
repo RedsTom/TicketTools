@@ -42,6 +42,9 @@ public class CommandRegistry {
     }
 
     public Optional<ICommand> getCommandByName(String name) {
-        return Optional.ofNullable(commands.get(name));
+        return commands.entrySet().stream()
+                .filter(e -> name.startsWith(e.getKey()))
+                .findAny()
+                .map(Map.Entry::getValue);
     }
 }
