@@ -1,39 +1,34 @@
 package yt.graven.gravensupport.utils.messages;
 
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.MessageBuilder;
+import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.Component;
+import net.dv8tion.jda.api.interactions.components.ItemComponent;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
+import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import org.jetbrains.annotations.NotNull;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
-import net.dv8tion.jda.api.entities.emoji.Emoji;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.InteractionHook;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.ItemComponent;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
-import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
-import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
-import net.dv8tion.jda.api.requests.restaction.WebhookMessageEditAction;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
-import net.dv8tion.jda.api.utils.FileUpload;
-import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
-import net.dv8tion.jda.api.utils.messages.MessageCreateData;
-import net.dv8tion.jda.api.utils.messages.MessageEditData;
-import org.jetbrains.annotations.NotNull;
 
 public class TMessage {
 
     private final List<ActionRow> actionRows = new ArrayList<>();
-    private MessageCreateBuilder msgBuilder = new MessageCreateBuilder();
+    private List<File> files = new ArrayList<>();
+    private MessageBuilder msgBuilder = new MessageBuilder();
 
     public static TMessage create() {
         return new TMessage();
     }
 
-    public static TMessage from(MessageCreateBuilder msgBuilder) {
+    public static TMessage from(MessageBuilder msgBuilder) {
         return new TMessage().setMsgBuilder(msgBuilder);
     }
 
@@ -49,7 +44,7 @@ public class TMessage {
         return msg;
     }
 
-    private TMessage setMsgBuilder(MessageCreateBuilder msgBuilder) {
+    private TMessage setMsgBuilder(MessageBuilder msgBuilder) {
         this.msgBuilder = msgBuilder;
         return this;
     }
@@ -70,13 +65,13 @@ public class TMessage {
         return this;
     }
 
-    public TMessage addFiles(FileUpload... files) {
-        msgBuilder.addFiles(files);
+    public TMessage addFile(File file) {
+        this.files.add(file);
         return this;
     }
 
-    public TMessage setFiles(List<FileUpload> files) {
-        msgBuilder.setFiles(files);
+    public TMessage setFiles(List<File> files) {
+        this.files = files;
         return this;
     }
 
@@ -84,35 +79,31 @@ public class TMessage {
         return new TActionRow(this);
     }
 
-    public MessageEditData buildEdit() {
-        return MessageEditData.fromCreateData(build());
-    }
-
-    public MessageCreateData build() {
-        msgBuilder.setComponents(actionRows);
+    public Message build() {
+        msgBuilder.setActionRows(actionRows);
         return msgBuilder.build();
     }
 
-    public MessageCreateAction sendMessage(MessageChannel channel) {
-        MessageCreateAction action = channel.sendMessage(this.build());
+    public MessageAction sendMessage(MessageChannel channel) {
+        MessageAction action = channel.sendMessage(this.build());
+        for (File file : files) {
+            action = action.addFile(file);
+            file.delete();
+        }
+        files = new ArrayList<>();
         return action;
     }
 
-    public MessageCreateAction sendMessage(User user) {
-        MessageCreateAction action = user.openPrivateChannel().complete().sendMessage(this.build());
+    public MessageAction sendMessage(User user) {
+        MessageAction action = user.openPrivateChannel()
+            .complete()
+            .sendMessage(this.build());
+        for (File file : files) {
+            action = action.addFile(file);
+            file.delete();
+        }
+        files = new ArrayList<>();
         return action;
-    }
-
-    public ReplyCallbackAction reply(SlashCommandInteractionEvent event) {
-        return event.deferReply(true).applyData(build());
-    }
-
-    public ReplyCallbackAction reply(SlashCommandInteractionEvent event, boolean ephemeral) {
-        return event.deferReply(ephemeral).applyData(build());
-    }
-
-    public WebhookMessageEditAction<Message> editReply(InteractionHook reply) {
-        return reply.editOriginal(buildEdit());
     }
 
     public static class TActionRow {
@@ -126,7 +117,10 @@ public class TMessage {
         }
 
         public TActionRow deletable() {
-            return add(Button.secondary("delete", Emoji.fromUnicode("🗑️")));
+            return add(Button.secondary(
+                "delete",
+                Emoji.fromUnicode("🗑️")
+            ));
         }
 
         public TButton button(String id) {
@@ -143,9 +137,7 @@ public class TMessage {
         }
 
         public TMessage build() {
-            if (!components.isEmpty()) {
-                msg.actionRows.add(ActionRow.of(components));
-            }
+            msg.actionRows.add(ActionRow.of(components));
             return msg;
         }
 
@@ -197,32 +189,42 @@ public class TMessage {
                 }
                 if (link != null) {
                     if (text != null) {
-                        tActionRow.components.add(Button.link(link, text));
+                        tActionRow.components.add(
+                            Button.link(link, text)
+                        );
                     } else if (emoji != null) {
-                        tActionRow.components.add(Button.link(link, emoji));
+                        tActionRow.components.add(
+                            Button.link(link, emoji)
+                        );
                     }
                     return tActionRow;
                 }
                 if (text == null && emoji != null) {
-                    tActionRow.components.add(Button.of(buttonStyle, id, emoji));
+                    tActionRow.components.add(
+                        Button.of(buttonStyle, id, emoji)
+                    );
                     return tActionRow;
                 }
                 if (text != null && emoji == null) {
-                    tActionRow.components.add(Button.of(buttonStyle, id, text));
+                    tActionRow.components.add(
+                        Button.of(buttonStyle, id, text)
+                    );
                     return tActionRow;
                 }
-                tActionRow.components.add(Button.of(buttonStyle, id, text, emoji));
+                tActionRow.components.add(
+                    Button.of(buttonStyle, id, text, emoji)
+                );
                 return tActionRow;
             }
         }
 
         public static class TSelectMenu {
             private final TActionRow row;
-            private StringSelectMenu.Builder builder;
+            private SelectMenu.Builder builder;
 
             private TSelectMenu(TActionRow row, @NotNull String customId) {
                 this.row = row;
-                this.builder = StringSelectMenu.create(customId);
+                this.builder = SelectMenu.create(customId);
             }
 
             public TSelectMenu addOption(String label, String value, Emoji emoji) {
