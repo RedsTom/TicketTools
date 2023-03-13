@@ -2,26 +2,32 @@ package yt.graven.gravensupport.utils.messages.serializable;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.utils.FileUpload;
 
 public class SerializableMessageArray {
 
-    @Expose private final int version = 1;
+    @Expose
+    private final int version = 1;
 
-    @Expose(deserialize = false, serialize = false) public User fromUser;
-    @Expose(deserialize = false, serialize = false) private String attachementsChannelId;
+    @Expose(deserialize = false, serialize = false)
+    public User fromUser;
+
+    @Expose(deserialize = false, serialize = false)
+    private String attachementsChannelId;
 
     @Expose
     @SerializedName("to")
     private SerializableMessageAuthor from;
-    @Expose private List<SerializableMessage> messages = new ArrayList<>();
+
+    @Expose
+    private List<SerializableMessage> messages = new ArrayList<>();
 
     public SerializableMessageArray(String attachementsChannelId, User from) {
         this.attachementsChannelId = attachementsChannelId;
@@ -59,10 +65,10 @@ public class SerializableMessageArray {
             TextChannel channel = fromUser.getJDA().getTextChannelById(attachementsChannelId);
             message.getAttachments().forEach(attachment -> {
                 File f = attachment.downloadToFile().join();
-                Message msg = channel
-                    .sendMessage("Attachement of @" + message.getAuthor().getAsTag())
-                    .addFile(f)
-                    .complete();
+                Message msg = channel.sendMessage(
+                                "Attachement of @" + message.getAuthor().getAsTag())
+                        .addFiles(FileUpload.fromData(f))
+                        .complete();
 
                 for (Message.Attachment msgAttachment : msg.getAttachments()) {
                     sMessage.getAttachementUrls().add(msgAttachment.getUrl());
@@ -71,7 +77,7 @@ public class SerializableMessageArray {
             });
         }
 
-        if(message.getEmbeds().size() != 0) {
+        if (message.getEmbeds().size() != 0) {
             for (MessageEmbed embed : message.getEmbeds()) {
                 sMessage.addEmbed(embed);
             }
@@ -79,5 +85,4 @@ public class SerializableMessageArray {
 
         messages.add(sMessage);
     }
-
 }

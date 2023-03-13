@@ -1,11 +1,14 @@
 package yt.graven.gravensupport.commands.ticket.create.interactions;
 
+import java.awt.*;
+import java.time.Instant;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -16,10 +19,6 @@ import yt.graven.gravensupport.commands.ticket.Ticket;
 import yt.graven.gravensupport.commands.ticket.TicketManager;
 import yt.graven.gravensupport.utils.interactions.IIInteractionAction;
 import yt.graven.gravensupport.utils.messages.Embeds;
-
-import java.awt.*;
-import java.time.Instant;
-import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -38,7 +37,10 @@ public class ConfirmMessageHandler implements IIInteractionAction<ButtonInteract
                 .replace(originalMessageId.replaceAll("\\[[0-9]+]", ""), "")
                 .replaceAll("[\\[\\]]", "");
 
-        Message referingMessage = event.getChannel().getHistoryAround(originalMessageId, 50).complete().getMessageById(originalMessageId);
+        Message referingMessage = event.getChannel()
+                .getHistoryAround(originalMessageId, 50)
+                .complete()
+                .getMessageById(originalMessageId);
 
         if (referingMessage == null) {
             event.deferReply(true)
@@ -64,7 +66,6 @@ public class ConfirmMessageHandler implements IIInteractionAction<ButtonInteract
             return;
         }
 
-
         boolean attachements = referingMessage.getAttachments().size() != 0;
 
         InteractionHook interaction = null;
@@ -73,9 +74,9 @@ public class ConfirmMessageHandler implements IIInteractionAction<ButtonInteract
         }
 
         InteractionHook fInteraction = interaction;
-        ticket.get().confirmSendToUser(referingMessage)
+        ticket.get()
+                .confirmSendToUser(referingMessage)
                 .thenAccept((message) -> {
-
                     EmbedBuilder embed = new EmbedBuilder(baseEmbed)
                             .setTitle("Message transmis :")
                             .setDescription(message.getContentRaw())
@@ -83,29 +84,46 @@ public class ConfirmMessageHandler implements IIInteractionAction<ButtonInteract
                             .setTimestamp(Instant.now())
                             .setColor(Color.GREEN);
 
-                    embed.getFields().add(new MessageEmbed.Field("🔗 Identifiant du message envoyé", message.getId(), true));
+                    embed.getFields()
+                            .add(new MessageEmbed.Field("🔗 Identifiant du message envoyé", message.getId(), true));
 
                     if (attachements) {
                         fInteraction.deleteOriginal().queue();
-                        embedMessage.editMessageEmbeds(embed.build())
+                        embedMessage
+                                .editMessageEmbeds(embed.build())
                                 .setActionRow(
-                                        Button.of(ButtonStyle.SUCCESS, "edit-message", "Modifier le message", Emoji.fromUnicode("✏️")),
-                                        Button.of(ButtonStyle.DANGER, "delete-message", "Supprimer le message", Emoji.fromUnicode("🗑️"))
-                                )
+                                        Button.of(
+                                                ButtonStyle.SUCCESS,
+                                                "edit-message",
+                                                "Modifier le message",
+                                                Emoji.fromUnicode("✏️")),
+                                        Button.of(
+                                                ButtonStyle.DANGER,
+                                                "delete-message",
+                                                "Supprimer le message",
+                                                Emoji.fromUnicode("🗑️")))
                                 .queue();
                     } else {
                         event.deferEdit()
                                 .setEmbeds(embed.build())
                                 .setActionRow(
-                                        Button.of(ButtonStyle.SUCCESS, "edit-message", "Modifier le message", Emoji.fromUnicode("✏️")),
-                                        Button.of(ButtonStyle.DANGER, "delete-message", "Supprimer le message", Emoji.fromUnicode("🗑️"))
-                                )
+                                        Button.of(
+                                                ButtonStyle.SUCCESS,
+                                                "edit-message",
+                                                "Modifier le message",
+                                                Emoji.fromUnicode("✏️")),
+                                        Button.of(
+                                                ButtonStyle.DANGER,
+                                                "delete-message",
+                                                "Supprimer le message",
+                                                Emoji.fromUnicode("🗑️")))
                                 .queue();
                     }
                 })
                 .exceptionally((error) -> {
                     fInteraction
-                            .editOriginal(embeds.errorMessage(error.getMessage()).build())
+                            .editOriginal(
+                                    embeds.errorMessage(error.getMessage()).buildEdit())
                             .queue();
                     return null;
                 });

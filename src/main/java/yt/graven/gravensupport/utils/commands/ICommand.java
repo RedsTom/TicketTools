@@ -1,21 +1,16 @@
 package yt.graven.gravensupport.utils.commands;
 
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import java.io.IOException;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import yt.graven.gravensupport.utils.exceptions.CommandCancelledException;
 import yt.graven.gravensupport.utils.exceptions.TicketException;
 
-import java.io.IOException;
-
 public interface ICommand {
 
-    String[] getNames();
+    String getName();
 
-    String getDescription();
+    SlashCommandData getSlashCommandData();
 
-    void run(MessageReceivedEvent event, String[] args) throws TicketException, IOException, CommandCancelledException;
-
-    default boolean isShown() {
-        return true;
-    }
-
+    void run(SlashCommandInteractionEvent event) throws TicketException, IOException, CommandCancelledException;
 }
