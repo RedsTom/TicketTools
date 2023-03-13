@@ -8,6 +8,7 @@ public class DeleteHandler implements IIInteractionAction<ButtonInteractionEvent
         try {
             event.deferEdit().queue();
             event.getMessage().delete().queue();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
     }
 }

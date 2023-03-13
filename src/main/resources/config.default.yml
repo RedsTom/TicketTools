@@ -1,6 +1,5 @@
 config:
   token: ''
-  prefix: '!'
 
   ticket_guild:
     guild_id: 0

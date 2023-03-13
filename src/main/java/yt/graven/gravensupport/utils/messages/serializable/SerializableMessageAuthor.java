@@ -9,7 +9,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SerializableMessageAuthor {
-    @Expose public long id = 0L;
-    @Expose public String name = "";
-    @Expose public String avatarUrl = "";
+    @Expose
+    public long id = 0L;
+
+    @Expose
+    public String name = "";
+
+    @Expose
+    public String avatarUrl = "";
 }
