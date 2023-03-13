@@ -53,7 +53,7 @@ compileJava {
 
 spotless {
     java {
-        palantirJavaFormat()
+        palantirJavaFormat('2.28.0')
 
         importOrder()
         removeUnusedImports()
