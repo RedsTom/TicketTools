@@ -3,6 +3,7 @@ package yt.graven.gravensupport.commands.ticket.create;
 import static net.dv8tion.jda.api.entities.channel.ChannelType.*;
 
 import java.io.IOException;
+
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
@@ -15,6 +16,7 @@ import yt.graven.gravensupport.utils.commands.ICommand;
 import yt.graven.gravensupport.utils.exceptions.TicketException;
 import yt.graven.gravensupport.utils.messages.Embeds;
 import yt.graven.gravensupport.utils.messages.TMessage;
+import yt.graven.gravensupport.utils.messages.builder.MessageFactory;
 
 @Command
 @RequiredArgsConstructor
@@ -37,11 +39,12 @@ public class TicketCommand implements ICommand {
     @Override
     public void run(SlashCommandInteractionEvent event) throws TicketException, IOException {
         if (ticketManager.exists(event.getUser())) {
-            TMessage.from(embeds.ticketAlreadyExists(true))
-                    .actionRow()
-                    .build()
+            // spotless:off
+            MessageFactory.create()
+                    .addEmbeds(embeds.ticketAlreadyExists(true))
                     .reply(event)
                     .queue();
+            // spotless:on
             return;
         }
 

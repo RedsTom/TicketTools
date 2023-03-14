@@ -5,6 +5,7 @@ import club.minnced.discord.webhook.external.JDAWebhookClient;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import java.awt.*;
 import java.io.IOException;
 import java.net.URL;
@@ -15,6 +16,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
@@ -32,6 +34,7 @@ import yt.graven.gravensupport.utils.WebhookMessageAdapter;
 import yt.graven.gravensupport.utils.exceptions.TicketAlreadyExistsException;
 import yt.graven.gravensupport.utils.messages.Embeds;
 import yt.graven.gravensupport.utils.messages.TMessage;
+import yt.graven.gravensupport.utils.messages.builder.MessageFactory;
 import yt.graven.gravensupport.utils.messages.serializable.SerializableMessageArray;
 
 public class Ticket {
@@ -99,7 +102,9 @@ public class Ticket {
         return ticket;
     }
 
-    /** Sends a message to confirm the opening of the ticket in the case of a user-opened ticket. */
+    /**
+     * Sends a message to confirm the opening of the ticket in the case of a user-opened ticket.
+     */
     public void proposeOpening(InteractionHook reply) {
         if ((webhook != null && to != null) || opened) {
             throw new TicketAlreadyExistsException(from);
@@ -132,7 +137,9 @@ public class Ticket {
                         errorHandler);
     }
 
-    /** Directly opens a ticket without asking for the user permission. */
+    /**
+     * Directly opens a ticket without asking for the user permission.
+     */
     public void forceOpening(User by) throws IOException {
         TMessage.from(embeds.forceOpening(sentEmote.getFormatted()))
                 .sendMessage(from)
@@ -254,8 +261,8 @@ public class Ticket {
                     "📎 Pièces jointes :",
                     "`"
                             + message.getAttachments().stream()
-                                    .map(Message.Attachment::getFileName)
-                                    .collect(Collectors.joining("`, `"))
+                            .map(Message.Attachment::getFileName)
+                            .collect(Collectors.joining("`, `"))
                             + "`",
                     true);
         }
@@ -329,13 +336,24 @@ public class Ticket {
                     .addFiles(FileUpload.fromData(json.getBytes(StandardCharsets.UTF_8), to.getName() + ".json"))
                     .complete();
 
-            String reportJsonUrl = "";
-            for (Message.Attachment attachment : report.getAttachments()) {
-                reportJsonUrl = attachment.getUrl();
-            }
-
+            String reportJsonUrl = report.getAttachments().get(0).getUrl();
             TextChannel ticketsChannel =
                     moderationGuild.getTextChannelById(config.getString("config.ticket_guild.channels_ids.tickets"));
+
+            MessageFactory.create()
+                    .addEmbeds(embeds.ticketClosing(from, report.getJumpUrl()))
+                    .addActionRow(actionRow -> actionRow
+                            .addButton(button -> button
+                                    .setText("Aller au rapport")
+                                    .setLink(report.getJumpUrl())
+                            )
+                            .addButton(button -> button
+                                    .setText("Consulter le rapport (en ligne)")
+                                    .setLink("https://redstom.github.io/GravenDev-TicketReader/?input=%s".formatted(reportJsonUrl))
+                            )
+                    )
+                    .send(ticketsChannel);
+
             TMessage.from(embeds.ticketClosing(from, report.getJumpUrl()))
                     .actionRow()
                     .button()

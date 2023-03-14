@@ -29,10 +29,8 @@ public class PingCommand implements ICommand {
 
     @Override
     public void run(SlashCommandInteractionEvent event) {
-        pingComputer.update()
-                .thenAccept(ignored -> embeds.ping(pingComputer)
-                        .reply(event)
-                        .queue()
-                );
+        pingComputer
+                .update()
+                .thenAccept(ignored -> embeds.ping(pingComputer).reply(event).queue());
     }
 }

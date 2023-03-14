@@ -32,6 +32,7 @@ import yt.graven.gravensupport.utils.interactions.ButtonActions;
 import yt.graven.gravensupport.utils.interactions.ModalActions;
 import yt.graven.gravensupport.utils.interactions.SelectionMenuActions;
 import yt.graven.gravensupport.utils.messages.Embeds;
+import yt.graven.gravensupport.utils.messages.builder.data.TicketActionRow;
 
 @Slf4j
 @Component
@@ -112,10 +113,8 @@ public class EventReceiver extends ListenerAdapter {
             Optional<Ticket> ticket = ticketManager.get(MiscUtil.parseLong(textChannel.getTopic()));
             if (ticket.isEmpty()) {
                 embeds.noTicketAttachedMessage()
-                        .actionRow()
-                        .deletable()
-                        .build()
-                        .sendMessage(event.getChannel())
+                        .addActionRow(TicketActionRow::addDeletableButton)
+                        .send(event.getChannel())
                         .queue();
                 return;
             }

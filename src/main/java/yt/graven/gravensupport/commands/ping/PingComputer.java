@@ -1,7 +1,6 @@
 package yt.graven.gravensupport.commands.ping;
 
 import java.util.concurrent.CompletableFuture;
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.JDA;

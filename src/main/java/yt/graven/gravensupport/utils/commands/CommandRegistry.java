@@ -34,7 +34,10 @@ public class CommandRegistry {
     }
 
     public void load(ICommand command) {
-        log.info("Loaded command \"{}\" into {}.", command.getName(), command.getClass().getSimpleName());
+        log.info(
+                "Loaded command \"{}\" into {}.",
+                command.getName(),
+                command.getClass().getSimpleName());
         this.commands.put(command.getName(), command);
     }
 

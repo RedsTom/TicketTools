@@ -2,16 +2,16 @@ package yt.graven.gravensupport.utils.messages;
 
 import java.awt.*;
 import java.time.Instant;
-
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.commands.ping.PingComputer;
+import yt.graven.gravensupport.utils.messages.builder.MessageFactory;
+import yt.graven.gravensupport.utils.messages.builder.data.TicketMessage;
 
 @Component
 public class Embeds {
@@ -20,67 +20,60 @@ public class Embeds {
         return new EmbedBuilder().setColor(Color.RED).addField("Erreur :", "> " + message, false);
     }
 
-    public TMessage errorMessage(String message) {
-        return TMessage.from(error(message));
+    public TicketMessage errorMessage(String message) {
+        return MessageFactory.from(error(message));
     }
 
     public EmbedBuilder success(String message) {
         return new EmbedBuilder().setColor(Color.GREEN).setTitle("Succès").setDescription(message);
     }
 
-    public TMessage successMessage(String message) {
-        return TMessage.from(success(message)).actionRow().build();
+    public TicketMessage successMessage(String message) {
+        return MessageFactory.from(success(message));
     }
 
     public EmbedBuilder ticketAlreadyExists(boolean personal) {
-        return error(personal ? "Vous avez déjà un ticket ouvert." : "Un ticket est déjà ouvert avec cet utilisateur.");
+        return error(personal ? "Vous avez déjà un ticket ouvert avec la modération." : "Un ticket est déjà ouvert avec cet utilisateur.");
     }
 
-    public TMessage ticketAlreadyExistsMessage(GuildMessageChannel ticketChannel, boolean personal) {
-        return TMessage.from(ticketAlreadyExists(personal))
-                .actionRow()
-                .button()
-                .withText("Aller au ticket")
-                .withLink(String.format(
-                        "https://discord.com/channels/%s/%s",
-                        ticketChannel.getGuild().getId(), ticketChannel.getId()))
-                .build()
-                .build();
+    public TicketMessage ticketAlreadyExistsMessage(GuildMessageChannel ticketChannel, boolean personal) {
+        // spotless:off
+        return MessageFactory.from(ticketAlreadyExists(personal))
+                .addActionRow(actionRow -> actionRow
+                        .addButton(button -> button
+                                .setText("Aller au ticket")
+                                .setLink(ticketChannel.getJumpUrl())
+                        )
+                );
+        // spotless:on
     }
 
-    public TMessage ping(PingComputer manager) {
-        return TMessage.from(
-                new EmbedBuilder()
-                        .setTitle(":ping_pong: Pong !")
-                        .setColor(Color.green)
-                        .addField(
-                                "↔️ Ping du Gateway :",
-                                String.format(
-                                        """
-                                                    **`%s`** ms
-                                                """.trim(),
-                                        manager.getGatewayPing()),
-                                false)
-                        .addField(
-                                "➡️ Ping de l'API :",
-                                String.format(
-                                        """
-                                                    **`%s`** ms
-                                                """.trim(),
-                                        manager.getRestPing()),
-                                false)
-                )
-                .actionRow()
-                .add(Button.of(ButtonStyle.PRIMARY, "refresh-ping", "Actualiser", Emoji.fromUnicode("🔁")))
-                .build();
+    public TicketMessage ping(PingComputer manager) {
+        EmbedBuilder embed = new EmbedBuilder()
+                .setTitle(":ping_pong: Pong !")
+                .setColor(Color.green)
+                .addField("↔️ Ping du Gateway :", "\n**`%s`** ms".formatted(manager.getGatewayPing()), false)
+                .addField("➡️ Ping de l'API :", "\n**`%s`** ms".formatted(manager.getRestPing()), false);
+
+        // spotless:off
+        return MessageFactory.create()
+                .addEmbeds(embed)
+                .addActionRow(actionRow -> actionRow
+                        .addButton("refresh-ping", button -> button
+                                .setStyle(ButtonStyle.PRIMARY)
+                                .setText("Actualiser")
+                                .setEmoji(Emoji.fromUnicode("🔁"))
+                        )
+                );
+        // spotless:on
     }
 
     public EmbedBuilder noTicketAttached() {
         return error("Impossible de trouver un ticket rattaché à ce salon");
     }
 
-    public TMessage noTicketAttachedMessage() {
-        return TMessage.from(noTicketAttached()).actionRow().build();
+    public TicketMessage noTicketAttachedMessage() {
+        return MessageFactory.create().addEmbeds(noTicketAttached());
     }
 
     public EmbedBuilder proposeOpening(String sentEmote) {
@@ -187,18 +180,18 @@ public class Embeds {
                                 channel.getName(),
                                 forced
                                         ? String.format(
-                                        """
+                                                """
                                                  🛂 **Ouvert par**
                                                  %s (`@%s`)
 
                                                 """,
-                                        by.getAsMention(), by.getAsTag())
+                                                by.getAsMention(), by.getAsTag())
                                         : String.format(
-                                        """
+                                                """
                                                     📝 **Raison**
                                                     `%s`
                                                 """,
-                                        reason)),
+                                                reason)),
                         false);
     }
 
