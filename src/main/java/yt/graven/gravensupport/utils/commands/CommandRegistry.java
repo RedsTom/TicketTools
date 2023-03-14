@@ -24,10 +24,6 @@ public class CommandRegistry {
         ctx.getBeansWithAnnotation(Command.class).values().stream()
                 .filter(ICommand.class::isInstance)
                 .map(ICommand.class::cast)
-                .peek(a -> log.info(
-                        "Loaded command \"{}\" into {}.",
-                        a.getName(),
-                        a.getClass().getSimpleName()))
                 .forEach(this::load);
 
         jda.updateCommands()
@@ -38,6 +34,7 @@ public class CommandRegistry {
     }
 
     public void load(ICommand command) {
+        log.info("Loaded command \"{}\" into {}.", command.getName(), command.getClass().getSimpleName());
         this.commands.put(command.getName(), command);
     }
 
