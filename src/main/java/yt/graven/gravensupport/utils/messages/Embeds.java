@@ -2,11 +2,16 @@ package yt.graven.gravensupport.utils.messages;
 
 import java.awt.*;
 import java.time.Instant;
+
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import org.springframework.stereotype.Component;
+import yt.graven.gravensupport.commands.ping.PingComputer;
 
 @Component
 public class Embeds {
@@ -31,10 +36,6 @@ public class Embeds {
         return error(personal ? "Vous avez déjà un ticket ouvert." : "Un ticket est déjà ouvert avec cet utilisateur.");
     }
 
-    public TMessage ticketAlreadyExistsMessage(boolean personal) {
-        return TMessage.from(ticketAlreadyExists(personal)).actionRow().build();
-    }
-
     public TMessage ticketAlreadyExistsMessage(GuildMessageChannel ticketChannel, boolean personal) {
         return TMessage.from(ticketAlreadyExists(personal))
                 .actionRow()
@@ -44,6 +45,33 @@ public class Embeds {
                         "https://discord.com/channels/%s/%s",
                         ticketChannel.getGuild().getId(), ticketChannel.getId()))
                 .build()
+                .build();
+    }
+
+    public TMessage ping(PingComputer manager) {
+        return TMessage.from(
+                new EmbedBuilder()
+                        .setTitle(":ping_pong: Pong !")
+                        .setColor(Color.green)
+                        .addField(
+                                "↔️ Ping du Gateway :",
+                                String.format(
+                                        """
+                                                    **`%s`** ms
+                                                """.trim(),
+                                        manager.getGatewayPing()),
+                                false)
+                        .addField(
+                                "➡️ Ping de l'API :",
+                                String.format(
+                                        """
+                                                    **`%s`** ms
+                                                """.trim(),
+                                        manager.getRestPing()),
+                                false)
+                )
+                .actionRow()
+                .add(Button.of(ButtonStyle.PRIMARY, "refresh-ping", "Actualiser", Emoji.fromUnicode("🔁")))
                 .build();
     }
 
@@ -61,35 +89,35 @@ public class Embeds {
                 .setTitle("Ticket en cours d'ouverture !")
                 .setDescription(
                         """
-                Votre demande d'ouverture de ticket a bien été prise en compte.
-                Veuillez cependant confirmer que vous avez pris connaissance des règles de ceux-cis.
-                """)
+                                Votre demande d'ouverture de ticket a bien été prise en compte.
+                                Veuillez cependant confirmer que vous avez pris connaissance des règles de ceux-cis.
+                                """)
                 .addField(
                         "✉️ Règles des tickets :",
                         """
-                - Les messages que vous envoyez ne peuvent ni être édités, ni être supprimés.
-                - Tous les messages envoyés sont enregistrés.
-                - Les règles du discord `Graven - Développement` sont également applicables dans les tickets.
-                - Les tickets ouverts sans justification seront sanctionnés.
-                - Les tickets sont destinés à la modération. Les demandes d'aides sont susceptibles d'être sanctionnées.
-                """,
+                                - Les messages que vous envoyez ne peuvent ni être édités, ni être supprimés.
+                                - Tous les messages envoyés sont enregistrés.
+                                - Les règles du discord `Graven - Développement` sont également applicables dans les tickets.
+                                - Les tickets ouverts sans justification seront sanctionnés.
+                                - Les tickets sont destinés à la modération. Les demandes d'aides sont susceptibles d'être sanctionnées.
+                                """,
                         false)
                 .addField(
                         "❔ Utilisation :",
                         String.format(
                                 """
-                - Pour transmettre un message, vous avez juste à envoyer un message en privé avec ce bot.
-                - Les réponses de la modération se feront par le biais de ces message privés.
-                - Si votre message est transmis, la réaction %s sera ajoutée à vos messages
-                """,
+                                        - Pour transmettre un message, vous avez juste à envoyer un message en privé avec ce bot.
+                                        - Les réponses de la modération se feront par le biais de ces message privés.
+                                        - Si votre message est transmis, la réaction %s sera ajoutée à vos messages
+                                        """,
                                 sentEmote),
                         false)
                 .addField(
                         "✨ Terminer l'ouverture du ticket",
                         """
-                Afin de terminer l'ouverture du ticket, merci de sélectionner ci-dessous la raison de l'ouverture de votre ticket.
-                Vous serez ensuite recontacté dans les plus brefs délais.
-                """,
+                                Afin de terminer l'ouverture du ticket, merci de sélectionner ci-dessous la raison de l'ouverture de votre ticket.
+                                Vous serez ensuite recontacté dans les plus brefs délais.
+                                """,
                         false)
                 .setColor(Color.GREEN);
     }
@@ -100,33 +128,33 @@ public class Embeds {
                 .setTitle("Ticket ouvert !")
                 .setDescription(
                         """
-                La modération a ouvert un ticket vous impliquant.
-                Vous pouvez désormais discuter avec le staff en message privé avec le bot
-                """)
+                                La modération a ouvert un ticket vous impliquant.
+                                Vous pouvez désormais discuter avec le staff en message privé avec le bot
+                                """)
                 .addField(
                         "✉️ Règles des tickets :",
                         """
-                - Les messages que vous envoyez ne peuvent ni être édités, ni être supprimés.
-                - Tous les messages envoyés sont enregistrés.
-                - Les règles du discord `Graven - Développement` sont également applicables dans les tickets.
-                """,
+                                - Les messages que vous envoyez ne peuvent ni être édités, ni être supprimés.
+                                - Tous les messages envoyés sont enregistrés.
+                                - Les règles du discord `Graven - Développement` sont également applicables dans les tickets.
+                                """,
                         false)
                 .addField(
                         "❔ Utilisation :",
                         String.format(
                                 """
-                - Pour transmettre un message, vous avez juste à envoyer un message en privé avec ce bot.
-                - Les réponses de la modération se feront par le biais de ces message privés.
-                - Si votre message est transmis, la réaction %s sera ajoutée à vos messages
-                """,
+                                        - Pour transmettre un message, vous avez juste à envoyer un message en privé avec ce bot.
+                                        - Les réponses de la modération se feront par le biais de ces message privés.
+                                        - Si votre message est transmis, la réaction %s sera ajoutée à vos messages
+                                        """,
                                 sentEmote),
                         false)
                 .addField(
                         "⚠️ Avertissement :",
                         """
-                Ce ticket a été ouvert par la modération. Il est donc sûrement lié à un comportement problématique.
-                Veuillez en tenir compte dans les messages que vous adresserez tout au long de ce ticket.
-                """,
+                                Ce ticket a été ouvert par la modération. Il est donc sûrement lié à un comportement problématique.
+                                Veuillez en tenir compte dans les messages que vous adresserez tout au long de ce ticket.
+                                """,
                         false)
                 .setColor(Color.ORANGE);
     }
@@ -141,17 +169,17 @@ public class Embeds {
                         "ℹ️ Détails :",
                         String.format(
                                 """
-                    > **Identifiant de l'utilisateur**
-                    %s
+                                        > **Identifiant de l'utilisateur**
+                                        %s
 
-                    > **Nom de l'utilisateur**
-                    %s (`@%s`)
+                                        > **Nom de l'utilisateur**
+                                        %s (`@%s`)
 
-                    :hash: **Salon**
-                    %s (`#%s`)
+                                        :hash: **Salon**
+                                        %s (`#%s`)
 
-                    %s
-                    """,
+                                        %s
+                                        """,
                                 from.getId(),
                                 from.getAsMention(),
                                 from.getAsTag(),
@@ -159,18 +187,18 @@ public class Embeds {
                                 channel.getName(),
                                 forced
                                         ? String.format(
-                                                """
-                         🛂 **Ouvert par**
-                         %s (`@%s`)
+                                        """
+                                                 🛂 **Ouvert par**
+                                                 %s (`@%s`)
 
-                        """,
-                                                by.getAsMention(), by.getAsTag())
+                                                """,
+                                        by.getAsMention(), by.getAsTag())
                                         : String.format(
-                                                """
-                        📝 **Raison**
-                        `%s`
-                    """,
-                                                reason)),
+                                        """
+                                                    📝 **Raison**
+                                                    `%s`
+                                                """,
+                                        reason)),
                         false);
     }
 
@@ -184,15 +212,15 @@ public class Embeds {
                         "ℹ️ Détails :",
                         String.format(
                                 """
-                    > **Identifiant de l'utilisateur**
-                    %s
+                                        > **Identifiant de l'utilisateur**
+                                        %s
 
-                    > **Nom de l'utilisateur**
-                    %s (`@%s`)
+                                        > **Nom de l'utilisateur**
+                                        %s (`@%s`)
 
-                    :spiral_note_pad: **Rapport**
-                    [Lien du rapport](%s)
-                    """,
+                                        :spiral_note_pad: **Rapport**
+                                        [Lien du rapport](%s)
+                                        """,
                                 from.getId(), from.getAsMention(), from.getAsTag(), jumpUrl),
                         false);
     }
