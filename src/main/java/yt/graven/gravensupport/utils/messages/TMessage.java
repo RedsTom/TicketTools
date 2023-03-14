@@ -1,11 +1,9 @@
 package yt.graven.gravensupport.utils.messages;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -23,7 +21,17 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
 import org.jetbrains.annotations.NotNull;
+import yt.graven.gravensupport.utils.messages.builder.MessageFactory;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * @deprecated Will be replaced by {@link yt.graven.gravensupport.utils.messages.builder.data.TicketMessage}, which is created using {@link MessageFactory#create()}
+ */
+@Deprecated(forRemoval = true)
 public class TMessage {
 
     private final List<ActionRow> actionRows = new ArrayList<>();
@@ -60,7 +68,7 @@ public class TMessage {
     }
 
     public TMessage setEmbeds(EmbedBuilder... embeds) {
-        msgBuilder.setEmbeds(Arrays.stream(embeds).map(EmbedBuilder::build).collect(Collectors.toList()));
+        msgBuilder.setEmbeds(Arrays.stream(embeds).map(EmbedBuilder::build).toList());
         return this;
     }
 
