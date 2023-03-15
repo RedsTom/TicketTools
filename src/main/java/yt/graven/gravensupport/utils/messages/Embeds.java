@@ -29,16 +29,20 @@ public class Embeds {
     }
 
     public TicketMessage successMessage(String message) {
-        return MessageFactory.from(success(message));
+        return MessageFactory.create().addEmbeds(success(message));
     }
 
     public EmbedBuilder ticketAlreadyExists(boolean personal) {
-        return error(personal ? "Vous avez déjà un ticket ouvert avec la modération." : "Un ticket est déjà ouvert avec cet utilisateur.");
+        return error(
+                personal
+                        ? "Vous avez déjà un ticket ouvert avec la modération."
+                        : "Un ticket est déjà ouvert avec cet utilisateur.");
     }
 
     public TicketMessage ticketAlreadyExistsMessage(GuildMessageChannel ticketChannel, boolean personal) {
         // spotless:off
-        return MessageFactory.from(ticketAlreadyExists(personal))
+        return MessageFactory.create()
+                .addEmbeds(ticketAlreadyExists(personal))
                 .addActionRow(actionRow -> actionRow
                         .addButton(button -> button
                                 .setText("Aller au ticket")

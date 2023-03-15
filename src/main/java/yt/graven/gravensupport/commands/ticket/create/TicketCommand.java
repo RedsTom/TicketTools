@@ -1,9 +1,6 @@
 package yt.graven.gravensupport.commands.ticket.create;
 
-import static net.dv8tion.jda.api.entities.channel.ChannelType.*;
-
 import java.io.IOException;
-
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
@@ -15,7 +12,6 @@ import yt.graven.gravensupport.utils.commands.Command;
 import yt.graven.gravensupport.utils.commands.ICommand;
 import yt.graven.gravensupport.utils.exceptions.TicketException;
 import yt.graven.gravensupport.utils.messages.Embeds;
-import yt.graven.gravensupport.utils.messages.TMessage;
 import yt.graven.gravensupport.utils.messages.builder.MessageFactory;
 
 @Command

@@ -113,7 +113,7 @@ public class EventReceiver extends ListenerAdapter {
             Optional<Ticket> ticket = ticketManager.get(MiscUtil.parseLong(textChannel.getTopic()));
             if (ticket.isEmpty()) {
                 embeds.noTicketAttachedMessage()
-                        .addActionRow(TicketActionRow::addDeletableButton)
+                        .addActionRow(TicketActionRow::addDeleteButton)
                         .send(event.getChannel())
                         .queue();
                 return;

@@ -24,6 +24,9 @@ public class TicketButton {
     @Setter
     private String link;
 
+    @Setter
+    private boolean disabled = false;
+
     public TicketButton() {}
 
     public TicketButton(String id) {
@@ -35,7 +38,7 @@ public class TicketButton {
             style = ButtonStyle.SECONDARY;
         }
 
-        if(link != null) {
+        if (link != null) {
             style = ButtonStyle.LINK;
         }
 
@@ -47,6 +50,12 @@ public class TicketButton {
         }
 
         String idOrLink = id != null ? id : link;
-        return Button.of(style, idOrLink, text, emoji);
+        Button btn = Button.of(style, idOrLink, text, emoji);
+
+        if (disabled) {
+            btn = btn.asDisabled();
+        }
+
+        return btn;
     }
 }

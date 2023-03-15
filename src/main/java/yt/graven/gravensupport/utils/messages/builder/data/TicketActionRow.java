@@ -1,20 +1,18 @@
 package yt.graven.gravensupport.utils.messages.builder.data;
 
-import net.dv8tion.jda.api.entities.emoji.Emoji;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.ItemComponent;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.UnaryOperator;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.ItemComponent;
 
 public class TicketActionRow {
 
     private final List<ItemComponent> components = new ArrayList<>();
 
-    public TicketActionRow() {
-    }
+    public TicketActionRow() {}
 
     public TicketActionRow(ItemComponent... components) {
         this.components.addAll(List.of(components));
@@ -36,11 +34,8 @@ public class TicketActionRow {
         return this;
     }
 
-    public TicketActionRow addDeletableButton() {
-        return addButton(button -> button
-                .setId("delete")
-                .setEmoji(Emoji.fromUnicode("🗑️"))
-        );
+    public TicketActionRow addDeleteButton() {
+        return addButton(button -> button.setId("delete").setEmoji(Emoji.fromUnicode("🗑️")));
     }
 
     public TicketActionRow addSelectMenu(String id, UnaryOperator<TicketSelectMenu> applier) {

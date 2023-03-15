@@ -105,10 +105,12 @@ public class ModTicketCommand implements ICommand {
         Ticket ticket = ticketManager.create(user);
         ticket.forceOpening(event.getUser());
 
+        // spotless::off
         embeds.successMessage(String.format("Le ticket avec %s a bien été ouvert.", user.getAsMention()))
                 .addActionRow(actionRow -> actionRow.addButton(button ->
                         button.setText("Aller au ticket").setLink(ticket.getTo().getJumpUrl())))
                 .editReply(reply)
                 .queue();
+        // spotless:on
     }
 }

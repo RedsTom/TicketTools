@@ -5,18 +5,17 @@ import club.minnced.discord.webhook.external.JDAWebhookClient;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
 import java.awt.*;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
-
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
@@ -24,17 +23,15 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;
 import net.dv8tion.jda.api.interactions.InteractionHook;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.requests.ErrorResponse;
 import net.dv8tion.jda.api.utils.FileUpload;
-import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import org.simpleyaml.configuration.file.YamlConfiguration;
 import yt.graven.gravensupport.utils.WebhookMessageAdapter;
 import yt.graven.gravensupport.utils.exceptions.TicketAlreadyExistsException;
 import yt.graven.gravensupport.utils.messages.Embeds;
-import yt.graven.gravensupport.utils.messages.TMessage;
 import yt.graven.gravensupport.utils.messages.builder.MessageFactory;
+import yt.graven.gravensupport.utils.messages.builder.data.TicketActionRow;
 import yt.graven.gravensupport.utils.messages.serializable.SerializableMessageArray;
 
 public class Ticket {
@@ -114,36 +111,43 @@ public class Ticket {
                 .ignore(ErrorResponse.UNKNOWN_MESSAGE)
                 .handle(ErrorResponse.CANNOT_SEND_TO_USER, exception -> handleUnableToDmUser(reply));
 
-        from.openPrivateChannel()
-                .complete()
-                .sendMessage(TMessage.from(embeds.proposeOpening(sentEmote.getFormatted()))
-                        .actionRow()
-                        .add(Button.secondary("?", "Raison : ").asDisabled())
-                        .build()
-                        .actionRow()
-                        .selectMenu("opening-reason")
-                        .addOption("Signalement utilisateur", "op-user-report", Emoji.fromUnicode("\uD83D\uDCDD"))
-                        .addOption("Contester une sanction", "op-unban", Emoji.fromUnicode("⛔"))
-                        .addOption("Proposer une amélioration", "op-enhancement", Emoji.fromUnicode("✨"))
-                        .addOption("Autre", "op-other", Emoji.fromUnicode("\uD83D\uDCAC"))
-                        .build()
-                        .build()
-                        .build())
+        // spotless:off
+        MessageFactory.create()
+                .addEmbeds(embeds.proposeOpening(sentEmote.getFormatted()))
+                .addActionRow(actionRow -> actionRow
+                        .addButton("?", button -> button
+                                .setText("Raison : ")
+                                .setDisabled(true)
+                        )
+                )
+                .addActionRow(actionRow -> actionRow
+                        .addSelectMenu("opening-menu", selectMenu -> selectMenu
+                                .addOption(Emoji.fromUnicode("📝"), "Signalement utilisateur", "op-user-report")
+                                .addOption(Emoji.fromUnicode("⛔"), "Contester une sanction", "op-unban")
+                                .addOption(Emoji.fromUnicode("✨"), "Proposer une amélioration", "op-enhancement")
+                                .addOption(Emoji.fromUnicode("\uD83D\uDCAC"), "Autre", "op-other")
+                        )
+                )
+                .send(from)
                 .queue(
                         msg -> {
-                            reply.editOriginal("➡️ " + msg.getChannel().getAsMention())
-                                    .queue();
+                            reply.editOriginal("➡️ " + msg.getChannel().getAsMention()).queue();
                         },
-                        errorHandler);
+                        errorHandler
+                );
+        // spotless:on
     }
 
     /**
      * Directly opens a ticket without asking for the user permission.
      */
     public void forceOpening(User by) throws IOException {
-        TMessage.from(embeds.forceOpening(sentEmote.getFormatted()))
-                .sendMessage(from)
+        // spotless:off
+        MessageFactory.create()
+                .addEmbeds(embeds.forceOpening(sentEmote.getFormatted()))
+                .send(from)
                 .queue();
+        // spotless:on
 
         openOnServer(true, by, null);
     }
@@ -161,47 +165,55 @@ public class Ticket {
         this.webhook = retrieveWebhook();
 
         if (!forced) {
-            TMessage.create()
-                    .setEmbeds(new EmbedBuilder()
-                            .setTitle("\uD83D\uDCDD Raison de l'ouverture du ticket")
-                            .setDescription("**`" + reason + "`**")
-                            .setColor(0x48dbfb)
-                            .build())
-                    .sendMessage(channel)
+            // spotless:off
+            MessageEmbed reasonEmbed = new EmbedBuilder()
+                    .setTitle("\uD83D\uDCDD Raison de l'ouverture du ticket")
+                    .setDescription("**`" + reason + "`**")
+                    .setColor(0x48dbfb)
+                    .build();
+            MessageEmbed firstMessageSelectorEmbed = new EmbedBuilder()
+                    .setTitle("Sélectionnez le premier message à envoyer :")
+                    .setColor(0x48dbfb)
+                    .build();
+
+            MessageFactory.create()
+                    .addEmbeds(reasonEmbed)
+                    .send(channel)
                     .complete();
-            TMessage.create()
-                    .setEmbeds(new EmbedBuilder()
-                            .setTitle("Sélectionnez le premier message à envoyer :")
-                            .setColor(0x48dbfb)
-                            .build())
-                    .actionRow()
-                    .selectMenu("first-sentence")
-                    .addOption("Bonjour", "bonjour", Emoji.fromUnicode("☀️"))
-                    .addOption("Bonsoir", "bonsoir", Emoji.fromUnicode("🌙"))
-                    .build()
-                    .build()
-                    .actionRow()
-                    .deletable()
-                    .build()
-                    .sendMessage(channel)
+
+            MessageFactory.create()
+                    .addEmbeds(firstMessageSelectorEmbed)
+                    .addActionRow(actionRow -> actionRow
+                            .addSelectMenu("first-sentence", selectMenu -> selectMenu
+                                    .addOption(Emoji.fromUnicode("☀️"), "Bonjour", "bonjour")
+                                    .addOption(Emoji.fromUnicode("🌙"), "Bonsoir", "bonsoir")
+                            )
+                    )
+                    .addActionRow(TicketActionRow::addDeleteButton)
+                    .send(channel)
                     .complete();
+            // spotless:on
         }
 
         TextChannel ticketChannel =
                 moderationGuild.getTextChannelById(config.getString("config.ticket_guild.channels_ids.tickets"));
-        TMessage.from(embeds.ticketOpening(forced, by, from, channel, reason))
-                .actionRow()
-                .button()
-                .withText("Aller au salon")
-                .withLink(String.format("https://discord.com/channels/%s/%s", moderationGuild.getId(), channel.getId()))
-                .build()
-                .button()
-                .withText("Aller à l'utilisateur")
-                .withLink(String.format("https://discord.com/users/%s", from.getId()))
-                .build()
-                .build()
-                .sendMessage(ticketChannel)
+
+        // spotless:off
+        MessageFactory.create()
+                .addEmbeds(embeds.ticketOpening(forced, by, from, channel, reason))
+                .addActionRow(actionRow -> actionRow
+                        .addButton(button -> button
+                                .setText("Aller au salon")
+                                .setLink(channel.getJumpUrl())
+                        )
+                        .addButton(button -> button
+                                .setText("Aller à l'utilisateur")
+                                .setLink("https://discord.com/users/%s".formatted(from.getId()))
+                        )
+                )
+                .send(ticketChannel)
                 .queue();
+        // spotless:on
 
         opened = true;
     }
@@ -246,7 +258,7 @@ public class Ticket {
     public void sendToUser(Message message) {
         String content = message.getContentRaw().substring(1).trim();
 
-        EmbedBuilder embedBuilder = new EmbedBuilder()
+        EmbedBuilder confirmEmbed = new EmbedBuilder()
                 .setTitle("Confirmer l'envoi du message ?")
                 .setDescription(content)
                 .setColor(Color.ORANGE)
@@ -257,56 +269,68 @@ public class Ticket {
                         true);
 
         if (message.getAttachments().size() != 0) {
-            embedBuilder.addField(
+            confirmEmbed.addField(
                     "📎 Pièces jointes :",
                     "`"
                             + message.getAttachments().stream()
-                            .map(Message.Attachment::getFileName)
-                            .collect(Collectors.joining("`, `"))
+                                    .map(Message.Attachment::getFileName)
+                                    .collect(Collectors.joining("`, `"))
                             + "`",
                     true);
         }
 
-        TMessage.from(embedBuilder.build())
-                .actionRow()
-                .button("confirm-message")
-                .withStyle(ButtonStyle.SUCCESS)
-                .withText("Confirmer")
-                .build()
-                .button("deny-message")
-                .withStyle(ButtonStyle.DANGER)
-                .withText("Annuler")
-                .build()
-                .deletable()
-                .build()
-                .sendMessage(message.getChannel())
-                .queue();
+        // spotless:off
+        MessageFactory.create()
+                .addEmbeds(confirmEmbed)
+                .addActionRow(actionRow -> actionRow
+                        .addButton("confirm-message", button -> button
+                                .setText("Confirmer")
+                                .setStyle(ButtonStyle.SUCCESS)
+                        )
+                );
+
+        MessageFactory.create()
+                .addEmbeds(confirmEmbed)
+                .addActionRow(actionRow -> actionRow
+                        .addButton("confirm-message", button -> button
+                                .setStyle(ButtonStyle.SUCCESS)
+                                .setText("Confirmer")
+                        )
+                        .addButton("deny-message", button -> button
+                                .setStyle(ButtonStyle.DANGER)
+                                .setText("Annuler")
+                        )
+                        .addDeleteButton()
+                )
+                .send(message.getChannel());
+        // spotless:on
     }
 
     public CompletableFuture<Message> confirmSendToUser(Message message) {
         CompletableFuture<Message> cf = new CompletableFuture<>();
 
         Executors.newSingleThreadExecutor().execute(() -> {
-            try {
-                TMessage builder = TMessage.from(MessageCreateBuilder.fromMessage(message))
-                        .setContent(
-                                message.getContentRaw().startsWith("'")
-                                        ? message.getContentRaw().substring(1).trim()
-                                        : message.getContentRaw().trim());
+            String content = message.getContentRaw().startsWith("'")
+                    ? message.getContentRaw().substring(1).trim()
+                    : message.getContentRaw().trim();
 
-                // Set attachements as files in builder
-                builder.addFiles(message.getAttachments().stream()
-                        .map(attachment -> FileUpload.fromData(
-                                attachment.getProxy().download().join(), attachment.getFileName()))
-                        .toArray(FileUpload[]::new));
-
-                builder.sendMessage(getFrom()).queue(cf::complete, (e) -> {
-                    getTo().sendMessage(embeds.errorMessage(e.getMessage()).build())
-                            .queue();
-                });
-            } catch (Exception e) {
-                cf.completeExceptionally(e);
-            }
+            // spotless:off
+            MessageFactory.create()
+                    .setTextContent(content)
+                    .apply(builder -> {
+                        FileUpload[] files = message.getAttachments().stream()
+                                .map(attachment -> FileUpload.fromData(
+                                        attachment.getProxy().download().join(),
+                                        attachment.getFileName())
+                                )
+                                .toArray(FileUpload[]::new);
+                        return builder.addFiles(files);
+                    })
+                    .send(from)
+                    .queue(cf::complete, e -> embeds.errorMessage(e.getMessage())
+                            .send(to)
+                            .queue());
+            // spotless:on
         });
 
         return cf;
@@ -343,6 +367,16 @@ public class Ticket {
             MessageFactory.create()
                     .addEmbeds(embeds.ticketClosing(from, report.getJumpUrl()))
                     .addActionRow(actionRow -> actionRow
+                            .addButton(
+                                    button -> button.setText("Aller au rapport").setLink(report.getJumpUrl()))
+                            .addButton(button -> button.setText("Consulter le rapport (en ligne)")
+                                    .setLink("https://redstom.github.io/GravenDev-TicketReader/?input=%s"
+                                            .formatted(reportJsonUrl))))
+                    .send(ticketsChannel);
+
+            // spotless:off
+            MessageFactory.create()
+                    .addActionRow(actionRow -> actionRow
                             .addButton(button -> button
                                     .setText("Aller au rapport")
                                     .setLink(report.getJumpUrl())
@@ -353,39 +387,24 @@ public class Ticket {
                             )
                     )
                     .send(ticketsChannel);
+            // spotless:on
 
-            TMessage.from(embeds.ticketClosing(from, report.getJumpUrl()))
-                    .actionRow()
-                    .button()
-                    .withText("Aller au rapport")
-                    .withLink(report.getJumpUrl())
-                    .build()
-                    .button()
-                    .withText("Consulter le rapport (en ligne)")
-                    .withLink("https://redstom.github.io/GravenDev-TicketReader/?input=" + reportJsonUrl)
-                    .build()
-                    .build()
-                    .sendMessage(ticketsChannel)
-                    .complete();
-
-            String ticket = from.getJDA().retrieveCommands().complete().stream()
+            String ticketCommand = from.getJDA().retrieveCommands().complete().stream()
                     .filter(a -> a.getName().equalsIgnoreCase("ticket"))
                     .findFirst()
                     .map(a -> a.getAsMention())
                     .orElse("`/ticket`");
 
-            TMessage.create()
-                    .setEmbeds(new EmbedBuilder()
-                            .setColor(Color.RED)
-                            .setTitle("Ticket fermé.")
-                            .setDescription("La modération a fermé le ticket avec vous. Si vous souhaitez le rouvrir, "
-                                    + "refaites la commande "
-                                    + ticket
-                                    + "."))
-                    .sendMessage(from)
-                    .queue();
+            EmbedBuilder closedEmbed = new EmbedBuilder()
+                    .setColor(Color.RED)
+                    .setTitle("Ticket fermé.")
+                    .setDescription(
+                            "La modération a fermé le ticket avec vous. Si vous souhaitez le rouvrir, refaites la commande %s."
+                                    .formatted(ticketCommand));
 
-            to.delete().queue((v1) -> ticketManager.remove(from));
+            MessageFactory.create().addEmbeds(closedEmbed).send(from).queue();
+
+            to.delete().queue(ignored -> ticketManager.remove(from));
         });
     }
 
@@ -395,6 +414,11 @@ public class Ticket {
         String errorMessage = "Impossible d'envoyer un message privé à cet utilisateur!";
         MessageEmbed embed = embeds.error(errorMessage).build();
 
-        TMessage.from(embed).editReply(reply).queue();
+        // spotless:off
+        MessageFactory.create()
+                .addEmbeds(embed)
+                .editReply(reply)
+                .queue();
+        // spotless:on
     }
 }
