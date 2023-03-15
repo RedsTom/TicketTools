@@ -17,22 +17,4 @@ public class MessageFactory {
     public static TicketMessage from(MessageCreateBuilder builder) {
         return new TicketMessage(builder);
     }
-
-    /**
-     * @deprecated Use {@link TicketMessage#addEmbeds(MessageEmbed...)} )} instead
-     */
-    @Deprecated(forRemoval = true)
-    public static TicketMessage from(MessageEmbed... embeds) {
-        return create().apply(builder -> builder.setEmbeds(embeds));
-    }
-
-    /**
-     * @deprecated Use {@link TicketMessage#addEmbeds(EmbedBuilder...)} )} instead
-     */
-    @Deprecated(forRemoval = true)
-    public static TicketMessage from(EmbedBuilder... content) {
-        MessageEmbed[] embeds = Arrays.stream(content).map(EmbedBuilder::build).toArray(MessageEmbed[]::new);
-
-        return from(embeds);
-    }
 }

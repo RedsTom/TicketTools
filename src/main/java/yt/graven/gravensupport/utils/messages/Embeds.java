@@ -21,7 +21,7 @@ public class Embeds {
     }
 
     public TicketMessage errorMessage(String message) {
-        return MessageFactory.from(error(message));
+        return MessageFactory.create().addEmbeds(error(message));
     }
 
     public EmbedBuilder success(String message) {
