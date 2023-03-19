@@ -22,35 +22,35 @@ public class TicketManager {
     private final YamlConfiguration config;
     private final Embeds embeds;
 
-    private final Map<Long, Ticket> tickets = new HashMap<>();
+    private final Map<Long, OldTicket> tickets = new HashMap<>();
 
-    public Ticket create(User user) throws TicketException {
+    public OldTicket create(User user) throws TicketException {
         if (exists(user)) {
             throw new TicketAlreadyExistsException(user);
         }
-        Ticket t = new Ticket(this, embeds, config, user);
+        OldTicket t = new OldTicket(this, embeds, config, user);
         store(t);
         return t;
     }
 
-    public Ticket create(JDA jda, long userId) throws TicketException {
+    public OldTicket create(JDA jda, long userId) throws TicketException {
         User user = jda.retrieveUserById(userId).complete();
         return create(user);
     }
 
-    public Optional<Ticket> get(User user) {
+    public Optional<OldTicket> get(User user) {
         return get(user.getIdLong());
     }
 
-    public Optional<Ticket> get(long userId) {
+    public Optional<OldTicket> get(long userId) {
         return Optional.ofNullable(tickets.get(userId));
     }
 
-    public Ticket getOrCreate(User user) throws TicketException {
+    public OldTicket getOrCreate(User user) throws TicketException {
         return get(user).orElse(create(user));
     }
 
-    public Ticket getOrCreate(JDA jda, long userId) throws TicketException {
+    public OldTicket getOrCreate(JDA jda, long userId) throws TicketException {
         return get(userId).orElse(create(jda, userId));
     }
 
@@ -62,8 +62,8 @@ public class TicketManager {
         return tickets.containsKey(userId);
     }
 
-    public void store(Ticket ticket) {
-        tickets.put(ticket.getFrom().getIdLong(), ticket);
+    public void store(OldTicket oldTicket) {
+        tickets.put(oldTicket.getFrom().getIdLong(), oldTicket);
     }
 
     public void load(JDA jda) throws TicketException {
@@ -84,7 +84,7 @@ public class TicketManager {
 
         cat.getTextChannels().forEach(channel -> {
             try {
-                store(Ticket.loadFromChannel(this, embeds, config, channel));
+                store(OldTicket.loadFromChannel(this, embeds, config, channel));
             } catch (IOException e) {
                 new TicketException("Impossible to load ticket from channel #" + channel.getName()).printStackTrace();
             }

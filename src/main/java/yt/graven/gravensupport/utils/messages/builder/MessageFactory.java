@@ -1,8 +1,5 @@
 package yt.graven.gravensupport.utils.messages.builder;
 
-import java.util.Arrays;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import yt.graven.gravensupport.utils.messages.builder.data.TicketMessage;
 

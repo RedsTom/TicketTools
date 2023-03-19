@@ -1,7 +1,5 @@
 package yt.graven.gravensupport.commands.ticket.close;
 
-import java.util.Objects;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -11,12 +9,15 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.utils.MiscUtil;
 import org.simpleyaml.configuration.file.YamlConfiguration;
-import yt.graven.gravensupport.commands.ticket.Ticket;
+import yt.graven.gravensupport.commands.ticket.OldTicket;
 import yt.graven.gravensupport.commands.ticket.TicketManager;
 import yt.graven.gravensupport.utils.commands.Command;
 import yt.graven.gravensupport.utils.commands.ICommand;
 import yt.graven.gravensupport.utils.exceptions.CommandCancelledException;
 import yt.graven.gravensupport.utils.messages.Embeds;
+
+import java.util.Objects;
+import java.util.Optional;
 
 @Command
 @RequiredArgsConstructor
@@ -58,7 +59,7 @@ public class CloseCommand implements ICommand {
             return;
         }
 
-        Optional<Ticket> ticket = ticketManager.get(MiscUtil.parseLong(((TextChannel) event.getChannel()).getTopic()));
+        Optional<OldTicket> ticket = ticketManager.get(MiscUtil.parseLong(((TextChannel) event.getChannel()).getTopic()));
         if (ticket.isEmpty()) {
             embeds.errorMessage("Impossible de trouver le ticket associé à ce salon !")
                     .reply(event)

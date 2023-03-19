@@ -34,7 +34,7 @@ import yt.graven.gravensupport.utils.messages.builder.MessageFactory;
 import yt.graven.gravensupport.utils.messages.builder.data.TicketActionRow;
 import yt.graven.gravensupport.utils.messages.serializable.SerializableMessageArray;
 
-public class Ticket {
+public class OldTicket {
 
     private final TicketManager ticketManager;
     private final Embeds embeds;
@@ -51,7 +51,7 @@ public class Ticket {
             .create();
     private WebhookClient webhook;
 
-    private Ticket(
+    private OldTicket(
             TicketManager ticketManager,
             Embeds embeds,
             YamlConfiguration config,
@@ -77,12 +77,12 @@ public class Ticket {
      *
      * @param from User to create the ticket with
      */
-    public Ticket(TicketManager ticketManager, Embeds embeds, YamlConfiguration config, User from) {
+    public OldTicket(TicketManager ticketManager, Embeds embeds, YamlConfiguration config, User from) {
         this(ticketManager, embeds, config, from, null, null);
         this.opened = false;
     }
 
-    public static Ticket loadFromChannel(
+    public static OldTicket loadFromChannel(
             TicketManager ticketManager, Embeds embeds, YamlConfiguration config, TextChannel channel)
             throws IOException {
         String topic = channel.getTopic();
@@ -94,9 +94,9 @@ public class Ticket {
                     "Error : Unable to find an user matching the ticket #" + channel.getName() + " !");
         }
 
-        Ticket ticket = new Ticket(ticketManager, embeds, config, user, channel, null);
-        ticket.webhook = ticket.retrieveWebhook();
-        return ticket;
+        OldTicket oldTicket = new OldTicket(ticketManager, embeds, config, user, channel, null);
+        oldTicket.webhook = oldTicket.retrieveWebhook();
+        return oldTicket;
     }
 
     /**

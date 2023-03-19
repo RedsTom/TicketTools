@@ -1,9 +1,5 @@
 package yt.graven.gravensupport.commands.ticket.create;
 
-import static net.dv8tion.jda.api.entities.channel.ChannelType.*;
-
-import java.io.IOException;
-import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.User;
@@ -15,13 +11,18 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import yt.graven.gravensupport.commands.ticket.Ticket;
+import yt.graven.gravensupport.commands.ticket.OldTicket;
 import yt.graven.gravensupport.commands.ticket.TicketManager;
 import yt.graven.gravensupport.utils.commands.Command;
 import yt.graven.gravensupport.utils.commands.ICommand;
 import yt.graven.gravensupport.utils.exceptions.CommandCancelledException;
 import yt.graven.gravensupport.utils.exceptions.TicketException;
 import yt.graven.gravensupport.utils.messages.Embeds;
+
+import java.io.IOException;
+import java.util.Arrays;
+
+import static net.dv8tion.jda.api.entities.channel.ChannelType.*;
 
 @Command
 @RequiredArgsConstructor
@@ -102,7 +103,7 @@ public class ModTicketCommand implements ICommand {
             return;
         }
 
-        Ticket ticket = ticketManager.create(user);
+        OldTicket ticket = ticketManager.create(user);
         ticket.forceOpening(event.getUser());
 
         // spotless::off
