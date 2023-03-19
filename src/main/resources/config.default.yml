@@ -9,3 +9,10 @@ config:
       reports: 0
       tickets: 0
       attachements: 0
+
+database:
+  host: localhost
+  port: 5432
+  database: database
+  username: username
+  password: password

@@ -28,6 +28,8 @@ dependencies {
     implementation 'ch.qos.logback:logback-classic:1.2.11'
     implementation 'club.minnced:discord-webhooks:0.8.0'
     implementation 'com.google.code.gson:gson:2.9.0'
+    implementation 'com.zaxxer:HikariCP:5.0.1'
+    implementation 'org.postgresql:postgresql:42.2.27'
 }
 
 test {

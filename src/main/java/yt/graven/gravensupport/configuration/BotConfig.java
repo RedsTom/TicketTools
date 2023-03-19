@@ -15,19 +15,22 @@ import org.simpleyaml.configuration.file.YamlConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import yt.graven.gravensupport.common.exception.BotStartupException;
 import yt.graven.gravensupport.common.exception.ImpossibleException;
 import yt.graven.gravensupport.configuration.exception.ConfigurationException;
+import yt.graven.gravensupport.database.DatabaseConfig;
 
 @Configuration
 @ComponentScan("yt.graven.gravensupport")
+@Import({DatabaseConfig.class})
 public class BotConfig {
     private static final String CONFIGURATION_FILE = "config.yml";
     private static final String DEFAULT_CONFIGURATION_FILE = "config.default.yml";
     private static final String CONFIGURATION_TOKEN_PROPERTY = "config.token";
 
     @Bean
-    public YamlConfiguration getBotConfiguration() {
+    YamlConfiguration botConfiguration() {
         Path configurationFile = Paths.get(CONFIGURATION_FILE);
 
         if (!Files.exists(configurationFile)) {
@@ -49,8 +52,8 @@ public class BotConfig {
 
     @Bean
     @SuppressWarnings("unused")
-    public JDA getJDAInstance() {
-        String token = this.getBotConfiguration().getString(CONFIGURATION_TOKEN_PROPERTY);
+    JDA getJDAInstance(YamlConfiguration botConfiguration) {
+        String token = botConfiguration.getString(CONFIGURATION_TOKEN_PROPERTY);
         if (token.isEmpty()) {
             throw new BotStartupException("No token provided!");
         }

@@ -7,6 +7,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.configuration.BotConfig;
+import yt.graven.gravensupport.database.DatabaseManager;
 
 public class Main {
 
@@ -22,9 +23,12 @@ public class Main {
     private static class Startup {
 
         private final EventReceiver eventReceiver;
+        private final DatabaseManager dbManager;
         private final JDA client;
 
         public void run() {
+            dbManager.createAll();
+
             this.client
                     .getPresence()
                     .setPresence(Activity.listening("/ticket | Ouvrez un ticket avec la modération"), false);
