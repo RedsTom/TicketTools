@@ -1,8 +1,5 @@
 package yt.graven.gravensupport;
 
-import java.io.IOException;
-import java.util.Objects;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
@@ -20,8 +17,8 @@ import org.simpleyaml.configuration.file.YamlConfiguration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.commands.ping.PingCommand;
-import yt.graven.gravensupport.commands.ticket.Ticket;
-import yt.graven.gravensupport.commands.ticket.TicketManager;
+import yt.graven.gravensupport.commands.ticket.OldTicket;
+import yt.graven.gravensupport.commands.ticket.OldTicketManager;
 import yt.graven.gravensupport.commands.ticket.close.CloseCommand;
 import yt.graven.gravensupport.commands.ticket.create.TicketCommand;
 import yt.graven.gravensupport.commands.ticket.id.IdCommand;
@@ -33,6 +30,10 @@ import yt.graven.gravensupport.utils.interactions.ModalActions;
 import yt.graven.gravensupport.utils.interactions.SelectionMenuActions;
 import yt.graven.gravensupport.utils.messages.Embeds;
 import yt.graven.gravensupport.utils.messages.builder.data.TicketActionRow;
+
+import java.io.IOException;
+import java.util.Objects;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -46,7 +47,7 @@ public class EventReceiver extends ListenerAdapter {
     private final CloseCommand closeCommand;
     private final IdCommand idCommand;
     private final YamlConfiguration config;
-    private final TicketManager ticketManager;
+    private final OldTicketManager oldTicketManager;
     private final Embeds embeds;
 
     private boolean loaded = false;
@@ -60,7 +61,7 @@ public class EventReceiver extends ListenerAdapter {
         log.info("Bot ready - Commands initialized!");
 
         try {
-            ticketManager.load(event.getJDA());
+            oldTicketManager.load(event.getJDA());
         } catch (TicketException e) {
             e.printStackTrace();
         }
@@ -87,8 +88,8 @@ public class EventReceiver extends ListenerAdapter {
          * Check for a dm from a member for a potential forward to a ticket.
          */
         if (event.getChannelType() == ChannelType.PRIVATE) {
-            if (!ticketManager.exists(event.getAuthor())) return;
-            Ticket ticket = ticketManager.get(event.getAuthor()).get();
+            if (!oldTicketManager.exists(event.getAuthor())) return;
+            OldTicket ticket = oldTicketManager.get(event.getAuthor()).get();
 
             if (!ticket.isOpened()) return;
 
@@ -110,7 +111,7 @@ public class EventReceiver extends ListenerAdapter {
                     textChannel.getParentCategoryId(), config.getString("config.ticket_guild.tickets_category")))
                 return;
 
-            Optional<Ticket> ticket = ticketManager.get(MiscUtil.parseLong(textChannel.getTopic()));
+            Optional<OldTicket> ticket = oldTicketManager.get(MiscUtil.parseLong(textChannel.getTopic()));
             if (ticket.isEmpty()) {
                 embeds.noTicketAttachedMessage()
                         .addActionRow(TicketActionRow::addDeleteButton)

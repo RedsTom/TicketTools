@@ -1,8 +1,5 @@
 package yt.graven.gravensupport.commands.ticket.create.interactions;
 
-import java.awt.*;
-import java.io.IOException;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
@@ -15,25 +12,29 @@ import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.Modal;
 import org.springframework.stereotype.Component;
-import yt.graven.gravensupport.commands.ticket.Ticket;
-import yt.graven.gravensupport.commands.ticket.TicketManager;
+import yt.graven.gravensupport.commands.ticket.OldTicket;
+import yt.graven.gravensupport.commands.ticket.OldTicketManager;
 import yt.graven.gravensupport.utils.exceptions.TicketException;
 import yt.graven.gravensupport.utils.interactions.IIInteractionAction;
 import yt.graven.gravensupport.utils.messages.Embeds;
+
+import java.awt.*;
+import java.io.IOException;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
 public class OpeningReasonHandler implements IIInteractionAction<StringSelectInteractionEvent> {
 
     private final Embeds embeds;
-    private final TicketManager manager;
+    private final OldTicketManager manager;
 
     @Override
     public void run(StringSelectInteractionEvent event) throws TicketException, IOException {
         if (event.getChannel().getType() != ChannelType.PRIVATE) return;
 
         PrivateChannel channel = event.getChannel().asPrivateChannel();
-        Optional<Ticket> ticket = manager.get(channel.getUser());
+        Optional<OldTicket> ticket = manager.get(channel.getUser());
 
         if (ticket.isEmpty()) {
             ticket = Optional.of(manager.create(channel.getUser()));

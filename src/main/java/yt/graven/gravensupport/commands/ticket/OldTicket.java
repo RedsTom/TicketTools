@@ -34,9 +34,9 @@ import yt.graven.gravensupport.utils.messages.builder.MessageFactory;
 import yt.graven.gravensupport.utils.messages.builder.data.TicketActionRow;
 import yt.graven.gravensupport.utils.messages.serializable.SerializableMessageArray;
 
-public class Ticket {
+public class OldTicket {
 
-    private final TicketManager ticketManager;
+    private final OldTicketManager oldTicketManager;
     private final Embeds embeds;
     private final YamlConfiguration config;
     private final User from;
@@ -51,8 +51,8 @@ public class Ticket {
             .create();
     private WebhookClient webhook;
 
-    private Ticket(
-            TicketManager ticketManager,
+    private OldTicket(
+            OldTicketManager oldTicketManager,
             Embeds embeds,
             YamlConfiguration config,
             User from,
@@ -63,7 +63,7 @@ public class Ticket {
         this.to = to;
         this.config = config;
         this.opened = true;
-        this.ticketManager = ticketManager;
+        this.oldTicketManager = oldTicketManager;
         this.webhook = webhook;
 
         this.moderationGuild = from.getJDA().getGuildById(config.getString("config.ticket_guild.guild_id"));
@@ -77,13 +77,13 @@ public class Ticket {
      *
      * @param from User to create the ticket with
      */
-    public Ticket(TicketManager ticketManager, Embeds embeds, YamlConfiguration config, User from) {
-        this(ticketManager, embeds, config, from, null, null);
+    public OldTicket(OldTicketManager oldTicketManager, Embeds embeds, YamlConfiguration config, User from) {
+        this(oldTicketManager, embeds, config, from, null, null);
         this.opened = false;
     }
 
-    public static Ticket loadFromChannel(
-            TicketManager ticketManager, Embeds embeds, YamlConfiguration config, TextChannel channel)
+    public static OldTicket loadFromChannel(
+            OldTicketManager oldTicketManager, Embeds embeds, YamlConfiguration config, TextChannel channel)
             throws IOException {
         String topic = channel.getTopic();
         topic = topic == null ? "0" : topic;
@@ -94,9 +94,9 @@ public class Ticket {
                     "Error : Unable to find an user matching the ticket #" + channel.getName() + " !");
         }
 
-        Ticket ticket = new Ticket(ticketManager, embeds, config, user, channel, null);
-        ticket.webhook = ticket.retrieveWebhook();
-        return ticket;
+        OldTicket oldTicket = new OldTicket(oldTicketManager, embeds, config, user, channel, null);
+        oldTicket.webhook = oldTicket.retrieveWebhook();
+        return oldTicket;
     }
 
     /**
@@ -404,12 +404,12 @@ public class Ticket {
 
             MessageFactory.create().addEmbeds(closedEmbed).send(from).queue();
 
-            to.delete().queue(ignored -> ticketManager.remove(from));
+            to.delete().queue(ignored -> oldTicketManager.remove(from));
         });
     }
 
     private void handleUnableToDmUser(InteractionHook reply) {
-        ticketManager.remove(from);
+        oldTicketManager.remove(from);
 
         String errorMessage = "Impossible d'envoyer un message privé à cet utilisateur!";
         MessageEmbed embed = embeds.error(errorMessage).build();

@@ -1,29 +1,30 @@
 package yt.graven.gravensupport.commands.ticket.create.interactions;
 
-import java.awt.*;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.utils.MiscUtil;
 import org.springframework.stereotype.Component;
-import yt.graven.gravensupport.commands.ticket.Ticket;
-import yt.graven.gravensupport.commands.ticket.TicketManager;
+import yt.graven.gravensupport.commands.ticket.OldTicket;
+import yt.graven.gravensupport.commands.ticket.OldTicketManager;
 import yt.graven.gravensupport.utils.interactions.IIInteractionAction;
 import yt.graven.gravensupport.utils.messages.Embeds;
 import yt.graven.gravensupport.utils.messages.builder.MessageFactory;
+
+import java.awt.*;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
 public class FirstSentenceHandler implements IIInteractionAction<StringSelectInteractionEvent> {
 
-    private final TicketManager ticketManager;
+    private final OldTicketManager oldTicketManager;
     private final Embeds embeds;
 
     @Override
     public void run(StringSelectInteractionEvent event) {
-        Optional<Ticket> ticket = ticketManager.get(MiscUtil.parseLong(((TextChannel) event.getChannel()).getTopic()));
+        Optional<OldTicket> ticket = oldTicketManager.get(MiscUtil.parseLong(((TextChannel) event.getChannel()).getTopic()));
         if (ticket.isEmpty()) {
             event.deferReply(true)
                     .addEmbeds(new EmbedBuilder()

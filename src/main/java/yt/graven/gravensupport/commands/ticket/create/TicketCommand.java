@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
-import yt.graven.gravensupport.commands.ticket.TicketManager;
+import yt.graven.gravensupport.commands.ticket.OldTicketManager;
 import yt.graven.gravensupport.utils.commands.Command;
 import yt.graven.gravensupport.utils.commands.ICommand;
 import yt.graven.gravensupport.utils.exceptions.TicketException;
@@ -18,7 +18,7 @@ import yt.graven.gravensupport.utils.messages.builder.MessageFactory;
 @RequiredArgsConstructor
 public class TicketCommand implements ICommand {
 
-    private final TicketManager ticketManager;
+    private final OldTicketManager oldTicketManager;
     private final Embeds embeds;
 
     @Override
@@ -34,7 +34,7 @@ public class TicketCommand implements ICommand {
 
     @Override
     public void run(SlashCommandInteractionEvent event) throws TicketException, IOException {
-        if (ticketManager.exists(event.getUser())) {
+        if (oldTicketManager.exists(event.getUser())) {
             // spotless:off
             MessageFactory.create()
                     .addEmbeds(embeds.ticketAlreadyExists(true))
@@ -46,6 +46,6 @@ public class TicketCommand implements ICommand {
 
         InteractionHook reply = event.deferReply(true).complete();
 
-        ticketManager.create(event.getUser()).proposeOpening(reply);
+        oldTicketManager.create(event.getUser()).proposeOpening(reply);
     }
 }
