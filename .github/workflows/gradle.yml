@@ -31,6 +31,7 @@ jobs:
 
     - name: Check code formatting
       run: ./gradlew spotlessCheck
+      if: github.event_name == 'pull_request' || github.ref_type == 'tag'
 
     - name: Execute Gradle build
       run: ./gradlew build
