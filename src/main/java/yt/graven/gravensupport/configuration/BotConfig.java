@@ -23,7 +23,7 @@ import yt.graven.gravensupport.database.DatabaseConfig;
 
 @Configuration
 @ComponentScan("yt.graven.gravensupport")
-@Import({DatabaseConfig.class})
+@Import({DatabaseConfig.class, TicketCommonsConfig.class})
 public class BotConfig {
     private static final String CONFIGURATION_FILE = "config.yml";
     private static final String DEFAULT_CONFIGURATION_FILE = "config.default.yml";
@@ -52,14 +52,17 @@ public class BotConfig {
 
     @Bean
     @SuppressWarnings("unused")
-    JDA getJDAInstance(YamlConfiguration botConfiguration) {
+    JDA getJDAInstance(YamlConfiguration botConfiguration) throws InterruptedException {
         String token = botConfiguration.getString(CONFIGURATION_TOKEN_PROPERTY);
         if (token.isEmpty()) {
             throw new BotStartupException("No token provided!");
         }
 
         EnumSet<GatewayIntent> allIntentsBecauseWhyNot = EnumSet.allOf(GatewayIntent.class);
-        return JDABuilder.create(allIntentsBecauseWhyNot).setToken(token).build();
+        return JDABuilder.create(allIntentsBecauseWhyNot)
+                .setToken(token)
+                .build()
+                .awaitReady();
     }
 
     private Path getDefaultConfigFromInsideJar() {
