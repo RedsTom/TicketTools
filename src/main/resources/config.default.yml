@@ -11,8 +11,8 @@ config:
       attachements: 0
 
 database:
-  host: localhost
-  port: 5432
-  database: database
-  username: username
-  password: password
+  host: ''
+  port: 0
+  database: ''
+  username: ''
+  password: ''
