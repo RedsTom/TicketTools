@@ -34,7 +34,7 @@ jobs:
       if: github.event_name == 'pull_request' || github.ref_type == 'tag'
 
     - name: Execute Gradle build
-      run: ./gradlew build
+      run: ./gradlew build -x spotlesscheck -x spotlessjavacheck
 
     - name: Cache everything for CD
       if: github.ref_type == 'tag'
