@@ -10,14 +10,14 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
-import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.utils.MiscUtil;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.commands.ticket.Ticket;
 import yt.graven.gravensupport.commands.ticket.TicketManager;
 import yt.graven.gravensupport.utils.interactions.IIInteractionAction;
+import yt.graven.gravensupport.utils.messages.builder.MessageFactory;
+import yt.graven.gravensupport.utils.messages.builder.data.TicketActionRow;
 
 @Component
 @RequiredArgsConstructor
@@ -32,14 +32,14 @@ public class DeleteMessageHandler implements IIInteractionAction<ButtonInteracti
 
         Optional<Ticket> ticket = ticketManager.get(MiscUtil.parseLong(((TextChannel) event.getChannel()).getTopic()));
         if (ticket.isEmpty()) {
-            event.deferReply(true)
-                    .addEmbeds(new EmbedBuilder()
-                            .setColor(Color.RED)
-                            .setTitle("Erreur")
-                            .setDescription("Impossible de trouver le ticket associé à ce salon !")
-                            .setFooter("")
-                            .build())
-                    .queue();
+            MessageEmbed embed = new EmbedBuilder()
+                    .setColor(Color.RED)
+                    .setTitle("Erreur")
+                    .setDescription("Impossible de trouver le ticket associé à ce salon !")
+                    .setFooter("")
+                    .build();
+
+            event.deferReply(true).addEmbeds(embed).queue();
             return;
         }
 
@@ -55,27 +55,29 @@ public class DeleteMessageHandler implements IIInteractionAction<ButtonInteracti
                 .getMessageById(messageId);
 
         if (referingMessage == null) {
-            event.deferReply(true)
-                    .addEmbeds(new EmbedBuilder()
-                            .setColor(Color.RED)
-                            .setTitle("Erreur")
-                            .setDescription("Impossible de trouver le message cible associé à cet envoi !")
-                            .build())
-                    .queue();
+            MessageEmbed embed = new EmbedBuilder()
+                    .setColor(Color.RED)
+                    .setTitle("Erreur")
+                    .setDescription("Impossible de trouver le message cible associé à cet envoi !")
+                    .build();
+
+            event.deferReply(true).addEmbeds(embed).queue();
             return;
         }
 
         referingMessage.delete().queue();
 
         List<MessageEmbed> embedList = new ArrayList<>(event.getMessage().getEmbeds());
-        embedList.add(new EmbedBuilder()
+        MessageEmbed embed = new EmbedBuilder()
                 .setTitle("Message supprimé")
                 .setColor(Color.RED)
                 .setTimestamp(Instant.now())
-                .build());
-        event.deferEdit()
-                .setActionRow(Button.secondary("delete", Emoji.fromUnicode("🗑️")))
-                .setEmbeds(embedList)
-                .queue();
+                .build();
+        embedList.add(embed);
+
+        MessageFactory.create()
+                .addEmbeds(embedList.toArray(MessageEmbed[]::new))
+                .addActionRow(TicketActionRow::addDeleteButton)
+                .editReply(event.deferEdit().complete());
     }
 }

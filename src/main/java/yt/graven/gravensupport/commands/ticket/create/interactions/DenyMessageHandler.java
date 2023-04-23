@@ -17,8 +17,9 @@ public class DenyMessageHandler implements IIInteractionAction<ButtonInteraction
     @Override
     public void run(ButtonInteractionEvent event) {
         List<MessageEmbed> embedList = new ArrayList<>(event.getMessage().getEmbeds());
-        embedList.add(
-                new EmbedBuilder().setTitle("Envoi annulé").setColor(Color.RED).build());
+        MessageEmbed embed =
+                new EmbedBuilder().setTitle("Envoi annulé").setColor(Color.RED).build();
+        embedList.add(embed);
         event.deferEdit()
                 .setActionRow(Button.secondary("delete", Emoji.fromUnicode("🗑️")))
                 .setEmbeds(embedList)

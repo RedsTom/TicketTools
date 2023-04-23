@@ -59,5 +59,6 @@ spotless {
         removeUnusedImports()
         formatAnnotations()
         trimTrailingWhitespace()
+        toggleOffOn()
     }
 }

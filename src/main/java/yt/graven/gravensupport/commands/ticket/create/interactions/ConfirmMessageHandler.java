@@ -120,10 +120,9 @@ public class ConfirmMessageHandler implements IIInteractionAction<ButtonInteract
                                 .queue();
                     }
                 })
-                .exceptionally((error) -> {
-                    fInteraction
-                            .editOriginal(
-                                    embeds.errorMessage(error.getMessage()).buildEdit())
+                .exceptionally(error -> {
+                    embeds.errorMessage(error.getMessage())
+                            .editReply(fInteraction)
                             .queue();
                     return null;
                 });
