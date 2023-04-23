@@ -20,10 +20,11 @@ public enum ButtonActions {
     DENY_MESSAGE("deny-message", (context) -> context.getBean(DenyMessageHandler.class)),
     DELETE_MESSAGE("delete-message", (context) -> context.getBean(DeleteMessageHandler.class)),
     EDIT_MESSAGE("edit-message", (context) -> context.getBean(EditMessageHandler.class)),
-    CONFIRM_OPENING("validate-opening", (context) -> context.getBean(ValidateOpeningHandler.class));
+    CONFIRM_OPENING("validate-opening", (context) -> context.getBean(ValidateOpeningHandler.class)),
+    REPORT_USER("report-user", (context) -> context.getBean(ReportUserButtonHandler.class));
 
     private final String actionId;
-    private final Function<ApplicationContext, IIInteractionAction<ButtonInteractionEvent>> handler;
+    private final Function<ApplicationContext, InteractionAction<ButtonInteractionEvent>> handler;
 
     public void run(ApplicationContext context, ButtonInteractionEvent event) throws TicketException, IOException {
         handler.apply(context).run(event);

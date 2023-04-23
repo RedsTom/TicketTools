@@ -5,6 +5,7 @@ import club.minnced.discord.webhook.external.JDAWebhookClient;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import java.awt.*;
 import java.io.IOException;
 import java.net.URL;
@@ -16,6 +17,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
@@ -152,7 +154,7 @@ public class Ticket {
         openOnServer(true, by, null);
     }
 
-    public void openOnServer(boolean forced, User by, String reason) throws IOException {
+    public void openOnServer(boolean forced, User by, TicketOpeningReason reason) throws IOException {
         if (opened) {
             throw new TicketAlreadyExistsException(from);
         }
@@ -168,7 +170,24 @@ public class Ticket {
             // spotless:off
             MessageEmbed reasonEmbed = new EmbedBuilder()
                     .setTitle("\uD83D\uDCDD Raison de l'ouverture du ticket")
-                    .setDescription("**`" + reason + "`**")
+                    .setDescription(switch (reason) {
+                        case TicketOpeningReason.Simple r -> "`%s`".formatted(r.reason());
+                        case TicketOpeningReason.UserReport r -> {
+                            User user = r.user(category.getJDA());
+
+                            String reportedUser = user == null
+                                    ? "`%s` (Utilisateur non trouvé)".formatted(r.userId())
+                                    : "%s (`%s`)".formatted(user.getAsMention(), user.getAsTag());
+
+                            yield """
+                                    **Signalement utilisateur**
+                                                                                                
+                                    Utilisateur signalé : %s
+                                    Raison : `%s`
+                                    """.formatted(reportedUser, r.reportReason());
+                        }
+                        case TicketOpeningReason.Empty r -> "`Aucune raison`";
+                    })
                     .setColor(0x48dbfb)
                     .build();
             MessageEmbed firstMessageSelectorEmbed = new EmbedBuilder()
@@ -200,7 +219,7 @@ public class Ticket {
 
         // spotless:off
         MessageFactory.create()
-                .addEmbeds(embeds.ticketOpening(forced, by, from, channel, reason))
+                .addEmbeds(embeds.ticketOpening(forced, by, from, channel, reason.reason()))
                 .addActionRow(actionRow -> actionRow
                         .addButton(button -> button
                                 .setText("Aller au salon")
@@ -273,8 +292,8 @@ public class Ticket {
                     "📎 Pièces jointes :",
                     "`"
                             + message.getAttachments().stream()
-                                    .map(Message.Attachment::getFileName)
-                                    .collect(Collectors.joining("`, `"))
+                            .map(Message.Attachment::getFileName)
+                            .collect(Collectors.joining("`, `"))
                             + "`",
                     true);
         }

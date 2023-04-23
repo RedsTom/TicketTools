@@ -15,13 +15,13 @@ import net.dv8tion.jda.api.utils.MiscUtil;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.commands.ticket.Ticket;
 import yt.graven.gravensupport.commands.ticket.TicketManager;
-import yt.graven.gravensupport.utils.interactions.IIInteractionAction;
+import yt.graven.gravensupport.utils.interactions.InteractionAction;
 import yt.graven.gravensupport.utils.messages.builder.MessageFactory;
 import yt.graven.gravensupport.utils.messages.builder.data.TicketActionRow;
 
 @Component
 @RequiredArgsConstructor
-public class DeleteMessageHandler implements IIInteractionAction<ButtonInteractionEvent> {
+public class DeleteMessageHandler implements InteractionAction<ButtonInteractionEvent> {
 
     private final TicketManager ticketManager;
 

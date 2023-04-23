@@ -15,10 +15,10 @@ import yt.graven.gravensupport.utils.exceptions.TicketException;
 @RequiredArgsConstructor
 public enum SelectionMenuActions {
     FIRST_SENTENCE("first-sentence", (context) -> context.getBean(FirstSentenceHandler.class)),
-    OPENING_REASON("opening-reason", (context) -> context.getBean(OpeningReasonHandler.class));
+    OPENING_REASON("opening-menu", (context) -> context.getBean(OpeningReasonHandler.class));
 
     private final String actionId;
-    private final Function<ApplicationContext, IIInteractionAction<StringSelectInteractionEvent>> handler;
+    private final Function<ApplicationContext, InteractionAction<StringSelectInteractionEvent>> handler;
 
     public void run(ApplicationContext context, StringSelectInteractionEvent event)
             throws TicketException, IOException {
