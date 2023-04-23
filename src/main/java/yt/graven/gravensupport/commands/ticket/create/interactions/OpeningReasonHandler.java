@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
-import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
@@ -65,22 +64,25 @@ public class OpeningReasonHandler implements InteractionAction<StringSelectInter
         }
 
         if (selectedOption.getValue().equalsIgnoreCase("op-user-report")) {
-
+            // spotless:off
             MessageFactory.create()
                     .addEmbeds(new EmbedBuilder()
                             .setTitle(":warning: Vous êtes sur le point de transmettre un signalement à la modération.")
-                            .setDescription(
-                                    """
+                            .setDescription("""
                                     Avant de continuer, merci de vous assurer que vous avez en votre possession l'identifiant de l'utilisateur que vous souhaitez signaler.
                                     :pencil: *Si vous ne savez pas comment le récupérer, merci de suivre les instructions indiquées sur [ce lien](<https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID->)*
 
                                     Une fois que vous avez cette information en votre possession, vous pouvez cliquer sur le bouton ci-dessous :arrow_down:
                                     """)
                             .setColor(Color.GREEN))
-                    .addActionRow(actionRow -> actionRow.addButton("report-user", button -> button.setText("Continuer")
-                            .setEmoji(Emoji.fromUnicode("➡\uFE0F"))))
+                    .addActionRow(actionRow -> actionRow
+                            .addButton("report-user", button ->
+                                    button.setText("Continuer")
+                            )
+                    )
                     .reply(event)
                     .queue();
+            // spotless:on
 
             return;
         }

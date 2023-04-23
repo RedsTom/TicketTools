@@ -78,6 +78,7 @@ public class DeleteMessageHandler implements InteractionAction<ButtonInteraction
         MessageFactory.create()
                 .addEmbeds(embedList.toArray(MessageEmbed[]::new))
                 .addActionRow(TicketActionRow::addDeleteButton)
-                .editReply(event.deferEdit().complete());
+                .editReply(event.deferEdit().complete())
+                .queue();
     }
 }

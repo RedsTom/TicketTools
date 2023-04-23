@@ -169,7 +169,7 @@ public class Ticket {
             MessageEmbed reasonEmbed = new EmbedBuilder()
                     .setTitle("\uD83D\uDCDD Raison de l'ouverture du ticket")
                     .setDescription(switch (reason) {
-                        case TicketOpeningReason.Simple r -> "`%s`".formatted(r.reason());
+                        case TicketOpeningReason.Simple r -> "`%s`".formatted(r.reason().trim());
                         case TicketOpeningReason.UserReport r -> {
                             User user = r.user(category.getJDA());
 
@@ -182,7 +182,7 @@ public class Ticket {
                                                                                                 
                                     Utilisateur signalé : %s
                                     Raison : `%s`
-                                    """.formatted(reportedUser, r.reportReason());
+                                    """.formatted(reportedUser, r.reportReason().trim());
                         }
                         case TicketOpeningReason.Empty r -> "`Aucune raison`";
                     })
@@ -301,15 +301,6 @@ public class Ticket {
                 .addEmbeds(confirmEmbed)
                 .addActionRow(actionRow -> actionRow
                         .addButton("confirm-message", button -> button
-                                .setText("Confirmer")
-                                .setStyle(ButtonStyle.SUCCESS)
-                        )
-                );
-
-        MessageFactory.create()
-                .addEmbeds(confirmEmbed)
-                .addActionRow(actionRow -> actionRow
-                        .addButton("confirm-message", button -> button
                                 .setStyle(ButtonStyle.SUCCESS)
                                 .setText("Confirmer")
                         )
@@ -319,7 +310,8 @@ public class Ticket {
                         )
                         .addDeleteButton()
                 )
-                .send(message.getChannel());
+                .send(message.getChannel())
+                .queue();
         // spotless:on
     }
 
@@ -389,7 +381,8 @@ public class Ticket {
                             .addButton(button -> button.setText("Consulter le rapport (en ligne)")
                                     .setLink("https://redstom.github.io/GravenDev-TicketReader/?input=%s"
                                             .formatted(reportJsonUrl))))
-                    .send(ticketsChannel);
+                    .send(ticketsChannel)
+                    .queue();
 
             // spotless:off
             MessageFactory.create()
@@ -403,7 +396,8 @@ public class Ticket {
                                     .setLink("https://redstom.github.io/GravenDev-TicketReader/?input=%s".formatted(reportJsonUrl))
                             )
                     )
-                    .send(ticketsChannel);
+                    .send(ticketsChannel)
+                    .queue();
             // spotless:on
 
             String ticketCommand = from.getJDA().retrieveCommands().complete().stream()

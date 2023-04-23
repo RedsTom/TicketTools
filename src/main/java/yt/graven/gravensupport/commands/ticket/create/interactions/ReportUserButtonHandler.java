@@ -16,20 +16,22 @@ public class ReportUserButtonHandler implements InteractionAction<ButtonInteract
 
     @Override
     public void run(ButtonInteractionEvent event) throws TicketException, IOException {
-
+        // spotless:off
         Modal modal = Modal.create("op-report-user", "Signaler un utilisateur")
                 .addActionRow(TextInput.create("user-id", "ID de l'utilisateur", TextInputStyle.SHORT)
                         .setPlaceholder("Identifiant de l'utilisateur")
                         .setRequiredRange(15, 20)
                         .setRequired(true)
-                        .build())
+                        .build()
+                )
                 .addActionRow(TextInput.create("reason", "Raison", TextInputStyle.PARAGRAPH)
-                        .setPlaceholder(
-                                """
-                                        Décrivez en quelques mots la raison de votre signalement.
-                                        """)
-                        .build())
+                        .setPlaceholder("""
+                                Décrivez en quelques mots la raison de votre signalement.
+                                """)
+                        .build()
+                )
                 .build();
+        // spotless:on
 
         event.replyModal(modal).queue();
     }
