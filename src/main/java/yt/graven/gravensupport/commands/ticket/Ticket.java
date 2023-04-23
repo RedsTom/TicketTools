@@ -205,9 +205,9 @@ public class Ticket {
 
                 if (user != null) {
                     reasonMessage.addActionRow(actionRow -> actionRow.addButton(
-                            "open-with-reported;%s".formatted(user.getId()), button -> button
-                                    .setText("Ouvrir un ticket avec la personne signalée")
-                                    .setEmoji(Emoji.fromUnicode("↗\uFE0F"))
+                                    "open-with-reported;%s".formatted(user.getId()), button -> button
+                                            .setText("Ouvrir un ticket avec la personne signalée")
+                                            .setEmoji(Emoji.fromUnicode("↗\uFE0F"))
                             )
                     );
                 }
@@ -391,16 +391,13 @@ public class Ticket {
 
             // spotless:off
             MessageFactory.create()
+                    .addEmbeds(embeds.ticketClosing(from, report.getJumpUrl()))
                     .addActionRow(actionRow -> actionRow
-                            .addButton(button -> button
-                                    .setText("Aller au rapport")
-                                    .setLink(report.getJumpUrl())
-                            )
-                            .addButton(button -> button
-                                    .setText("Consulter le rapport (en ligne)")
-                                    .setLink("https://redstom.github.io/GravenDev-TicketReader/?input=%s".formatted(reportJsonUrl))
-                            )
-                    )
+                            .addButton(
+                                    button -> button.setText("Aller au rapport").setLink(report.getJumpUrl()))
+                            .addButton(button -> button.setText("Consulter le rapport (en ligne)")
+                                    .setLink("https://redstom.github.io/GravenDev-TicketReader/?input=%s"
+                                            .formatted(reportJsonUrl))))
                     .send(ticketsChannel)
                     .queue();
             // spotless:on
@@ -418,20 +415,19 @@ public class Ticket {
                             "La modération a fermé le ticket avec vous. Si vous souhaitez le rouvrir, refaites la commande %s."
                                     .formatted(ticketCommand));
 
-            try {
-                MessageFactory.create().addEmbeds(closedEmbed).send(from).queue();
-            } catch (Exception e) {
-                String errorMessage = "Impossible d'informer l'utilisateur de la fermeture du ticket !";
-                MessageEmbed embed = embeds.error(errorMessage).build();
+            MessageFactory.create().addEmbeds(closedEmbed).send(from)
+                    .queue(ignored -> {
+                    }, error -> {
+                        String errorMessage = "Impossible d'informer l'utilisateur de la fermeture du ticket !";
+                        MessageEmbed embed = embeds.error(errorMessage).build();
 
-                // spotless:off
-                MessageFactory.create()
-                        .addEmbeds(embed)
-                        .send(ticketsChannel)
-                        .queue();
-                // spotless:on
-                return;
-            }
+                        // spotless:off
+                        MessageFactory.create()
+                                .addEmbeds(embed)
+                                .send(ticketsChannel)
+                                .queue();
+                        // spotless:on
+                    });
 
             to.delete().queue(ignored -> ticketManager.remove(from));
         });
