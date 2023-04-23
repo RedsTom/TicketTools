@@ -23,6 +23,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;
 import net.dv8tion.jda.api.interactions.InteractionHook;
+import net.dv8tion.jda.api.interactions.commands.ICommandReference;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.requests.ErrorResponse;
 import net.dv8tion.jda.api.utils.FileUpload;
@@ -130,9 +131,7 @@ public class Ticket {
                 )
                 .send(from)
                 .queue(
-                        msg -> {
-                            reply.editOriginal("➡️ " + msg.getChannel().getAsMention()).queue();
-                        },
+                        msg -> reply.editOriginal("➡️ " + msg.getChannel().getAsMention()).queue(),
                         errorHandler
                 );
         // spotless:on
@@ -149,7 +148,7 @@ public class Ticket {
                 .queue();
         // spotless:on
 
-        openOnServer(true, by, null);
+        openOnServer(true, by, new TicketOpeningReason.Empty());
     }
 
     public void openOnServer(boolean forced, User by, TicketOpeningReason reason) throws IOException {
@@ -165,27 +164,29 @@ public class Ticket {
         this.webhook = retrieveWebhook();
 
         if (!forced) {
+            String description = switch (reason) {
+                case TicketOpeningReason.Simple r -> "`%s`".formatted(r.reason().trim());
+                case TicketOpeningReason.UserReport r -> {
+                    User user = r.user(category.getJDA());
+
+                    String reportedUser = user == null
+                            ? "`%s` (Utilisateur non trouvé)".formatted(r.userId())
+                            : "%s (`%s`)".formatted(user.getAsMention(), user.getAsTag());
+
+                    yield """
+                            **Signalement utilisateur**
+                                                                                        
+                            Utilisateur signalé : %s
+                            Raison : `%s`
+                            """.formatted(reportedUser, r.reportReason().trim());
+                }
+                case TicketOpeningReason.Empty r -> "`Aucune raison`";
+            };
+
             // spotless:off
             MessageEmbed reasonEmbed = new EmbedBuilder()
                     .setTitle("\uD83D\uDCDD Raison de l'ouverture du ticket")
-                    .setDescription(switch (reason) {
-                        case TicketOpeningReason.Simple r -> "`%s`".formatted(r.reason().trim());
-                        case TicketOpeningReason.UserReport r -> {
-                            User user = r.user(category.getJDA());
-
-                            String reportedUser = user == null
-                                    ? "`%s` (Utilisateur non trouvé)".formatted(r.userId())
-                                    : "%s (`%s`)".formatted(user.getAsMention(), user.getAsTag());
-
-                            yield """
-                                    **Signalement utilisateur**
-                                                                                                
-                                    Utilisateur signalé : %s
-                                    Raison : `%s`
-                                    """.formatted(reportedUser, r.reportReason().trim());
-                        }
-                        case TicketOpeningReason.Empty r -> "`Aucune raison`";
-                    })
+                    .setDescription(description)
                     .setColor(0x48dbfb)
                     .build();
             MessageEmbed firstMessageSelectorEmbed = new EmbedBuilder()
@@ -262,9 +263,7 @@ public class Ticket {
         Executors.newSingleThreadExecutor().execute(() -> {
             WebhookMessageBuilder builder = WebhookMessageAdapter.fromJDA(message);
             webhook.send(builder.build())
-                    .thenAccept(msg -> {
-                        message.addReaction(sentEmote).queue();
-                    })
+                    .thenAccept(msg -> message.addReaction(sentEmote).queue())
                     .exceptionally((error) -> {
                         message.addReaction(Emoji.fromUnicode("❌")).queue();
                         return null;
@@ -282,7 +281,7 @@ public class Ticket {
                 .setFooter("⚠️ Tant que l'envoi du message n'a pas été confirmé, vous pouvez éditer son contenu.")
                 .addField(
                         "🔗 Identifiant du message",
-                        String.format("[%s](%s)", "" + message.getId(), "" + message.getJumpUrl()),
+                        String.format("[%s](%s)", message.getId(), message.getJumpUrl()),
                         true);
 
         if (message.getAttachments().size() != 0) {
@@ -403,7 +402,7 @@ public class Ticket {
             String ticketCommand = from.getJDA().retrieveCommands().complete().stream()
                     .filter(a -> a.getName().equalsIgnoreCase("ticket"))
                     .findFirst()
-                    .map(a -> a.getAsMention())
+                    .map(ICommandReference::getAsMention)
                     .orElse("`/ticket`");
 
             EmbedBuilder closedEmbed = new EmbedBuilder()
