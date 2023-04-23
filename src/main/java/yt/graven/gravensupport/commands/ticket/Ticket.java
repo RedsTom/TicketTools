@@ -389,17 +389,6 @@ public class Ticket {
             TextChannel ticketsChannel =
                     moderationGuild.getTextChannelById(config.getString("config.ticket_guild.channels_ids.tickets"));
 
-            MessageFactory.create()
-                    .addEmbeds(embeds.ticketClosing(from, report.getJumpUrl()))
-                    .addActionRow(actionRow -> actionRow
-                            .addButton(
-                                    button -> button.setText("Aller au rapport").setLink(report.getJumpUrl()))
-                            .addButton(button -> button.setText("Consulter le rapport (en ligne)")
-                                    .setLink("https://redstom.github.io/GravenDev-TicketReader/?input=%s"
-                                            .formatted(reportJsonUrl))))
-                    .send(ticketsChannel)
-                    .queue();
-
             // spotless:off
             MessageFactory.create()
                     .addActionRow(actionRow -> actionRow
