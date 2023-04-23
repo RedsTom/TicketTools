@@ -1,5 +1,8 @@
 package yt.graven.gravensupport.commands.ticket.create.interactions;
 
+import java.awt.*;
+import java.io.IOException;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
@@ -12,10 +15,6 @@ import yt.graven.gravensupport.commands.ticket.TicketOpeningReason;
 import yt.graven.gravensupport.utils.exceptions.TicketException;
 import yt.graven.gravensupport.utils.interactions.InteractionAction;
 import yt.graven.gravensupport.utils.messages.Embeds;
-
-import java.awt.*;
-import java.io.IOException;
-import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -50,13 +49,13 @@ public class ReportUserModalHandler implements InteractionAction<ModalInteractio
         reply.editOriginalEmbeds(new EmbedBuilder()
                         .setColor(Color.GREEN)
                         .setTitle("Ticket ouvert !")
-                        .setDescription("""
+                        .setDescription(
+                                """
                                 Le ticket a bien été ouvert ! Vous pouvez désormais communiquer avec la modération.
-                                
+
                                 Si vous avez des preuves pour étayer votre signalement, vous pouvez désormais les envoyer.
                                 """)
                         .build())
                 .queue();
-
     }
 }

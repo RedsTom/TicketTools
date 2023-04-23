@@ -5,7 +5,6 @@ import club.minnced.discord.webhook.external.JDAWebhookClient;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
 import java.awt.*;
 import java.io.IOException;
 import java.net.URL;
@@ -17,7 +16,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
-
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
@@ -292,8 +290,8 @@ public class Ticket {
                     "📎 Pièces jointes :",
                     "`"
                             + message.getAttachments().stream()
-                            .map(Message.Attachment::getFileName)
-                            .collect(Collectors.joining("`, `"))
+                                    .map(Message.Attachment::getFileName)
+                                    .collect(Collectors.joining("`, `"))
                             + "`",
                     true);
         }

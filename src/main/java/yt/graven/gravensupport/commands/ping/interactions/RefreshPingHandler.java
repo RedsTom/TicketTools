@@ -19,7 +19,8 @@ public class RefreshPingHandler implements InteractionAction<ButtonInteractionEv
     public void run(ButtonInteractionEvent event) {
         InteractionHook edit = event.deferEdit().complete();
 
-        pingComputer.update()
+        pingComputer
+                .update()
                 .thenAccept(ignored -> embeds.ping(pingComputer).editReply(edit).queue());
     }
 }

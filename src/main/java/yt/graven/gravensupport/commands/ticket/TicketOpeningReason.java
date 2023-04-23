@@ -7,8 +7,7 @@ public sealed interface TicketOpeningReason {
 
     String reason();
 
-    record Simple(String reason) implements TicketOpeningReason {
-    }
+    record Simple(String reason) implements TicketOpeningReason {}
 
     record UserReport(String userId, String reportReason) implements TicketOpeningReason {
 
