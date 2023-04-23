@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
@@ -73,7 +74,7 @@ public class TicketMessage {
         return event.deferReply(true).applyData(builder.build());
     }
 
-    public ReplyCallbackAction reply(StringSelectInteractionEvent event) {
+    public ReplyCallbackAction reply(GenericComponentInteractionCreateEvent event) {
         return event.deferReply(true).applyData(builder.build());
     }
 

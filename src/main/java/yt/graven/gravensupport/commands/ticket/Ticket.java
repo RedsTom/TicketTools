@@ -5,22 +5,12 @@ import club.minnced.discord.webhook.external.JDAWebhookClient;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import java.awt.*;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
+import net.dv8tion.jda.api.exceptions.ContextException;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.ICommandReference;
@@ -33,7 +23,20 @@ import yt.graven.gravensupport.utils.exceptions.TicketAlreadyExistsException;
 import yt.graven.gravensupport.utils.messages.Embeds;
 import yt.graven.gravensupport.utils.messages.builder.MessageFactory;
 import yt.graven.gravensupport.utils.messages.builder.data.TicketActionRow;
+import yt.graven.gravensupport.utils.messages.builder.data.TicketMessage;
 import yt.graven.gravensupport.utils.messages.serializable.SerializableMessageArray;
+
+import java.awt.*;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 public class Ticket {
 
@@ -194,10 +197,24 @@ public class Ticket {
                     .setColor(0x48dbfb)
                     .build();
 
-            MessageFactory.create()
-                    .addEmbeds(reasonEmbed)
-                    .send(channel)
-                    .complete();
+            TicketMessage reasonMessage = MessageFactory.create()
+                    .addEmbeds(reasonEmbed);
+
+            if (reason instanceof TicketOpeningReason.UserReport r) {
+                User user = r.user(category.getJDA());
+
+                if (user != null) {
+                    reasonMessage.addActionRow(actionRow -> actionRow.addButton(
+                            "open-with-reported;%s".formatted(user.getId()), button -> button
+                                    .setText("Ouvrir un ticket avec la personne signalée")
+                                    .setEmoji(Emoji.fromUnicode("↗\uFE0F"))
+                            )
+                    );
+                }
+            }
+
+            Message sentReasonMessage = reasonMessage.send(channel).complete();
+            sentReasonMessage.pin().queue();
 
             MessageFactory.create()
                     .addEmbeds(firstMessageSelectorEmbed)
@@ -289,8 +306,8 @@ public class Ticket {
                     "📎 Pièces jointes :",
                     "`"
                             + message.getAttachments().stream()
-                                    .map(Message.Attachment::getFileName)
-                                    .collect(Collectors.joining("`, `"))
+                            .map(Message.Attachment::getFileName)
+                            .collect(Collectors.joining("`, `"))
                             + "`",
                     true);
         }
@@ -412,7 +429,20 @@ public class Ticket {
                             "La modération a fermé le ticket avec vous. Si vous souhaitez le rouvrir, refaites la commande %s."
                                     .formatted(ticketCommand));
 
-            MessageFactory.create().addEmbeds(closedEmbed).send(from).queue();
+            try {
+                MessageFactory.create().addEmbeds(closedEmbed).send(from).queue();
+            } catch (Exception e) {
+                String errorMessage = "Impossible d'informer l'utilisateur de la fermeture du ticket !";
+                MessageEmbed embed = embeds.error(errorMessage).build();
+
+                // spotless:off
+                MessageFactory.create()
+                        .addEmbeds(embed)
+                        .send(ticketsChannel)
+                        .queue();
+                // spotless:on
+                return;
+            }
 
             to.delete().queue(ignored -> ticketManager.remove(from));
         });

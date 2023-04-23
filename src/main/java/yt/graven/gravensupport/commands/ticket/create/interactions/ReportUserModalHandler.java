@@ -38,14 +38,16 @@ public class ReportUserModalHandler implements InteractionAction<ModalInteractio
             ticket = Optional.of(manager.create(channel.getUser()));
         }
 
-        if (ticket.get().isOpened()) {
+        Ticket sureTicket = ticket.get();
+        if (sureTicket.isOpened()) {
             event.deferReply(true)
                     .addEmbeds(embeds.ticketAlreadyExists(true).build())
                     .queue();
             return;
         }
 
-        ticket.get().openOnServer(false, null, new TicketOpeningReason.UserReport(userId, reason));
+        sureTicket.openOnServer(false, null, new TicketOpeningReason.UserReport(userId, reason));
+
         reply.editOriginalEmbeds(new EmbedBuilder()
                         .setColor(Color.GREEN)
                         .setTitle("Ticket ouvert !")

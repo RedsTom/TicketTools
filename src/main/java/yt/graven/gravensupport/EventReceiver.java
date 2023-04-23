@@ -125,7 +125,7 @@ public class EventReceiver extends ListenerAdapter {
 
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
-        ButtonActions.getFromActionId(event.getButton().getId()).ifPresent(a -> {
+        ButtonActions.getFromActionId(event.getButton().getId().split(";")[0]).ifPresent(a -> {
             try {
                 a.run(context, event);
             } catch (TicketException | IOException e) {
@@ -136,7 +136,7 @@ public class EventReceiver extends ListenerAdapter {
 
     @Override
     public void onStringSelectInteraction(@NotNull StringSelectInteractionEvent event) {
-        SelectionMenuActions.getFromActionId(event.getSelectMenu().getId()).ifPresent(a -> {
+        SelectionMenuActions.getFromActionId(event.getSelectMenu().getId().split(";")[0]).ifPresent(a -> {
             try {
                 a.run(context, event);
             } catch (TicketException | IOException e) {
@@ -147,7 +147,7 @@ public class EventReceiver extends ListenerAdapter {
 
     @Override
     public void onModalInteraction(@NotNull ModalInteractionEvent event) {
-        ModalActions.getFromActionId(event.getModalId()).ifPresent(a -> {
+        ModalActions.getFromActionId(event.getModalId().split(";")[0]).ifPresent(a -> {
             try {
                 a.run(context, event);
             } catch (TicketException | IOException e) {
