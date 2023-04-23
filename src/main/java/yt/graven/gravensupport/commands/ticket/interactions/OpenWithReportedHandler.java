@@ -1,9 +1,8 @@
-package yt.graven.gravensupport.commands.ticket.create.interactions;
+package yt.graven.gravensupport.commands.ticket.interactions;
 
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
@@ -16,7 +15,6 @@ import yt.graven.gravensupport.utils.exceptions.TicketException;
 import yt.graven.gravensupport.utils.interactions.InteractionAction;
 import yt.graven.gravensupport.utils.messages.Embeds;
 import yt.graven.gravensupport.utils.messages.builder.MessageFactory;
-import yt.graven.gravensupport.utils.messages.builder.data.TicketMessage;
 
 import java.awt.*;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package yt.graven.gravensupport.commands.ticket.create.interactions;
+package yt.graven.gravensupport.commands.ticket.interactions;
 
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;

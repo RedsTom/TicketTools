@@ -8,8 +8,8 @@ import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import org.springframework.context.ApplicationContext;
-import yt.graven.gravensupport.commands.ticket.create.interactions.FirstSentenceHandler;
-import yt.graven.gravensupport.commands.ticket.create.interactions.OpeningReasonHandler;
+import yt.graven.gravensupport.commands.ticket.interactions.FirstSentenceHandler;
+import yt.graven.gravensupport.commands.ticket.interactions.OpeningReasonHandler;
 import yt.graven.gravensupport.utils.exceptions.TicketException;
 
 @RequiredArgsConstructor

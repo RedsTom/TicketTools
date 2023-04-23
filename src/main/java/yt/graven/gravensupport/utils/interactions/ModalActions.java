@@ -8,8 +8,8 @@ import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import org.springframework.context.ApplicationContext;
-import yt.graven.gravensupport.commands.ticket.create.interactions.OtherOpeningReasonHandler;
-import yt.graven.gravensupport.commands.ticket.create.interactions.ReportUserModalHandler;
+import yt.graven.gravensupport.commands.ticket.interactions.OtherOpeningReasonHandler;
+import yt.graven.gravensupport.commands.ticket.interactions.ReportUserModalHandler;
 import yt.graven.gravensupport.utils.exceptions.TicketException;
 
 @RequiredArgsConstructor

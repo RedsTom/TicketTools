@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import org.springframework.context.ApplicationContext;
 import yt.graven.gravensupport.commands.ping.interactions.RefreshPingHandler;
-import yt.graven.gravensupport.commands.ticket.create.interactions.*;
+import yt.graven.gravensupport.commands.ticket.interactions.*;
 import yt.graven.gravensupport.utils.exceptions.TicketException;
 
 @RequiredArgsConstructor

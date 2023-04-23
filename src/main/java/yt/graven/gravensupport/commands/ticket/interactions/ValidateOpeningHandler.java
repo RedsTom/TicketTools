@@ -1,4 +1,4 @@
-package yt.graven.gravensupport.commands.ticket.create.interactions;
+package yt.graven.gravensupport.commands.ticket.interactions;
 
 import java.awt.*;
 import java.io.IOException;
@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
-import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.commands.ticket.Ticket;
 import yt.graven.gravensupport.commands.ticket.TicketManager;
@@ -18,14 +18,13 @@ import yt.graven.gravensupport.utils.messages.Embeds;
 
 @Component
 @RequiredArgsConstructor
-public class OtherOpeningReasonHandler implements InteractionAction<ModalInteractionEvent> {
+public class ValidateOpeningHandler implements InteractionAction<ButtonInteractionEvent> {
 
-    private final Embeds embeds;
     private final TicketManager manager;
+    private final Embeds embeds;
 
     @Override
-    public void run(ModalInteractionEvent event) throws TicketException, IOException {
-
+    public void run(ButtonInteractionEvent event) throws TicketException, IOException {
         if (event.getChannel().getType() != ChannelType.PRIVATE) return;
 
         PrivateChannel channel = event.getChannel().asPrivateChannel();
@@ -42,17 +41,7 @@ public class OtherOpeningReasonHandler implements InteractionAction<ModalInterac
             return;
         }
 
-        String reason = event.getValue("reason").getAsString();
-
-        if (reason == null || reason.isEmpty()) {
-            event.deferReply(true)
-                    .addEmbeds(embeds.error("Vous devez entrer une raison pour ouvrir un ticket.")
-                            .build())
-                    .queue();
-            return;
-        }
-
-        ticket.get().openOnServer(false, null, new TicketOpeningReason.Simple(reason));
+        ticket.get().openOnServer(false, null, new TicketOpeningReason.Empty());
         event.deferReply(true)
                 .addEmbeds(new EmbedBuilder()
                         .setColor(Color.GREEN)
