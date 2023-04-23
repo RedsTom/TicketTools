@@ -18,7 +18,11 @@ public class DenyMessageHandler implements InteractionAction<ButtonInteractionEv
     public void run(ButtonInteractionEvent event) {
         List<MessageEmbed> embedList = new ArrayList<>(event.getMessage().getEmbeds());
         MessageEmbed embed =
-                new EmbedBuilder().setTitle("Envoi annulé").setColor(Color.RED).build();
+                new EmbedBuilder()
+                        .setTitle("Envoi annulé")
+                        .setColor(Color.RED)
+                        .setFooter("Annulé par " + event.getUser().getAsTag(), event.getUser().getAvatarUrl())
+                        .build();
         embedList.add(embed);
         event.deferEdit()
                 .setActionRow(Button.secondary("delete", Emoji.fromUnicode("🗑️")))

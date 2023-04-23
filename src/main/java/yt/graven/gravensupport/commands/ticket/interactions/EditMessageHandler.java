@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -106,6 +107,7 @@ public class EditMessageHandler implements InteractionAction<ButtonInteractionEv
                 .addField("Après : ", after, true)
                 .setTimestamp(Instant.now())
                 .setColor(Color.ORANGE)
+                .setFooter("Édité par " + event.getUser().getAsTag(), event.getUser().getAvatarUrl())
                 .build());
         event.deferEdit().setEmbeds(embedList).queue();
     }
