@@ -3,7 +3,6 @@ package yt.graven.gravensupport.commands.ticket.interactions;
 import java.awt.*;
 import java.io.IOException;
 import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
@@ -36,7 +35,8 @@ public class ReportUserModalHandler implements InteractionAction<ModalInteractio
         try {
             MiscUtil.parseSnowflake(userId);
         } catch (Exception e) {
-            reply.editOriginalEmbeds(embeds.error("L'identifiant de l'utilisateur fourni est invalide !").build())
+            reply.editOriginalEmbeds(embeds.error("L'identifiant de l'utilisateur fourni est invalide !")
+                            .build())
                     .queue();
             return;
         }
@@ -50,8 +50,7 @@ public class ReportUserModalHandler implements InteractionAction<ModalInteractio
 
         Ticket sureTicket = ticket.get();
         if (sureTicket.isOpened()) {
-            reply.editOriginalEmbeds(embeds.ticketAlreadyExists(true).build())
-                    .queue();
+            reply.editOriginalEmbeds(embeds.ticketAlreadyExists(true).build()).queue();
             return;
         }
 

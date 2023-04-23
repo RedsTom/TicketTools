@@ -1,5 +1,7 @@
 package yt.graven.gravensupport.commands.ticket.interactions;
 
+import java.awt.*;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -15,9 +17,6 @@ import yt.graven.gravensupport.utils.exceptions.TicketException;
 import yt.graven.gravensupport.utils.interactions.InteractionAction;
 import yt.graven.gravensupport.utils.messages.Embeds;
 import yt.graven.gravensupport.utils.messages.builder.MessageFactory;
-
-import java.awt.*;
-import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
@@ -48,25 +47,23 @@ public class OpenWithReportedHandler implements InteractionAction<ButtonInteract
                 .addEmbeds(new EmbedBuilder()
                         .setColor(Color.CYAN)
                         .setTitle("Ticket de signalement")
-                        .setDescription("Ce ticket a été ouvert suite à un signalement de %s (%s)".formatted(
-                                event.getUser().getAsMention(),
-                                event.getChannel().getAsMention()
-                        ))
-                )
+                        .setDescription("Ce ticket a été ouvert suite à un signalement de %s (%s)"
+                                .formatted(
+                                        event.getUser().getAsMention(),
+                                        event.getChannel().getAsMention())))
                 .send(ticket.getTo())
                 .complete()
                 .pin()
                 .queue();
 
         event.getMessage()
-                .editMessageComponents(ActionRow.of(
-                        Button.of(ButtonStyle.LINK, ticket.getTo().getJumpUrl(), "Accéder au ticket de l'utilisateur signalé")
-                ))
+                .editMessageComponents(ActionRow.of(Button.of(
+                        ButtonStyle.LINK, ticket.getTo().getJumpUrl(), "Accéder au ticket de l'utilisateur signalé")))
                 .queue();
 
-        embeds.successMessage("Le ticket a été ouvert avec succès !\n:arrow_right: %s".formatted(ticket.getTo().getAsMention()))
+        embeds.successMessage("Le ticket a été ouvert avec succès !\n:arrow_right: %s"
+                        .formatted(ticket.getTo().getAsMention()))
                 .reply(event)
                 .queue();
-
     }
 }

@@ -72,7 +72,9 @@ public class DeleteMessageHandler implements InteractionAction<ButtonInteraction
                 .setTitle("Message supprimé")
                 .setColor(Color.RED)
                 .setTimestamp(Instant.now())
-                .setFooter("Supprimé par " + event.getUser().getAsTag(), event.getUser().getAvatarUrl())
+                .setFooter(
+                        "Supprimé par " + event.getUser().getAsTag(),
+                        event.getUser().getAvatarUrl())
                 .build();
         embedList.add(embed);
 

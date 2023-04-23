@@ -136,13 +136,14 @@ public class EventReceiver extends ListenerAdapter {
 
     @Override
     public void onStringSelectInteraction(@NotNull StringSelectInteractionEvent event) {
-        SelectionMenuActions.getFromActionId(event.getSelectMenu().getId().split(";")[0]).ifPresent(a -> {
-            try {
-                a.run(context, event);
-            } catch (TicketException | IOException e) {
-                e.printStackTrace();
-            }
-        });
+        SelectionMenuActions.getFromActionId(event.getSelectMenu().getId().split(";")[0])
+                .ifPresent(a -> {
+                    try {
+                        a.run(context, event);
+                    } catch (TicketException | IOException e) {
+                        e.printStackTrace();
+                    }
+                });
     }
 
     @Override

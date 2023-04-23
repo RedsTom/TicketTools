@@ -82,7 +82,9 @@ public class ConfirmMessageHandler implements InteractionAction<ButtonInteractio
                             .setDescription(message.getContentRaw())
                             .setFooter("")
                             .setTimestamp(Instant.now())
-                            .setFooter("Envoyé par " + event.getUser().getAsTag(), event.getUser().getAvatarUrl())
+                            .setFooter(
+                                    "Envoyé par " + event.getUser().getAsTag(),
+                                    event.getUser().getAvatarUrl())
                             .setColor(Color.GREEN);
 
                     embed.getFields()

@@ -5,12 +5,22 @@ import club.minnced.discord.webhook.external.JDAWebhookClient;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import java.awt.*;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
-import net.dv8tion.jda.api.exceptions.ContextException;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.ICommandReference;
@@ -25,18 +35,6 @@ import yt.graven.gravensupport.utils.messages.builder.MessageFactory;
 import yt.graven.gravensupport.utils.messages.builder.data.TicketActionRow;
 import yt.graven.gravensupport.utils.messages.builder.data.TicketMessage;
 import yt.graven.gravensupport.utils.messages.serializable.SerializableMessageArray;
-
-import java.awt.*;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 public class Ticket {
 
@@ -167,24 +165,27 @@ public class Ticket {
         this.webhook = retrieveWebhook();
 
         if (!forced) {
-            String description = switch (reason) {
-                case TicketOpeningReason.Simple r -> "`%s`".formatted(r.reason().trim());
-                case TicketOpeningReason.UserReport r -> {
-                    User user = r.user(category.getJDA());
+            String description =
+                    switch (reason) {
+                        case TicketOpeningReason.Simple r -> "`%s`"
+                                .formatted(r.reason().trim());
+                        case TicketOpeningReason.UserReport r -> {
+                            User user = r.user(category.getJDA());
 
-                    String reportedUser = user == null
-                            ? "`%s` (Utilisateur non trouvé)".formatted(r.userId())
-                            : "%s (`%s`)".formatted(user.getAsMention(), user.getAsTag());
+                            String reportedUser = user == null
+                                    ? "`%s` (Utilisateur non trouvé)".formatted(r.userId())
+                                    : "%s (`%s`)".formatted(user.getAsMention(), user.getAsTag());
 
-                    yield """
+                            yield """
                             **Signalement utilisateur**
-                                                                                        
+
                             Utilisateur signalé : %s
                             Raison : `%s`
-                            """.formatted(reportedUser, r.reportReason().trim());
-                }
-                case TicketOpeningReason.Empty r -> "`Aucune raison`";
-            };
+                            """
+                                    .formatted(reportedUser, r.reportReason().trim());
+                        }
+                        case TicketOpeningReason.Empty r -> "`Aucune raison`";
+                    };
 
             // spotless:off
             MessageEmbed reasonEmbed = new EmbedBuilder()
@@ -306,8 +307,8 @@ public class Ticket {
                     "📎 Pièces jointes :",
                     "`"
                             + message.getAttachments().stream()
-                            .map(Message.Attachment::getFileName)
-                            .collect(Collectors.joining("`, `"))
+                                    .map(Message.Attachment::getFileName)
+                                    .collect(Collectors.joining("`, `"))
                             + "`",
                     true);
         }
@@ -415,19 +416,17 @@ public class Ticket {
                             "La modération a fermé le ticket avec vous. Si vous souhaitez le rouvrir, refaites la commande %s."
                                     .formatted(ticketCommand));
 
-            MessageFactory.create().addEmbeds(closedEmbed).send(from)
-                    .queue(ignored -> {
-                    }, error -> {
-                        String errorMessage = "Impossible d'informer l'utilisateur de la fermeture du ticket !";
-                        MessageEmbed embed = embeds.error(errorMessage).build();
+            MessageFactory.create().addEmbeds(closedEmbed).send(from).queue(ignored -> {}, error -> {
+                String errorMessage = "Impossible d'informer l'utilisateur de la fermeture du ticket !";
+                MessageEmbed embed = embeds.error(errorMessage).build();
 
-                        // spotless:off
+                // spotless:off
                         MessageFactory.create()
                                 .addEmbeds(embed)
                                 .send(ticketsChannel)
                                 .queue();
                         // spotless:on
-                    });
+            });
 
             to.delete().queue(ignored -> ticketManager.remove(from));
         });
