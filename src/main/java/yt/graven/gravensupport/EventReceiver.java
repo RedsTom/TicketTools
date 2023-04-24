@@ -32,6 +32,7 @@ import yt.graven.gravensupport.utils.interactions.ButtonActions;
 import yt.graven.gravensupport.utils.interactions.ModalActions;
 import yt.graven.gravensupport.utils.interactions.SelectionMenuActions;
 import yt.graven.gravensupport.utils.messages.Embeds;
+import yt.graven.gravensupport.utils.messages.builder.data.TicketActionRow;
 
 @Slf4j
 @Component
@@ -69,7 +70,7 @@ public class EventReceiver extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
-        registry.getCommandByName(event.getFullCommandName()).ifPresent(cmd -> {
+        registry.getCommandByName(event.getName()).ifPresent(cmd -> {
             try {
                 cmd.run(event);
             } catch (TicketException | IOException | CommandCancelledException e) {
@@ -112,10 +113,8 @@ public class EventReceiver extends ListenerAdapter {
             Optional<Ticket> ticket = ticketManager.get(MiscUtil.parseLong(textChannel.getTopic()));
             if (ticket.isEmpty()) {
                 embeds.noTicketAttachedMessage()
-                        .actionRow()
-                        .deletable()
-                        .build()
-                        .sendMessage(event.getChannel())
+                        .addActionRow(TicketActionRow::addDeleteButton)
+                        .send(event.getChannel())
                         .queue();
                 return;
             }
@@ -126,7 +125,7 @@ public class EventReceiver extends ListenerAdapter {
 
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
-        ButtonActions.getFromActionId(event.getButton().getId()).ifPresent(a -> {
+        ButtonActions.getFromActionId(event.getButton().getId().split(";")[0]).ifPresent(a -> {
             try {
                 a.run(context, event);
             } catch (TicketException | IOException e) {
@@ -137,18 +136,19 @@ public class EventReceiver extends ListenerAdapter {
 
     @Override
     public void onStringSelectInteraction(@NotNull StringSelectInteractionEvent event) {
-        SelectionMenuActions.getFromActionId(event.getSelectMenu().getId()).ifPresent(a -> {
-            try {
-                a.run(context, event);
-            } catch (TicketException | IOException e) {
-                e.printStackTrace();
-            }
-        });
+        SelectionMenuActions.getFromActionId(event.getSelectMenu().getId().split(";")[0])
+                .ifPresent(a -> {
+                    try {
+                        a.run(context, event);
+                    } catch (TicketException | IOException e) {
+                        e.printStackTrace();
+                    }
+                });
     }
 
     @Override
     public void onModalInteraction(@NotNull ModalInteractionEvent event) {
-        ModalActions.getFromActionId(event.getModalId()).ifPresent(a -> {
+        ModalActions.getFromActionId(event.getModalId().split(";")[0]).ifPresent(a -> {
             try {
                 a.run(context, event);
             } catch (TicketException | IOException e) {

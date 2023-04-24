@@ -1,4 +1,4 @@
-package yt.graven.gravensupport.commands.ticket.create.interactions;
+package yt.graven.gravensupport.commands.ticket.interactions;
 
 import java.awt.*;
 import java.util.Optional;
@@ -10,13 +10,13 @@ import net.dv8tion.jda.api.utils.MiscUtil;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.commands.ticket.Ticket;
 import yt.graven.gravensupport.commands.ticket.TicketManager;
-import yt.graven.gravensupport.utils.interactions.IIInteractionAction;
+import yt.graven.gravensupport.utils.interactions.InteractionAction;
 import yt.graven.gravensupport.utils.messages.Embeds;
-import yt.graven.gravensupport.utils.messages.TMessage;
+import yt.graven.gravensupport.utils.messages.builder.MessageFactory;
 
 @Component
 @RequiredArgsConstructor
-public class FirstSentenceHandler implements IIInteractionAction<StringSelectInteractionEvent> {
+public class FirstSentenceHandler implements InteractionAction<StringSelectInteractionEvent> {
 
     private final TicketManager ticketManager;
     private final Embeds embeds;
@@ -51,20 +51,18 @@ public class FirstSentenceHandler implements IIInteractionAction<StringSelectInt
                 .setFooter("")
                 .setColor(Color.GREEN);
 
-        TMessage.create()
-                .setContent(content)
-                .sendMessage(ticket.get().getFrom())
+        MessageFactory.create()
+                .setTextContent(content)
+                .send(ticket.get().getFrom())
                 .queue(
-                        (msg) -> {
-                            event.deferEdit().queue();
-                            TMessage.from(embed.build())
-                                    .sendMessage(event.getChannel())
+                        msg -> {
+                            MessageFactory.create()
+                                    .addEmbeds(embed.build())
+                                    .send(event.getChannel())
                                     .queue();
                             event.getMessage().delete().queue();
                         },
-                        (err) -> {
-                            event.reply(embeds.errorMessage(err.getMessage()).build())
-                                    .queue();
-                        });
+                        err -> event.reply(embeds.errorMessage(err.getMessage()).build())
+                                .queue());
     }
 }

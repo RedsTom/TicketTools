@@ -1,4 +1,4 @@
-package yt.graven.gravensupport.commands.ticket.create.interactions;
+package yt.graven.gravensupport.commands.ticket.interactions;
 
 import java.awt.*;
 import java.time.Instant;
@@ -17,12 +17,12 @@ import net.dv8tion.jda.api.utils.MiscUtil;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.commands.ticket.Ticket;
 import yt.graven.gravensupport.commands.ticket.TicketManager;
-import yt.graven.gravensupport.utils.interactions.IIInteractionAction;
+import yt.graven.gravensupport.utils.interactions.InteractionAction;
 import yt.graven.gravensupport.utils.messages.Embeds;
 
 @Component
 @RequiredArgsConstructor
-public class ConfirmMessageHandler implements IIInteractionAction<ButtonInteractionEvent> {
+public class ConfirmMessageHandler implements InteractionAction<ButtonInteractionEvent> {
 
     private final TicketManager ticketManager;
     private final Embeds embeds;
@@ -82,6 +82,9 @@ public class ConfirmMessageHandler implements IIInteractionAction<ButtonInteract
                             .setDescription(message.getContentRaw())
                             .setFooter("")
                             .setTimestamp(Instant.now())
+                            .setFooter(
+                                    "Envoyé par " + event.getUser().getAsTag(),
+                                    event.getUser().getAvatarUrl())
                             .setColor(Color.GREEN);
 
                     embed.getFields()
@@ -120,10 +123,9 @@ public class ConfirmMessageHandler implements IIInteractionAction<ButtonInteract
                                 .queue();
                     }
                 })
-                .exceptionally((error) -> {
-                    fInteraction
-                            .editOriginal(
-                                    embeds.errorMessage(error.getMessage()).buildEdit())
+                .exceptionally(error -> {
+                    embeds.errorMessage(error.getMessage())
+                            .editReply(fInteraction)
                             .queue();
                     return null;
                 });

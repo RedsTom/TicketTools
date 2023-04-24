@@ -1,4 +1,4 @@
-package yt.graven.gravensupport.commands.ticket.create.interactions;
+package yt.graven.gravensupport.commands.ticket.interactions;
 
 import java.awt.*;
 import java.io.IOException;
@@ -11,13 +11,14 @@ import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.commands.ticket.Ticket;
 import yt.graven.gravensupport.commands.ticket.TicketManager;
+import yt.graven.gravensupport.commands.ticket.TicketOpeningReason;
 import yt.graven.gravensupport.utils.exceptions.TicketException;
-import yt.graven.gravensupport.utils.interactions.IIInteractionAction;
+import yt.graven.gravensupport.utils.interactions.InteractionAction;
 import yt.graven.gravensupport.utils.messages.Embeds;
 
 @Component
 @RequiredArgsConstructor
-public class OtherOpeningReasonHandler implements IIInteractionAction<ModalInteractionEvent> {
+public class OtherOpeningReasonHandler implements InteractionAction<ModalInteractionEvent> {
 
     private final Embeds embeds;
     private final TicketManager manager;
@@ -51,7 +52,7 @@ public class OtherOpeningReasonHandler implements IIInteractionAction<ModalInter
             return;
         }
 
-        ticket.get().openOnServer(false, null, reason);
+        ticket.get().openOnServer(false, null, new TicketOpeningReason.Simple(reason));
         event.deferReply(true)
                 .addEmbeds(new EmbedBuilder()
                         .setColor(Color.GREEN)

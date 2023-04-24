@@ -1,4 +1,4 @@
-package yt.graven.gravensupport.commands.ticket.create.interactions;
+package yt.graven.gravensupport.commands.ticket.interactions;
 
 import java.awt.*;
 import java.time.Instant;
@@ -15,11 +15,11 @@ import net.dv8tion.jda.api.utils.MiscUtil;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.commands.ticket.Ticket;
 import yt.graven.gravensupport.commands.ticket.TicketManager;
-import yt.graven.gravensupport.utils.interactions.IIInteractionAction;
+import yt.graven.gravensupport.utils.interactions.InteractionAction;
 
 @Component
 @RequiredArgsConstructor
-public class EditMessageHandler implements IIInteractionAction<ButtonInteractionEvent> {
+public class EditMessageHandler implements InteractionAction<ButtonInteractionEvent> {
 
     private final TicketManager ticketManager;
 
@@ -106,6 +106,9 @@ public class EditMessageHandler implements IIInteractionAction<ButtonInteraction
                 .addField("Après : ", after, true)
                 .setTimestamp(Instant.now())
                 .setColor(Color.ORANGE)
+                .setFooter(
+                        "Édité par " + event.getUser().getAsTag(),
+                        event.getUser().getAvatarUrl())
                 .build());
         event.deferEdit().setEmbeds(embedList).queue();
     }

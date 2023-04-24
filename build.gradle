@@ -49,7 +49,14 @@ compileJava {
         attributes('Main-Class': 'yt.graven.gravensupport.Main')
     }
     options.encoding = "UTF-8"
+    options.compilerArgs += "--enable-preview"
 }
+
+
+[tasks.withType(Test), tasks.withType(JavaExec)].flatten().forEach {
+    it.jvmArgs += "--enable-preview"
+}
+
 
 spotless {
     java {
@@ -59,5 +66,6 @@ spotless {
         removeUnusedImports()
         formatAnnotations()
         trimTrailingWhitespace()
+        toggleOffOn()
     }
 }
