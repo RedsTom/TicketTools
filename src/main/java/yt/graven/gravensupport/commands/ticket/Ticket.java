@@ -172,9 +172,9 @@ public class Ticket {
                         case TicketOpeningReason.UserReport r -> {
                             User user = r.user(category.getJDA());
 
-                            String reportedUser = user == null
-                                    ? "`%s` (Utilisateur non trouvé)".formatted(r.userId())
-                                    : "%s (`%s`)".formatted(user.getAsMention(), user.getAsTag());
+                    String reportedUser = user == null
+                            ? "`%s` (Utilisateur non trouvé)".formatted(r.userId())
+                            : "%s (`%s` ; `%s`)".formatted(user.getAsMention(), user.getAsTag(), user.getId());
 
                             yield """
                             **Signalement utilisateur**
