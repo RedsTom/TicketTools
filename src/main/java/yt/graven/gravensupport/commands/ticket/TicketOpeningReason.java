@@ -21,7 +21,7 @@ public sealed interface TicketOpeningReason {
 
         @Override
         public String reason() {
-            return "Signalement un utilisateur";
+            return "Signaler un utilisateur";
         }
     }
 

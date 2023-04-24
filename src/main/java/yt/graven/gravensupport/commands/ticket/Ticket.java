@@ -174,7 +174,7 @@ public class Ticket {
 
                     String reportedUser = user == null
                             ? "`%s` (Utilisateur non trouvé)".formatted(r.userId())
-                            : "%s (`%s`)".formatted(user.getAsMention(), user.getAsTag());
+                            : "%s (`%s` ; `%s`)".formatted(user.getAsMention(), user.getAsTag(), user.getId());
 
                     yield """
                             **Signalement utilisateur**
