@@ -11,4 +11,4 @@ WORKDIR /home/GravenSupport
 COPY --from=builder /build/build/libs/*.jar /GravenSupport.jar
 VOLUME /home/GravenSupport/config.yml
 
-ENTRYPOINT ["java","-jar","/GravenSupport.jar"]
+ENTRYPOINT ["java","--enable-preview","-jar","/GravenSupport.jar"]
