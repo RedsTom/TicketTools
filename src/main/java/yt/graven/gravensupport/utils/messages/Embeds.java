@@ -2,7 +2,6 @@ package yt.graven.gravensupport.utils.messages;
 
 import java.awt.*;
 import java.time.Instant;
-
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -122,12 +121,13 @@ public class Embeds {
     }
 
     public EmbedBuilder forceOpening(String sentEmote, TicketOpeningReason reason) {
-        String reasonAsString = switch (reason) {
-            case TicketOpeningReason.Empty r -> "Aucune raison n'a été spécifiée";
-            case TicketOpeningReason.Simple r -> r.reason();
-            case TicketOpeningReason.UserReport r ->
-                    "Signalement utilisateur à cause de : %s".formatted(r.reportReason());
-        };
+        String reasonAsString =
+                switch (reason) {
+                    case TicketOpeningReason.Empty r -> "Aucune raison n'a été spécifiée";
+                    case TicketOpeningReason.Simple r -> r.reason();
+                    case TicketOpeningReason.UserReport r -> "Signalement utilisateur à cause de : %s"
+                            .formatted(r.reportReason());
+                };
         return new EmbedBuilder()
                 .setAuthor("Message automatique")
                 .setTitle("Ticket ouvert !")
@@ -161,7 +161,8 @@ public class Embeds {
                                 ```
                                 %s
                                 ```
-                                """.formatted(reasonAsString),
+                                """
+                                .formatted(reasonAsString),
                         false)
                 .setColor(Color.ORANGE);
     }
@@ -172,7 +173,9 @@ public class Embeds {
                 .setColor(forced ? Color.CYAN : Color.GREEN)
                 .setTimestamp(Instant.now())
                 .setThumbnail(from.getAvatarUrl())
-                .addField("ℹ️ Détails :", """
+                .addField(
+                        "ℹ️ Détails :",
+                        """
                                 > **Identifiant de l'utilisateur**
                                 %s
 
@@ -186,21 +189,23 @@ public class Embeds {
                                 `%s`
 
                                 %s
-                                """.formatted(
-                                from.getId(),
-                                from.getAsMention(),
-                                from.getAsTag(),
-                                channel.getAsMention(),
-                                channel.getName(),
-                                reason,
-                                forced ? String.format(
-                                        """
+                                """
+                                .formatted(
+                                        from.getId(),
+                                        from.getAsMention(),
+                                        from.getAsTag(),
+                                        channel.getAsMention(),
+                                        channel.getName(),
+                                        reason,
+                                        forced
+                                                ? String.format(
+                                                        """
                                                  🛂 **Ouvert par**
                                                  %s (`@%s`)
 
                                                 """,
-                                        by.getAsMention(), by.getAsTag())
-                                        : ""),
+                                                        by.getAsMention(), by.getAsTag())
+                                                : ""),
                         false);
     }
 

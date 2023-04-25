@@ -44,7 +44,11 @@ public class ModTicketCommand implements ICommand {
                 .addSubcommands(
                         new SubcommandData("open-with", "Ouvrir un ticket avec un utilisateur en particulier")
                                 .addOption(OptionType.USER, "user", "L'utilisateur avec qui ouvrir le ticket", true)
-                                .addOption(OptionType.STRING, "reason", "La raison pour laquelle le ticket est ouvert", true),
+                                .addOption(
+                                        OptionType.STRING,
+                                        "reason",
+                                        "La raison pour laquelle le ticket est ouvert",
+                                        true),
                         new SubcommandData("refresh-open", "Rafraichir les tickets ouverts"),
                         new SubcommandData("force-close", "Forcer le bot à croire que le ticket est fermé")
                                 .addOption(
@@ -87,7 +91,7 @@ public class ModTicketCommand implements ICommand {
                     .queue();
             return;
         }
-        if(reasonOption == null) {
+        if (reasonOption == null) {
             embeds.errorMessage("L'option `%s` est obligatoire.".formatted("reason"))
                     .editReply(reply)
                     .queue();

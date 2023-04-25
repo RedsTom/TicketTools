@@ -164,25 +164,27 @@ public class Ticket {
         this.to = channel;
         this.webhook = retrieveWebhook();
 
-        String description = switch (reason) {
-            case TicketOpeningReason.Simple r -> "`%s`".formatted(r.reason().trim());
-            case TicketOpeningReason.UserReport r -> {
-                User user = r.user(category.getJDA());
+        String description =
+                switch (reason) {
+                    case TicketOpeningReason.Simple r -> "`%s`"
+                            .formatted(r.reason().trim());
+                    case TicketOpeningReason.UserReport r -> {
+                        User user = r.user(category.getJDA());
 
-                            String reportedUser = user == null
-                                    ? "`%s` (Utilisateur non trouvé)".formatted(r.userId())
-                                    : "%s (`%s` ; `%s`)".formatted(user.getAsMention(), user.getAsTag(), user.getId());
+                        String reportedUser = user == null
+                                ? "`%s` (Utilisateur non trouvé)".formatted(r.userId())
+                                : "%s (`%s` ; `%s`)".formatted(user.getAsMention(), user.getAsTag(), user.getId());
 
-                            yield """
+                        yield """
                             **Signalement utilisateur**
 
                             Utilisateur signalé : %s
                             Raison : `%s`
                             """
-                                    .formatted(reportedUser, r.reportReason().trim());
-                        }
-                        case TicketOpeningReason.Empty r -> "`Aucune raison`";
-                    };
+                                .formatted(reportedUser, r.reportReason().trim());
+                    }
+                    case TicketOpeningReason.Empty r -> "`Aucune raison`";
+                };
 
         // spotless:off
         MessageEmbed reasonEmbed = new EmbedBuilder()

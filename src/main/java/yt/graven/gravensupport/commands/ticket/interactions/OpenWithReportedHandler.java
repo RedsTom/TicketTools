@@ -1,5 +1,7 @@
 package yt.graven.gravensupport.commands.ticket.interactions;
 
+import java.awt.*;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -16,9 +18,6 @@ import yt.graven.gravensupport.utils.exceptions.TicketException;
 import yt.graven.gravensupport.utils.interactions.InteractionAction;
 import yt.graven.gravensupport.utils.messages.Embeds;
 import yt.graven.gravensupport.utils.messages.builder.MessageFactory;
-
-import java.awt.*;
-import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
