@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.commands.ping.PingComputer;
+import yt.graven.gravensupport.commands.ticket.TicketOpeningReason;
 import yt.graven.gravensupport.utils.messages.builder.MessageFactory;
 import yt.graven.gravensupport.utils.messages.builder.data.TicketMessage;
 
@@ -119,7 +120,14 @@ public class Embeds {
                 .setColor(Color.GREEN);
     }
 
-    public EmbedBuilder forceOpening(String sentEmote) {
+    public EmbedBuilder forceOpening(String sentEmote, TicketOpeningReason reason) {
+        String reasonAsString =
+                switch (reason) {
+                    case TicketOpeningReason.Empty r -> "Aucune raison n'a été spécifiée";
+                    case TicketOpeningReason.Simple r -> r.reason();
+                    case TicketOpeningReason.UserReport r -> "Signalement utilisateur à cause de : %s"
+                            .formatted(r.reportReason());
+                };
         return new EmbedBuilder()
                 .setAuthor("Message automatique")
                 .setTitle("Ticket ouvert !")
@@ -149,9 +157,12 @@ public class Embeds {
                 .addField(
                         "⚠️ Avertissement :",
                         """
-                                Ce ticket a été ouvert par la modération. Il est donc sûrement lié à un comportement problématique.
-                                Veuillez en tenir compte dans les messages que vous adresserez tout au long de ce ticket.
-                                """,
+                                Ce ticket a été ouvert par la modération pour la raison suivante :
+                                ```
+                                %s
+                                ```
+                                """
+                                .formatted(reasonAsString),
                         false)
                 .setColor(Color.ORANGE);
     }
@@ -164,38 +175,37 @@ public class Embeds {
                 .setThumbnail(from.getAvatarUrl())
                 .addField(
                         "ℹ️ Détails :",
-                        String.format(
+                        """
+                                > **Identifiant de l'utilisateur**
+                                %s
+
+                                > **Nom de l'utilisateur**
+                                %s (`@%s`)
+
+                                :hash: **Salon**
+                                %s (`#%s`)
+
+                                📝 **Raison**
+                                `%s`
+
+                                %s
                                 """
-                                        > **Identifiant de l'utilisateur**
-                                        %s
-
-                                        > **Nom de l'utilisateur**
-                                        %s (`@%s`)
-
-                                        :hash: **Salon**
-                                        %s (`#%s`)
-
-                                        %s
-                                        """,
-                                from.getId(),
-                                from.getAsMention(),
-                                from.getAsTag(),
-                                channel.getAsMention(),
-                                channel.getName(),
-                                forced
-                                        ? String.format(
-                                                """
+                                .formatted(
+                                        from.getId(),
+                                        from.getAsMention(),
+                                        from.getAsTag(),
+                                        channel.getAsMention(),
+                                        channel.getName(),
+                                        reason,
+                                        forced
+                                                ? String.format(
+                                                        """
                                                  🛂 **Ouvert par**
                                                  %s (`@%s`)
 
                                                 """,
-                                                by.getAsMention(), by.getAsTag())
-                                        : String.format(
-                                                """
-                                                    📝 **Raison**
-                                                    `%s`
-                                                """,
-                                                reason)),
+                                                        by.getAsMention(), by.getAsTag())
+                                                : ""),
                         false);
     }
 

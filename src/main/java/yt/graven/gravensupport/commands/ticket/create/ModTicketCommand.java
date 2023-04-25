@@ -17,6 +17,7 @@ import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import yt.graven.gravensupport.commands.ticket.Ticket;
 import yt.graven.gravensupport.commands.ticket.TicketManager;
+import yt.graven.gravensupport.commands.ticket.TicketOpeningReason;
 import yt.graven.gravensupport.utils.commands.Command;
 import yt.graven.gravensupport.utils.commands.ICommand;
 import yt.graven.gravensupport.utils.exceptions.CommandCancelledException;
@@ -42,7 +43,12 @@ public class ModTicketCommand implements ICommand {
                 .setDefaultPermissions(DefaultMemberPermissions.DISABLED)
                 .addSubcommands(
                         new SubcommandData("open-with", "Ouvrir un ticket avec un utilisateur en particulier")
-                                .addOption(OptionType.USER, "user", "L'utilisateur avec qui ouvrir le ticket", true),
+                                .addOption(OptionType.USER, "user", "L'utilisateur avec qui ouvrir le ticket", true)
+                                .addOption(
+                                        OptionType.STRING,
+                                        "reason",
+                                        "La raison pour laquelle le ticket est ouvert",
+                                        true),
                         new SubcommandData("refresh-open", "Rafraichir les tickets ouverts"),
                         new SubcommandData("force-close", "Forcer le bot à croire que le ticket est fermé")
                                 .addOption(
@@ -77,6 +83,7 @@ public class ModTicketCommand implements ICommand {
         }
 
         OptionMapping userOption = event.getOption("user");
+        OptionMapping reasonOption = event.getOption("reason");
 
         if (userOption == null) {
             embeds.errorMessage("L'option `%s` est obligatoire.".formatted("user"))
@@ -84,8 +91,15 @@ public class ModTicketCommand implements ICommand {
                     .queue();
             return;
         }
+        if (reasonOption == null) {
+            embeds.errorMessage("L'option `%s` est obligatoire.".formatted("reason"))
+                    .editReply(reply)
+                    .queue();
+            return;
+        }
 
         User user = userOption.getAsUser();
+        String reason = reasonOption.getAsString();
 
         if (ticketManager.exists(user)) {
             embeds.ticketAlreadyExistsMessage(ticketManager.get(user).get().getTo(), false)
@@ -103,7 +117,7 @@ public class ModTicketCommand implements ICommand {
         }
 
         Ticket ticket = ticketManager.create(user);
-        ticket.forceOpening(event.getUser());
+        ticket.forceOpening(event.getUser(), new TicketOpeningReason.Simple(reason));
 
         // spotless::off
         embeds.successMessage(String.format("Le ticket avec %s a bien été ouvert.", user.getAsMention()))

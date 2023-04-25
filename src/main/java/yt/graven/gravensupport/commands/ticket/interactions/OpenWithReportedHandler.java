@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import org.springframework.stereotype.Component;
 import yt.graven.gravensupport.commands.ticket.Ticket;
 import yt.graven.gravensupport.commands.ticket.TicketManager;
+import yt.graven.gravensupport.commands.ticket.TicketOpeningReason;
 import yt.graven.gravensupport.utils.exceptions.TicketException;
 import yt.graven.gravensupport.utils.interactions.InteractionAction;
 import yt.graven.gravensupport.utils.messages.Embeds;
@@ -41,7 +42,7 @@ public class OpenWithReportedHandler implements InteractionAction<ButtonInteract
         }
 
         Ticket ticket = manager.create(user);
-        ticket.forceOpening(event.getUser());
+        ticket.forceOpening(event.getUser(), new TicketOpeningReason.Simple("Discussion suite à un signalement"));
 
         MessageFactory.create()
                 .addEmbeds(new EmbedBuilder()

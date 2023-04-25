@@ -63,8 +63,13 @@ public class ReportUserModalHandler implements InteractionAction<ModalInteractio
                                 """
                                         Le ticket a bien été ouvert ! Vous pouvez désormais communiquer avec la modération.
 
+                                        **Rappel :**
+                                        Utilisateur signalé : %s (<@%s>)
+                                        Raison : %s
+
                                         Si vous avez des preuves pour étayer votre signalement, vous pouvez désormais les envoyer.
-                                        """)
+                                        """
+                                        .formatted(userId, userId, reason))
                         .build())
                 .queue();
     }
