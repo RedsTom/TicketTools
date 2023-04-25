@@ -10,7 +10,6 @@ import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
-import net.dv8tion.jda.api.exceptions.ContextException;
 import net.dv8tion.jda.api.exceptions.ErrorHandler;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.ICommandReference;
@@ -143,15 +142,15 @@ public class Ticket {
     /**
      * Directly opens a ticket without asking for the user permission.
      */
-    public void forceOpening(User by) throws IOException {
+    public void forceOpening(User by, TicketOpeningReason reason) throws IOException {
         // spotless:off
         MessageFactory.create()
-                .addEmbeds(embeds.forceOpening(sentEmote.getFormatted()))
+                .addEmbeds(embeds.forceOpening(sentEmote.getFormatted(), reason))
                 .send(from)
                 .queue();
         // spotless:on
 
-        openOnServer(true, by, new TicketOpeningReason.Empty());
+        openOnServer(true, by, reason);
     }
 
     public void openOnServer(boolean forced, User by, TicketOpeningReason reason) throws IOException {
@@ -166,56 +165,58 @@ public class Ticket {
         this.to = channel;
         this.webhook = retrieveWebhook();
 
-        if (!forced) {
-            String description = switch (reason) {
-                case TicketOpeningReason.Simple r -> "`%s`".formatted(r.reason().trim());
-                case TicketOpeningReason.UserReport r -> {
-                    User user = r.user(category.getJDA());
-
-                    String reportedUser = user == null
-                            ? "`%s` (Utilisateur non trouvé)".formatted(r.userId())
-                            : "%s (`%s`)".formatted(user.getAsMention(), user.getAsTag());
-
-                    yield """
-                            **Signalement utilisateur**
-                                                                                        
-                            Utilisateur signalé : %s
-                            Raison : `%s`
-                            """.formatted(reportedUser, r.reportReason().trim());
-                }
-                case TicketOpeningReason.Empty r -> "`Aucune raison`";
-            };
-
-            // spotless:off
-            MessageEmbed reasonEmbed = new EmbedBuilder()
-                    .setTitle("\uD83D\uDCDD Raison de l'ouverture du ticket")
-                    .setDescription(description)
-                    .setColor(0x48dbfb)
-                    .build();
-            MessageEmbed firstMessageSelectorEmbed = new EmbedBuilder()
-                    .setTitle("Sélectionnez le premier message à envoyer :")
-                    .setColor(0x48dbfb)
-                    .build();
-
-            TicketMessage reasonMessage = MessageFactory.create()
-                    .addEmbeds(reasonEmbed);
-
-            if (reason instanceof TicketOpeningReason.UserReport r) {
+        String description = switch (reason) {
+            case TicketOpeningReason.Simple r -> "`%s`".formatted(r.reason().trim());
+            case TicketOpeningReason.UserReport r -> {
                 User user = r.user(category.getJDA());
 
-                if (user != null) {
-                    reasonMessage.addActionRow(actionRow -> actionRow.addButton(
-                            "open-with-reported;%s".formatted(user.getId()), button -> button
-                                    .setText("Ouvrir un ticket avec la personne signalée")
-                                    .setEmoji(Emoji.fromUnicode("↗\uFE0F"))
-                            )
-                    );
-                }
-            }
+                String reportedUser = user == null
+                        ? "`%s` (Utilisateur non trouvé)".formatted(r.userId())
+                        : "%s (`%s`)".formatted(user.getAsMention(), user.getAsTag());
 
+                yield """
+                        **Signalement utilisateur**
+                                                                                    
+                        Utilisateur signalé : %s
+                        Raison : `%s`
+                        """.formatted(reportedUser, r.reportReason().trim());
+            }
+            case TicketOpeningReason.Empty r -> "`Aucune raison`";
+        };
+
+        // spotless:off
+        MessageEmbed reasonEmbed = new EmbedBuilder()
+                .setTitle("\uD83D\uDCDD Raison de l'ouverture du ticket")
+                .setDescription(description)
+                .setColor(0x48dbfb)
+                .build();
+        MessageEmbed firstMessageSelectorEmbed = new EmbedBuilder()
+                .setTitle("Sélectionnez le premier message à envoyer :")
+                .setColor(0x48dbfb)
+                .build();
+
+        TicketMessage reasonMessage = MessageFactory.create()
+                .addEmbeds(reasonEmbed);
+
+        if (reason instanceof TicketOpeningReason.UserReport r) {
+            User user = r.user(category.getJDA());
+
+            if (user != null) {
+                reasonMessage.addActionRow(actionRow -> actionRow.addButton(
+                                "open-with-reported;%s".formatted(user.getId()), button -> button
+                                        .setText("Ouvrir un ticket avec la personne signalée")
+                                        .setEmoji(Emoji.fromUnicode("↗\uFE0F"))
+                        )
+                );
+            }
+        }
+
+        if(!forced) {
             Message sentReasonMessage = reasonMessage.send(channel).complete();
             sentReasonMessage.pin().queue();
+        }
 
+        if (!forced) {
             MessageFactory.create()
                     .addEmbeds(firstMessageSelectorEmbed)
                     .addActionRow(actionRow -> actionRow
@@ -227,8 +228,8 @@ public class Ticket {
                     .addActionRow(TicketActionRow::addDeleteButton)
                     .send(channel)
                     .complete();
-            // spotless:on
         }
+        // spotless:on
 
         TextChannel ticketChannel =
                 moderationGuild.getTextChannelById(config.getString("config.ticket_guild.channels_ids.tickets"));
