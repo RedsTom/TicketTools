@@ -6,7 +6,7 @@ plugins {
     id 'com.diffplug.spotless' version '6.12.0'
 }
 
-group 'yt.graven'
+group 'me.redstom'
 version '1.0-SNAPSHOT'
 
 sourceCompatibility = targetCompatibility = '17'
@@ -40,13 +40,13 @@ shadowJar {
 }
 
 application {
-    mainClassName = 'yt.graven.gravensupport.Main'
+    mainClassName = 'me.redstom.tickettools.Main'
     setApplicationDefaultJvmArgs(["--add-opens", "java.base/java.net=ALL-UNNAMED"])
 }
 
 compileJava {
     manifest {
-        attributes('Main-Class': 'yt.graven.gravensupport.Main')
+        attributes('Main-Class': 'me.redstom.tickettools.Main')
     }
     options.encoding = "UTF-8"
     options.compilerArgs += "--enable-preview"
